@@ -85,12 +85,16 @@ func newDoctorCmd(flags *rootFlags) *cobra.Command {
 			}
 
 			// Check auth
+			authConfigured := false
+			authSource := ""
 			if cfg != nil {
 				header := cfg.AuthHeader()
 				if header == "" {
 					report["auth"] = "not configured"
 					report["auth_hint"] = "export VISOR_API_KEY=<your-key>"
 				} else {
+					authConfigured = true
+					authSource = cfg.AuthSource
 					report["auth"] = "configured"
 					report["auth_source"] = cfg.AuthSource
 				}
@@ -109,6 +113,11 @@ func newDoctorCmd(flags *rootFlags) *cobra.Command {
 				authEnvRequiredMissing = append(authEnvRequiredMissing, "VISOR_API_KEY")
 			}
 			switch {
+			case len(authEnvRequiredMissing) > 0 && authConfigured:
+				if authSource == "" {
+					authSource = "configured credentials"
+				}
+				report["env_vars"] = "INFO VISOR_API_KEY not set; using " + authSource
 			case len(authEnvRequiredMissing) > 0:
 				report["env_vars"] = "ERROR missing required: " + strings.Join(authEnvRequiredMissing, ", ")
 			case len(authEnvOptionalNames) > 1 && !authEnvOptionalSatisfied:

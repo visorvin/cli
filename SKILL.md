@@ -35,11 +35,13 @@ printf '%s' "$VISOR_API_KEY" | visor auth set-token --stdin
 
 ## Agent Patterns
 
-Use JSON and selected fields for compact output:
+Use `--agent` for compact, automation-safe JSON. For listings, compact output keeps useful row fields and excludes `photo_urls`.
 
 ```bash
-visor listings list --make toyota --model camry --limit 5 --json \
-  --select results.data.vin,results.data.price,results.data.dealer_name
+visor listings list --make ford --model mustang --max-price 20000 --limit 10 --agent
+
+visor listings list --make ford --model mustang --max-price 20000 --limit 10 --agent \
+  --select results.data.vin,results.data.year,results.data.price,results.data.miles,results.data.vdp_url
 
 visor facets --make ford --model f-150 --facets year,trim,fuel_type --json \
   --select results.data.facets,results.data.stats
@@ -51,7 +53,7 @@ visor vins 3TMAZ5CN0PM207381 --json \
   --select results.data.vin,results.data.status,results.data.latest_listing.price,results.data.build
 ```
 
-Responses use a provenance envelope. Select data under `results.data`.
+Responses use a provenance envelope. Select data under `results.data`. Listing fields use `miles` and `vdp_url`; guessed fields such as `mileage` or `url` return a validation error with valid field paths.
 
 ## Do Not Use For
 

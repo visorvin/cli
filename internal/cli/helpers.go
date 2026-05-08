@@ -376,6 +376,36 @@ func printJSONFiltered(w io.Writer, v any, flags *rootFlags) error {
 // Supports dotted paths like "events.shortName" to descend into nested structures.
 // Arrays are traversed element-wise: "events.shortName" keeps shortName on each event.
 func filterFields(data json.RawMessage, fields string) json.RawMessage {
+	filtered, err := filterFieldsValidated(data, fields)
+	if err != nil {
+		return filterFieldsRec(data, parseSelectPaths(fields))
+	}
+	return filtered
+}
+
+func filterFieldsValidated(data json.RawMessage, fields string) (json.RawMessage, error) {
+	paths := parseSelectPaths(fields)
+	if len(paths) == 0 {
+		return data, nil
+	}
+	invalid := make([]string, 0)
+	for _, p := range paths {
+		if !selectPathExists(data, p) {
+			invalid = append(invalid, strings.Join(p, "."))
+		}
+	}
+	if len(invalid) > 0 {
+		valid := validSelectPaths(data, 80)
+		msg := fmt.Sprintf("unknown selected field(s): %s", strings.Join(invalid, ", "))
+		if len(valid) > 0 {
+			msg += "; valid fields include: " + strings.Join(valid, ", ")
+		}
+		return nil, usageErr(fmt.Errorf(msg))
+	}
+	return filterFieldsRec(data, paths), nil
+}
+
+func parseSelectPaths(fields string) [][]string {
 	var paths [][]string
 	for _, f := range strings.Split(fields, ",") {
 		f = strings.TrimSpace(f)
@@ -384,14 +414,88 @@ func filterFields(data json.RawMessage, fields string) json.RawMessage {
 		}
 		parts := strings.Split(f, ".")
 		for i := range parts {
-			parts[i] = strings.ToLower(parts[i])
+			parts[i] = strings.ToLower(strings.TrimSpace(parts[i]))
 		}
 		paths = append(paths, parts)
 	}
-	if len(paths) == 0 {
-		return data
+	return paths
+}
+
+func selectPathExists(data json.RawMessage, path []string) bool {
+	if len(path) == 0 {
+		return true
 	}
-	return filterFieldsRec(data, paths)
+	var arr []json.RawMessage
+	if err := json.Unmarshal(data, &arr); err == nil {
+		if len(arr) == 0 {
+			return true
+		}
+		for _, el := range arr {
+			if selectPathExists(el, path) {
+				return true
+			}
+		}
+		return false
+	}
+	var obj map[string]json.RawMessage
+	if err := json.Unmarshal(data, &obj); err != nil {
+		return false
+	}
+	for k, v := range obj {
+		if selectSegmentMatches(k, path[0]) {
+			return selectPathExists(v, path[1:])
+		}
+	}
+	return false
+}
+
+func validSelectPaths(data json.RawMessage, limit int) []string {
+	seen := map[string]bool{}
+	var out []string
+	var walk func(json.RawMessage, []string)
+	walk = func(raw json.RawMessage, prefix []string) {
+		if len(out) >= limit {
+			return
+		}
+		var arr []json.RawMessage
+		if err := json.Unmarshal(raw, &arr); err == nil {
+			if len(arr) > 0 {
+				walk(arr[0], prefix)
+			}
+			return
+		}
+		var obj map[string]json.RawMessage
+		if err := json.Unmarshal(raw, &obj); err == nil {
+			keys := make([]string, 0, len(obj))
+			for k := range obj {
+				keys = append(keys, k)
+			}
+			sort.Strings(keys)
+			for _, k := range keys {
+				if len(out) >= limit {
+					return
+				}
+				p := append(append([]string{}, prefix...), k)
+				var childObj map[string]json.RawMessage
+				var childArr []json.RawMessage
+				if err := json.Unmarshal(obj[k], &childObj); err == nil {
+					walk(obj[k], p)
+					continue
+				}
+				if err := json.Unmarshal(obj[k], &childArr); err == nil && len(childArr) > 0 {
+					walk(childArr[0], p)
+					continue
+				}
+				path := strings.Join(p, ".")
+				if !seen[path] {
+					seen[path] = true
+					out = append(out, path)
+				}
+			}
+		}
+	}
+	walk(data, nil)
+	return out
 }
 
 // filterFieldsRec applies path filters to a JSON value. Each path is a list of
@@ -446,15 +550,30 @@ func filterFieldsRec(data json.RawMessage, paths [][]string) json.RawMessage {
 // matchSelectSegment returns the matching lowercase segment, or "" if no match.
 // Supports direct case-insensitive match and camelCase→kebab-case conversion.
 func matchSelectSegment(fieldName string, keepWhole map[string]bool, subPaths map[string][][]string) string {
-	lower := strings.ToLower(fieldName)
-	if keepWhole[lower] || subPaths[lower] != nil {
-		return lower
+	for candidate := range keepWhole {
+		if selectSegmentMatches(fieldName, candidate) {
+			return candidate
+		}
 	}
-	kebab := camelToKebab(fieldName)
-	if kebab != lower && (keepWhole[kebab] || subPaths[kebab] != nil) {
-		return kebab
+	for candidate := range subPaths {
+		if selectSegmentMatches(fieldName, candidate) {
+			return candidate
+		}
 	}
 	return ""
+}
+
+func selectSegmentMatches(fieldName, requested string) bool {
+	lower := strings.ToLower(fieldName)
+	if requested == lower {
+		return true
+	}
+	kebab := camelToKebab(fieldName)
+	if requested == kebab {
+		return true
+	}
+	snake := strings.ReplaceAll(kebab, "-", "_")
+	return requested == snake
 }
 
 // camelToKebab converts "orderDate" or "orderdate" to "order-date" by splitting on
@@ -474,12 +593,14 @@ func camelToKebab(s string) string {
 // printOutputWithFlags routes output through the right format based on flags.
 func printOutputWithFlags(w io.Writer, data json.RawMessage, flags *rootFlags) error {
 	// --select wins over --compact when both are set: an explicit field list
-	// is the user's authoritative request, so the high-gravity allow-list
-	// must not strip those fields out before --select can pick them. When
-	// only --compact is set (e.g., --agent without --select), the allow-list
-	// still runs.
+	// is the user's authoritative request, so compacting must not strip those
+	// fields before --select can pick them.
 	if flags.selectFields != "" {
-		data = filterFields(data, flags.selectFields)
+		filtered, err := filterFieldsValidated(data, flags.selectFields)
+		if err != nil {
+			return err
+		}
+		data = filtered
 	} else if flags.compact {
 		data = compactFields(data)
 	}
@@ -523,31 +644,58 @@ func extractResponseData(data json.RawMessage) json.RawMessage {
 }
 
 // compactFields keeps only the most important fields for agent consumption.
-// For arrays: allowlist of high-gravity fields (no descriptions).
-// For single objects: blocklist that strips known-verbose fields (descriptions, comments, etc.).
+// For arrays: allowlist of high-gravity fields (no descriptions/photos).
+// For single objects: blocklist that strips known-verbose fields.
 func compactFields(data json.RawMessage) json.RawMessage {
-	// Try array first
+	var obj map[string]any
+	if err := json.Unmarshal(data, &obj); err == nil {
+		if results, ok := obj["results"]; ok {
+			if raw, err := json.Marshal(results); err == nil {
+				obj["results"] = rawJSONToAny(compactFields(json.RawMessage(raw)))
+			}
+			result, _ := json.Marshal(obj)
+			return result
+		}
+		if dataVal, ok := obj["data"]; ok {
+			if raw, err := json.Marshal(dataVal); err == nil {
+				obj["data"] = rawJSONToAny(compactFields(json.RawMessage(raw)))
+			}
+			result, _ := json.Marshal(compactObjectMap(obj))
+			return result
+		}
+		return compactObjectFields(obj)
+	}
+
 	var items []map[string]any
 	if err := json.Unmarshal(data, &items); err == nil {
 		return compactListFields(items)
 	}
 
-	// Single object — use blocklist
-	var obj map[string]any
-	if err := json.Unmarshal(data, &obj); err == nil {
-		return compactObjectFields(obj)
-	}
-
 	return data
 }
 
-// compactListFields keeps only high-gravity fields for array responses.
+func rawJSONToAny(raw json.RawMessage) any {
+	var v any
+	if err := json.Unmarshal(raw, &v); err != nil {
+		return string(raw)
+	}
+	return v
+}
+
+// compactListFields keeps high-gravity fields for array responses, including
+// Visor listing fields agents need to rank and cite vehicles.
 func compactListFields(items []map[string]any) json.RawMessage {
 	keepFields := map[string]bool{
 		"id": true, "name": true, "title": true, "identifier": true,
 		"status": true, "state": true, "type": true, "priority": true,
 		"url": true, "email": true, "key": true,
 		"created_at": true, "updated_at": true, "createdAt": true, "updatedAt": true,
+		"listing_id": true, "vin": true, "year": true, "make": true, "model": true,
+		"trim": true, "version": true, "price": true, "msrp": true, "miles": true,
+		"dealer_id": true, "dealer_name": true, "city": true, "postal_code": true,
+		"inventory_type": true, "inventory_status": true, "vdp_url": true,
+		"days_on_market": true, "distance": true, "exterior_color": true,
+		"interior_color": true,
 	}
 
 	filtered := make([]map[string]any, 0, len(items))
@@ -565,11 +713,17 @@ func compactListFields(items []map[string]any) json.RawMessage {
 }
 
 // compactObjectFields strips known-verbose fields from single-object responses.
-// Uses a blocklist so it works across all API domains (project management, payments, CRM, etc.).
+// Uses a blocklist so it works across all API domains.
 func compactObjectFields(obj map[string]any) json.RawMessage {
+	result, _ := json.Marshal(compactObjectMap(obj))
+	return result
+}
+
+func compactObjectMap(obj map[string]any) map[string]any {
 	stripFields := map[string]bool{
 		"description": true, "body": true, "content": true,
 		"comments": true, "attachments": true, "html": true, "markdown": true,
+		"photo_urls": true, "photos": true, "images": true,
 	}
 
 	compact := map[string]any{}
@@ -578,8 +732,7 @@ func compactObjectFields(obj map[string]any) json.RawMessage {
 			compact[k] = v
 		}
 	}
-	result, _ := json.Marshal(compact)
-	return result
+	return compact
 }
 
 // printCSV renders JSON arrays as CSV with header row.

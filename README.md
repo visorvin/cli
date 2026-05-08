@@ -68,9 +68,12 @@ Config is stored at `~/.config/visor/config.toml`. Local cache/data lives under 
 # Verify credentials and connectivity.
 visor doctor
 
-# Search listings.
-visor listings list --make toyota --model camry --state CA --limit 5 --json \
-  --select results.data.vin,results.data.year,results.data.make,results.data.model,results.data.price,results.data.dealer_name
+# Search listings with full JSON.
+visor listings list --make ford --model mustang --max-price 20000 --limit 10 --json --no-input --no-color --yes
+
+# Search listings with compact agent output. Listing fields use miles and vdp_url.
+visor listings list --make ford --model mustang --max-price 20000 --limit 10 --agent \
+  --select results.data.vin,results.data.year,results.data.make,results.data.model,results.data.price,results.data.miles,results.data.vdp_url
 
 # Inspect available segment buckets.
 visor facets --make toyota --model camry --state CA --facets year,trim,inventory_type --json
@@ -110,7 +113,9 @@ visor listings list --dry-run
 visor listings list --agent
 ```
 
-`--agent` expands to JSON, compact output, no prompts, no color, and yes-to-confirmations. Responses are wrapped with provenance:
+`--agent` expands to JSON, compact output, no prompts, no color, and yes-to-confirmations. For listing rows, compact output keeps useful fields such as `vin`, `year`, `make`, `model`, `price`, `miles`, `dealer_name`, and `vdp_url`, and omits `photo_urls` unless you request full JSON without compact mode.
+
+Responses are wrapped with provenance:
 
 ```json
 {
@@ -119,7 +124,7 @@ visor listings list --agent
 }
 ```
 
-Use `results.data...` paths with `--select`.
+Use `results.data...` paths with `--select`. Unknown selected fields fail with a validation error that lists valid field paths; use `miles` rather than `mileage`, and `vdp_url` rather than `url` for listing rows.
 
 ## MCP
 
@@ -158,7 +163,7 @@ The script:
 
 1. Runs Printing Press against `https://api.visor.vin/v1/openapi.json`.
 2. Copies the fresh generated CLI into a temporary directory.
-3. Reapplies Visor productization: binary name `visor`, module `github.com/visorvin/cli`, MCP binary `visor-mcp`, customer-facing docs, and the current sync compatibility patch.
+3. Reapplies Visor productization: binary name `visor`, module `github.com/visorvin/cli`, MCP binary `visor-mcp`, customer-facing docs, secure auth handling, agent-output fixes, and the current sync compatibility patch.
 4. Replaces this repo's generated code and spec files.
 5. Runs `go test ./...` and builds `visor` and `visor-mcp`.
 
