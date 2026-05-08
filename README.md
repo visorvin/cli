@@ -183,7 +183,7 @@ VISOR_API_KEY="$VISOR_API_KEY" visor listings list --limit 1 --json
 This repo includes a GoReleaser config for `visor` and `visor-mcp` binaries across macOS, Linux, and Windows.
 
 ```bash
-goreleaser release --clean
+scripts/release.sh v1.0.1
 ```
 
-Set up repository secrets/tokens for GitHub Releases and the Homebrew tap before enabling automated releases.
+The release script runs local preflight checks, creates and pushes the tag, waits for the GitHub Actions release workflow, verifies the GitHub Release, and smoke-tests `install.sh` against the published assets.
