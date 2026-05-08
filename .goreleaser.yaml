@@ -1,0 +1,51 @@
+version: 2
+project_name: visor
+changelog:
+  disable: true
+builds:
+  - id: visor
+    main: ./cmd/visor
+    binary: visor
+    env:
+      - CGO_ENABLED=0
+    ldflags:
+      - -s -w -X github.com/visorvin/cli/internal/cli.version={{ .Version }}
+    targets:
+      - darwin_amd64
+      - darwin_arm64
+      - linux_amd64
+      - linux_arm64
+      - windows_amd64
+      - windows_arm64
+  - id: visor-mcp
+    main: ./cmd/visor-mcp
+    binary: visor-mcp
+    env:
+      - CGO_ENABLED=0
+    ldflags:
+      - -s -w
+    targets:
+      - darwin_amd64
+      - darwin_arm64
+      - linux_amd64
+      - linux_arm64
+      - windows_amd64
+      - windows_arm64
+archives:
+  - formats: [tar.gz]
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+checksum:
+  name_template: checksums.txt
+brews:
+  - name: visor
+    repository:
+      owner: visorvin
+      name: homebrew-tap
+    homepage: "https://github.com/visorvin/cli"
+    description: "Query Visor vehicle listings, facets, VIN detail, and dealer inventory from a scriptable CLI."
+    install: |
+      bin.install "visor"
+      bin.install "visor-mcp"

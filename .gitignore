@@ -1,0 +1,7 @@
+/bin/
+/build/
+/dist/
+*.db
+*.sqlite
+*.sqlite3
+.DS_Store

@@ -1,0 +1,39 @@
+{
+  "manifest_version": "0.3",
+  "name": "visor-mcp",
+  "display_name": "Visor Public",
+  "version": "4.0.6",
+  "description": "Visor Public API surface as MCP tools.",
+  "author": {
+    "name": "CLI Printing Press"
+  },
+  "license": "Apache-2.0",
+  "server": {
+    "type": "binary",
+    "entry_point": "bin/visor-mcp",
+    "mcp_config": {
+      "command": "${__dirname}/bin/visor-mcp",
+      "args": [],
+      "env": {
+        "VISOR_API_KEY": "${user_config.visor_api_key}"
+      }
+    }
+  },
+  "user_config": {
+    "visor_api_key": {
+      "type": "string",
+      "title": "VISOR_API_KEY",
+      "description": "Visor API bearer key.",
+      "sensitive": true,
+      "required": true
+    }
+  },
+  "compatibility": {
+    "claude_desktop": ">=1.0.0",
+    "platforms": [
+      "darwin",
+      "linux",
+      "win32"
+    ]
+  }
+}
