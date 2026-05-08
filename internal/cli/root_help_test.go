@@ -62,3 +62,61 @@ func TestAdvancedHelpShowsHiddenSurface(t *testing.T) {
 		}
 	}
 }
+
+func TestSubcommandHelpHidesGlobalFlagWall(t *testing.T) {
+	cmd := RootCmd()
+	var out bytes.Buffer
+	cmd.SetOut(&out)
+	cmd.SetErr(&out)
+	cmd.SetArgs([]string{"listings", "--help"})
+
+	if err := cmd.Execute(); err != nil {
+		t.Fatalf("listings help failed: %v", err)
+	}
+	got := out.String()
+	for _, want := range []string{
+		"Commands:",
+		"list",
+		"get",
+		"Run \"visor help advanced\"",
+	} {
+		if !strings.Contains(got, want) {
+			t.Fatalf("listings help missing %q:\n%s", want, got)
+		}
+	}
+	for _, clutter := range []string{"Global Flags:", "--deliver string", "--rate-limit float", "--data-source string"} {
+		if strings.Contains(got, clutter) {
+			t.Fatalf("listings help includes clutter %q:\n%s", clutter, got)
+		}
+	}
+}
+
+func TestEndpointHelpShowsCuratedFlagsOnly(t *testing.T) {
+	cmd := RootCmd()
+	var out bytes.Buffer
+	cmd.SetOut(&out)
+	cmd.SetErr(&out)
+	cmd.SetArgs([]string{"listings", "list", "--help"})
+
+	if err := cmd.Execute(); err != nil {
+		t.Fatalf("listings list help failed: %v", err)
+	}
+	got := out.String()
+	for _, want := range []string{
+		"Key Flags:",
+		"--make string",
+		"--max-price string",
+		"Output Flags:",
+		"--agent",
+		"--select string",
+	} {
+		if !strings.Contains(got, want) {
+			t.Fatalf("listings list help missing %q:\n%s", want, got)
+		}
+	}
+	for _, clutter := range []string{"Global Flags:", "--exclude-assembly-country", "--deliver string", "--rate-limit float"} {
+		if strings.Contains(got, clutter) {
+			t.Fatalf("listings list help includes clutter %q:\n%s", clutter, got)
+		}
+	}
+}

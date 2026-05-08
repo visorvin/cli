@@ -191,6 +191,7 @@ Run 'visor doctor' to verify auth and connectivity.`,
 	rootCmd.AddCommand(newVinsPromotedCmd(flags))
 	rootCmd.AddCommand(newVersionCliCmd())
 	rootCmd.AddCommand(newAdvancedHelpCmd(rootCmd))
+	installCleanHelp(rootCmd)
 
 	return rootCmd
 }
