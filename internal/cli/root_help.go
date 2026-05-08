@@ -10,11 +10,11 @@ import (
 )
 
 func printRootHelp(w io.Writer) {
-	fmt.Fprint(w, `__     ___
-\ \   / (_)___  ___  _ __
- \ \ / /| / __|/ _ \| '__|
-  \ V / | \__ \ (_) | |
-   \_/  |_|___/\___/|_|
+	fmt.Fprint(w, `__      ___ ___ ___  ___  ___
+\ \    / /_ _/ __|/ _ \| _ \
+ \ \  / / | |\__ \ (_) |   /
+  \ \/ / |___|___/\___/|_|_\
+   \__/   see the whole market
 
 Visor CLI — read-only vehicle listings, VIN, dealer, and facet search.
 
