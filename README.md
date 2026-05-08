@@ -20,13 +20,6 @@ To install somewhere other than `/usr/local/bin`:
 curl -fsSL https://raw.githubusercontent.com/visorvin/cli/main/install.sh | BIN_DIR="$HOME/.local/bin" sh
 ```
 
-Homebrew is also supported:
-
-```bash
-brew tap visorvin/tap
-brew install visor
-```
-
 ### Windows
 
 Download the latest Windows zip from GitHub Releases, extract `visor.exe`, and add it to your `PATH`:

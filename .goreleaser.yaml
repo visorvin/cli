@@ -39,13 +39,3 @@ archives:
         formats: [zip]
 checksum:
   name_template: checksums.txt
-brews:
-  - name: visor
-    repository:
-      owner: visorvin
-      name: homebrew-tap
-    homepage: "https://github.com/visorvin/cli"
-    description: "Query Visor vehicle listings, facets, VIN detail, and dealer inventory from a scriptable CLI."
-    install: |
-      bin.install "visor"
-      bin.install "visor-mcp"
