@@ -14,6 +14,18 @@ need() {
   command -v "$1" >/dev/null 2>&1 || fail "$1 is required"
 }
 
+print_banner() {
+  cat <<'VISOR'
+__     ___
+\ \   / (_)___  ___  _ __
+ \ \ / /| / __|/ _ \| '__|
+  \ V / | \__ \ (_) | |
+   \_/  |_|___/\___/|_|
+
+VISOR
+  printf 'Visor CLI installer\n\n'
+}
+
 os=$(uname -s | tr '[:upper:]' '[:lower:]')
 case "$os" in
   darwin|linux) ;;
@@ -29,6 +41,8 @@ esac
 
 need curl
 need tar
+
+print_banner
 
 if [ "$VERSION" = "latest" ]; then
   release_url="https://api.github.com/repos/$REPO/releases/latest"

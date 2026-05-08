@@ -20,6 +20,7 @@ func TestRootHelpIsCuratedForPublicSurface(t *testing.T) {
 	}
 	got := out.String()
 	for _, want := range []string{
+		`__     ___`,
 		"Core Commands:",
 		"listings      Search and fetch vehicle listings",
 		"Common Flags:",
