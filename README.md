@@ -8,16 +8,16 @@ The CLI is read-only. It is built for customer workflows, shell scripts, and AI 
 
 ### macOS and Linux
 
-Install the latest prebuilt binary without Go:
+Install the latest prebuilt binary without Go. For agent and CI contexts, install into a user-writable directory so the script does not need `sudo`:
+
+```bash
+BIN_DIR="$HOME/.local/bin" sh -c 'curl -fsSL https://raw.githubusercontent.com/visorvin/cli/main/install.sh | sh'
+```
+
+For an interactive system-wide install, omit `BIN_DIR`. The installer defaults to `/usr/local/bin` and may prompt for `sudo`:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/visorvin/cli/main/install.sh | sh
-```
-
-To install somewhere other than `/usr/local/bin`:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/visorvin/cli/main/install.sh | BIN_DIR="$HOME/.local/bin" sh
 ```
 
 ### Windows
@@ -73,7 +73,7 @@ visor listings list --make ford --model mustang --max-price 20000 --limit 10 --j
 
 # Search listings with compact agent output. Listing fields use miles and vdp_url.
 visor listings list --make ford --model mustang --max-price 20000 --limit 10 --agent \
-  --select results.data.vin,results.data.year,results.data.make,results.data.model,results.data.price,results.data.miles,results.data.vdp_url
+  --select id,vin,year,make,model,price,miles,vdp_url
 
 # Inspect available segment buckets.
 visor facets --make toyota --model camry --state CA --facets year,trim,inventory_type --json
@@ -107,7 +107,7 @@ All endpoint commands support common output controls:
 
 ```bash
 visor listings list --json
-visor listings list --json --select results.data.vin,results.data.price
+visor listings list --json --select vin,price
 visor listings list --csv
 visor listings list --dry-run
 visor listings list --agent
@@ -124,7 +124,7 @@ Responses are wrapped with provenance:
 }
 ```
 
-Use `results.data...` paths with `--select`. Unknown selected fields fail with a validation error that lists valid field paths; use `miles` rather than `mileage`, and `vdp_url` rather than `url` for listing rows.
+For standard list responses, `--select` accepts row-relative fields such as `id,vin,year,price,miles`. Full paths such as `results.data.vin` still work. Unknown selected fields fail with a validation error that lists valid field paths; use `miles` rather than `mileage`, and `vdp_url` rather than `url` for listing rows.
 
 ## MCP
 

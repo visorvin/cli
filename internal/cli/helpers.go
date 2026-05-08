@@ -384,7 +384,7 @@ func filterFields(data json.RawMessage, fields string) json.RawMessage {
 }
 
 func filterFieldsValidated(data json.RawMessage, fields string) (json.RawMessage, error) {
-	paths := parseSelectPaths(fields)
+	paths := expandRowRelativeSelectPaths(data, parseSelectPaths(fields))
 	if len(paths) == 0 {
 		return data, nil
 	}
@@ -403,6 +403,26 @@ func filterFieldsValidated(data json.RawMessage, fields string) (json.RawMessage
 		return nil, usageErr(fmt.Errorf(msg))
 	}
 	return filterFieldsRec(data, paths), nil
+}
+
+func expandRowRelativeSelectPaths(data json.RawMessage, paths [][]string) [][]string {
+	if len(paths) == 0 || !selectPathExists(data, []string{"results", "data"}) {
+		return paths
+	}
+	expanded := make([][]string, 0, len(paths))
+	for _, p := range paths {
+		if len(p) == 0 || selectPathExists(data, p) {
+			expanded = append(expanded, p)
+			continue
+		}
+		candidate := append([]string{"results", "data"}, p...)
+		if selectPathExists(data, candidate) {
+			expanded = append(expanded, candidate)
+			continue
+		}
+		expanded = append(expanded, p)
+	}
+	return expanded
 }
 
 func parseSelectPaths(fields string) [][]string {

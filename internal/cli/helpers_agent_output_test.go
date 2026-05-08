@@ -35,6 +35,32 @@ func TestFilterFieldsValidatedSelectsThroughProvenanceEnvelope(t *testing.T) {
 	}
 }
 
+func TestFilterFieldsValidatedAcceptsRowRelativeListFields(t *testing.T) {
+	input := json.RawMessage(`{
+		"meta":{"source":"live"},
+		"results":{"data":[{"id":"listing-1","vin":"1FA","year":2018,"price":19995,"miles":81234,"photo_urls":["https://example.test/photo.jpg"]}]}
+	}`)
+
+	got, err := filterFieldsValidated(input, "id,vin,year,price,miles")
+	if err != nil {
+		t.Fatalf("filterFieldsValidated returned error: %v", err)
+	}
+
+	var out map[string]any
+	if err := json.Unmarshal(got, &out); err != nil {
+		t.Fatalf("unmarshal output: %v", err)
+	}
+	row := out["results"].(map[string]any)["data"].([]any)[0].(map[string]any)
+	for _, want := range []string{"id", "vin", "year", "price", "miles"} {
+		if _, ok := row[want]; !ok {
+			t.Fatalf("row-relative select missing %s: %#v", want, row)
+		}
+	}
+	if _, ok := row["photo_urls"]; ok {
+		t.Fatalf("row-relative select should not include unselected photo_urls: %#v", row)
+	}
+}
+
 func TestFilterFieldsValidatedErrorsOnUnknownFieldWithValidExamples(t *testing.T) {
 	input := json.RawMessage(`{"results":{"data":[{"vin":"1FA","miles":81234,"vdp_url":"https://example.test/car"}]}}`)
 
