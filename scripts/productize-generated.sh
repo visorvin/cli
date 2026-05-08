@@ -60,6 +60,10 @@ if [ -f "$ROOT/scripts/patch-agent-output.py" ]; then
   python3 "$ROOT/scripts/patch-agent-output.py"
 fi
 
+if [ -f "$ROOT/scripts/patch-root-help.py" ]; then
+  python3 "$ROOT/scripts/patch-root-help.py"
+fi
+
 if [ -f .printing-press.json ] && command -v jq >/dev/null 2>&1; then
   tmp_meta="$(mktemp)"
   jq '.owner = "visorvin" | .spec_path = "spec.json" | .cli_name = "visor" | .mcp_binary = "visor-mcp"' .printing-press.json > "$tmp_meta"

@@ -83,7 +83,7 @@ func newRootCmd(flags *rootFlags) *cobra.Command {
 	rootCmd := &cobra.Command{
 		Use:   "visor",
 		Short: `Visor CLI — Query Visor vehicle listings, facets, VIN detail, and dealer inventory from a scriptable CLI.`,
-		Long: `Manage visor resources via the visor API.
+		Long: `Visor CLI — read-only vehicle listings, VIN, dealer, and facet search.
 
 Add --agent to any command for JSON output + non-interactive mode.
 Run 'visor doctor' to verify auth and connectivity.`,
@@ -91,6 +91,14 @@ Run 'visor doctor' to verify auth and connectivity.`,
 		Version:      version,
 	}
 	rootCmd.SetVersionTemplate("visor {{ .Version }}\n")
+	defaultHelpFunc := rootCmd.HelpFunc()
+	rootCmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
+		if cmd == rootCmd {
+			printRootHelp(cmd.OutOrStdout())
+			return
+		}
+		defaultHelpFunc(cmd, args)
+	})
 
 	rootCmd.PersistentFlags().BoolVar(&flags.asJSON, "json", false, "Output as JSON")
 	rootCmd.PersistentFlags().BoolVar(&flags.compact, "compact", false, "Return only key fields (id, name, status, timestamps) for minimal token usage")
@@ -182,6 +190,7 @@ Run 'visor doctor' to verify auth and connectivity.`,
 	rootCmd.AddCommand(newFacetsPromotedCmd(flags))
 	rootCmd.AddCommand(newVinsPromotedCmd(flags))
 	rootCmd.AddCommand(newVersionCliCmd())
+	rootCmd.AddCommand(newAdvancedHelpCmd(rootCmd))
 
 	return rootCmd
 }
