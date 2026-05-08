@@ -69,7 +69,8 @@ rsync -a --delete \
   --exclude='.github/' \
   --exclude='README.md' \
   --exclude='SKILL.md' \
-  --exclude='internal/cli/auth_test.go' \
+  --exclude='install.sh' \
+  --exclude='internal/cli/*_test.go' \
   "$TMP/visor-generated/" "$ROOT/"
 
 "$ROOT/scripts/productize-generated.sh"
