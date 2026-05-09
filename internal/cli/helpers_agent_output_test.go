@@ -117,3 +117,79 @@ func TestPrintOutputWithFlagsReturnsSelectValidationError(t *testing.T) {
 		t.Fatalf("expected no output on validation error, got %q", buf.String())
 	}
 }
+
+func TestPrintOutputWithFlagsRendersMarkdownEnvelope(t *testing.T) {
+	var buf bytes.Buffer
+	flags := &rootFlags{markdown: true, compact: true}
+	input := json.RawMessage(`{
+		"meta":{"source":"live"},
+		"results":{"data":[{"vin":"1FA","year":2018,"make":"ford","model":"mustang","price":19995,"miles":81234,"vdp_url":"https://example.test/car","photo_urls":["https://example.test/photo.jpg"]}]}
+	}`)
+
+	if err := printOutputWithFlags(&buf, input, flags); err != nil {
+		t.Fatalf("printOutputWithFlags returned error: %v", err)
+	}
+	out := buf.String()
+	for _, want := range []string{"## Listings", "_1 result._", "| vin | year | make | model | price | miles | vdp_url |", "| 1FA | 2018 | ford | mustang | 19995 | 81234 | [link](https://example.test/car) |", "## Meta", "| source | live |"} {
+		if !strings.Contains(out, want) {
+			t.Fatalf("markdown output missing %q:\n%s", want, out)
+		}
+	}
+	if strings.Contains(out, "photo_urls") {
+		t.Fatalf("markdown compact output should omit photo_urls:\n%s", out)
+	}
+}
+
+func TestPrintMarkdownRendersDirectResultsArray(t *testing.T) {
+	var buf bytes.Buffer
+	input := json.RawMessage(`{
+		"meta":{"source":"local","resource_type":"listings"},
+		"results":[{"vin":"1FA","year":2018,"make":"ford","model":"mustang","price":19995,"miles":81234,"vdp_url":"https://example.test/car"}]
+	}`)
+
+	if err := printMarkdown(&buf, input); err != nil {
+		t.Fatalf("printMarkdown returned error: %v", err)
+	}
+	out := buf.String()
+	for _, want := range []string{"## Listings", "| vin | year | make | model | price | miles | vdp_url |", "## Meta", "| resource_type | listings |"} {
+		if !strings.Contains(out, want) {
+			t.Fatalf("markdown output missing %q:\n%s", want, out)
+		}
+	}
+}
+
+func TestPrintMarkdownRendersFacetSections(t *testing.T) {
+	var buf bytes.Buffer
+	input := json.RawMessage(`{
+		"meta":{"source":"live"},
+		"results":{"facets":{"make":[{"value":"ford","count":12},{"value":"toyota","count":8}],"year":[{"value":2024,"count":4}]},"stats":{"total":20,"min_price":10000,"max_price":30000}}
+	}`)
+
+	if err := printMarkdown(&buf, input); err != nil {
+		t.Fatalf("printMarkdown returned error: %v", err)
+	}
+	out := buf.String()
+	for _, want := range []string{"## Facets", "### Stats", "| total | 20 |", "### Facet Values", "#### Make", "| value | count |", "| ford | 12 |", "#### Year"} {
+		if !strings.Contains(out, want) {
+			t.Fatalf("facet markdown output missing %q:\n%s", want, out)
+		}
+	}
+}
+
+func TestPrintMarkdownRendersNestedVehicleDetail(t *testing.T) {
+	var buf bytes.Buffer
+	input := json.RawMessage(`{
+		"meta":{"source":"live"},
+		"results":{"vin":"1FA","status":"active","latest_listing":{"vin":"1FA","year":2018,"make":"ford","model":"mustang","price":19995,"miles":81234,"vdp_url":"https://example.test/car"},"build":{"trim":"GT","fuel_type":"gas"}}
+	}`)
+
+	if err := printMarkdown(&buf, input); err != nil {
+		t.Fatalf("printMarkdown returned error: %v", err)
+	}
+	out := buf.String()
+	for _, want := range []string{"## Vehicle", "### Summary", "| vin | 1FA |", "### Vehicle", "| vin | 1FA |", "| vdp_url | [link](https://example.test/car) |", "### Build", "| trim | GT |", "| fuel_type | gas |"} {
+		if !strings.Contains(out, want) {
+			t.Fatalf("nested markdown output missing %q:\n%s", want, out)
+		}
+	}
+}

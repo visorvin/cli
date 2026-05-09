@@ -325,21 +325,14 @@ func newFacetsPromotedCmd(flags *rootFlags) *cobra.Command {
 			if flags.csv {
 				return printOutputWithFlags(cmd.OutOrStdout(), data, flags)
 			}
-			// For JSON output, wrap with provenance envelope. --select wins over
-			// --compact when both are set; --compact only runs when no explicit
-			// fields were requested.
-			if flags.asJSON || !isTerminal(cmd.OutOrStdout()) {
-				filtered := data
-				if flags.selectFields != "" {
-					filtered = filterFields(filtered, flags.selectFields)
-				} else if flags.compact {
-					filtered = compactFields(filtered)
-				}
-				wrapped, wrapErr := wrapWithProvenance(filtered, prov)
+			// For structured output, wrap with provenance first so --select paths
+			// match the documented envelope shape, e.g. results.data.vin.
+			if flags.asJSON || flags.markdown || !isTerminal(cmd.OutOrStdout()) {
+				wrapped, wrapErr := wrapWithProvenance(data, prov)
 				if wrapErr != nil {
 					return wrapErr
 				}
-				return printOutput(cmd.OutOrStdout(), wrapped, true)
+				return printOutputWithFlags(cmd.OutOrStdout(), wrapped, flags)
 			}
 			if wantsHumanTable(cmd.OutOrStdout(), flags) {
 				var items []map[string]any

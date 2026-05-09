@@ -632,6 +632,10 @@ func printOutputWithFlags(w io.Writer, data json.RawMessage, flags *rootFlags) e
 	if flags.csv {
 		return printCSV(w, data)
 	}
+	// --markdown: render as Markdown for transcript-friendly output
+	if flags.markdown {
+		return printMarkdown(w, data)
+	}
 	return printOutput(w, data, flags.asJSON)
 }
 
@@ -797,6 +801,473 @@ func printCSV(w io.Writer, data json.RawMessage) error {
 	return nil
 }
 
+type markdownEnvelope struct {
+	Results any
+	Meta    map[string]any
+}
+
+// printMarkdown renders JSON objects and arrays as Markdown. It is deliberately
+// shape-aware rather than schema-bound: known Visor fields get useful ordering
+// and sections, while unknown upstream fields still render through generic
+// object/array fallbacks.
+func printMarkdown(w io.Writer, data json.RawMessage) error {
+	if env, ok := parseMarkdownEnvelope(data); ok {
+		if err := printMarkdownAny(w, markdownTitle(env.Results, true), env.Results, 2); err != nil {
+			return err
+		}
+		if len(env.Meta) > 0 {
+			fmt.Fprintln(w)
+			return printMarkdownAny(w, "Meta", env.Meta, 2)
+		}
+		return nil
+	}
+
+	var decoded any
+	if err := json.Unmarshal(data, &decoded); err != nil {
+		fmt.Fprintln(w, "```")
+		fmt.Fprintln(w, string(data))
+		fmt.Fprintln(w, "```")
+		return nil
+	}
+	return printMarkdownAny(w, markdownTitle(decoded, true), decoded, 2)
+}
+
+func parseMarkdownEnvelope(data json.RawMessage) (markdownEnvelope, bool) {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return markdownEnvelope{}, false
+	}
+	resultsRaw, hasResults := raw["results"]
+	dataRaw, hasData := raw["data"]
+	if !hasResults && !hasData {
+		return markdownEnvelope{}, false
+	}
+	if !hasResults {
+		resultsRaw = dataRaw
+	}
+	var results any
+	if err := json.Unmarshal(resultsRaw, &results); err != nil {
+		results = string(resultsRaw)
+	}
+	results = unwrapMarkdownData(results)
+	meta := map[string]any{}
+	if metaRaw, ok := raw["meta"]; ok {
+		_ = json.Unmarshal(metaRaw, &meta)
+	}
+	return markdownEnvelope{Results: results, Meta: meta}, true
+}
+
+func unwrapMarkdownData(v any) any {
+	obj, ok := v.(map[string]any)
+	if !ok {
+		return v
+	}
+	data, hasData := obj["data"]
+	if !hasData {
+		return v
+	}
+	// Only unwrap common response envelopes. If an upstream payload uses `data`
+	// as one field among many domain fields, preserve the object.
+	if len(obj) <= 3 {
+		return data
+	}
+	if _, ok := obj["status"]; ok {
+		return data
+	}
+	return v
+}
+
+func printMarkdownHeading(w io.Writer, title string) error {
+	return printMarkdownHeadingLevel(w, 2, title)
+}
+
+func printMarkdownHeadingLevel(w io.Writer, level int, title string) error {
+	if level < 1 {
+		level = 1
+	}
+	if level > 6 {
+		level = 6
+	}
+	_, err := fmt.Fprintf(w, "%s %s\n\n", strings.Repeat("#", level), title)
+	return err
+}
+
+func printMarkdownTable(w io.Writer, items []map[string]any) error {
+	if len(items) == 0 {
+		_, err := fmt.Fprintln(w, "_No results._")
+		return err
+	}
+	headers := markdownHeaders(items)
+	fmt.Fprintf(w, "| %s |\n", strings.Join(headers, " | "))
+	separators := make([]string, len(headers))
+	for i := range separators {
+		separators[i] = "---"
+	}
+	fmt.Fprintf(w, "| %s |\n", strings.Join(separators, " | "))
+	for _, item := range items {
+		row := make([]string, len(headers))
+		for i, h := range headers {
+			row[i] = markdownCellValue(h, item[h])
+		}
+		fmt.Fprintf(w, "| %s |\n", strings.Join(row, " | "))
+	}
+	return nil
+}
+
+func printMarkdownObject(w io.Writer, obj map[string]any) error {
+	if len(obj) == 0 {
+		_, err := fmt.Fprintln(w, "_No fields._")
+		return err
+	}
+	headers := prioritizeAllHeaders(obj)
+	fmt.Fprintln(w, "| Field | Value |")
+	fmt.Fprintln(w, "| --- | --- |")
+	for _, h := range headers {
+		fmt.Fprintf(w, "| %s | %s |\n", escapeMarkdownTableCell(h), markdownCellValue(h, obj[h]))
+	}
+	return nil
+}
+
+func printMarkdownAny(w io.Writer, title string, v any, level int) error {
+	v = unwrapMarkdownData(v)
+	switch val := v.(type) {
+	case []any:
+		items, ok := markdownObjectArray(val)
+		if ok {
+			heading := markdownDisplayTitle(title, markdownTitle(items, false))
+			if err := printMarkdownHeadingLevel(w, level, heading); err != nil {
+				return err
+			}
+			fmt.Fprintf(w, "_%d result%s._\n\n", len(items), pluralSuffix(len(items)))
+			return printMarkdownTable(w, items)
+		}
+		if err := printMarkdownHeadingLevel(w, level, title); err != nil {
+			return err
+		}
+		return printMarkdownList(w, val)
+	case map[string]any:
+		return printMarkdownObjectSections(w, title, val, level)
+	default:
+		if err := printMarkdownHeadingLevel(w, level, title); err != nil {
+			return err
+		}
+		_, err := fmt.Fprintf(w, "%s\n", escapeMarkdownText(formatCellValue(val)))
+		return err
+	}
+}
+
+func printMarkdownObjectSections(w io.Writer, title string, obj map[string]any, level int) error {
+	if isFacetResponse(obj) {
+		return printMarkdownFacets(w, obj, level)
+	}
+	if err := printMarkdownHeadingLevel(w, level, markdownDisplayTitle(title, markdownTitle(obj, false))); err != nil {
+		return err
+	}
+	scalars, nested := splitMarkdownObject(obj)
+	if len(scalars) == 0 && len(nested) == 0 {
+		_, err := fmt.Fprintln(w, "_No fields._")
+		return err
+	}
+	if len(scalars) > 0 {
+		if len(nested) > 0 {
+			if err := printMarkdownHeadingLevel(w, level+1, "Summary"); err != nil {
+				return err
+			}
+		}
+		if err := printMarkdownObject(w, scalars); err != nil {
+			return err
+		}
+	}
+	for _, key := range markdownNestedKeys(nested) {
+		fmt.Fprintln(w)
+		if err := printMarkdownAny(w, markdownHumanTitle(key), nested[key], level+1); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func printMarkdownFacets(w io.Writer, obj map[string]any, level int) error {
+	if err := printMarkdownHeadingLevel(w, level, "Facets"); err != nil {
+		return err
+	}
+	scalars, nested := splitMarkdownObject(obj)
+	if len(scalars) > 0 {
+		if err := printMarkdownHeadingLevel(w, level+1, "Summary"); err != nil {
+			return err
+		}
+		if err := printMarkdownObject(w, scalars); err != nil {
+			return err
+		}
+	}
+	if stats, ok := nested["stats"]; ok {
+		fmt.Fprintln(w)
+		if err := printMarkdownAny(w, "Stats", stats, level+1); err != nil {
+			return err
+		}
+		delete(nested, "stats")
+	}
+	if facets, ok := nested["facets"]; ok {
+		fmt.Fprintln(w)
+		if err := printMarkdownHeadingLevel(w, level+1, "Facet Values"); err != nil {
+			return err
+		}
+		if err := printMarkdownFacetValues(w, facets, level+2); err != nil {
+			return err
+		}
+		delete(nested, "facets")
+	}
+	for _, key := range markdownNestedKeys(nested) {
+		fmt.Fprintln(w)
+		if err := printMarkdownAny(w, markdownHumanTitle(key), nested[key], level+1); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func printMarkdownFacetValues(w io.Writer, facets any, level int) error {
+	facetMap, ok := facets.(map[string]any)
+	if !ok {
+		return printMarkdownAny(w, "Facet Values", facets, level)
+	}
+	keys := make([]string, 0, len(facetMap))
+	for key := range facetMap {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	for i, key := range keys {
+		if i > 0 {
+			fmt.Fprintln(w)
+		}
+		if err := printMarkdownAny(w, markdownHumanTitle(key), facetMap[key], level); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func printMarkdownList(w io.Writer, items []any) error {
+	if len(items) == 0 {
+		_, err := fmt.Fprintln(w, "_No values._")
+		return err
+	}
+	for _, item := range items {
+		fmt.Fprintf(w, "- %s\n", escapeMarkdownText(formatCellValue(item)))
+	}
+	return nil
+}
+
+func markdownHeaders(items []map[string]any) []string {
+	seen := map[string]bool{}
+	headers := make([]string, 0)
+	preferred := []string{
+		"value", "count",
+		"id", "listing_id", "vin", "year", "make", "model", "trim", "version",
+		"price", "msrp", "miles", "dealer_id", "dealer_name", "city", "state",
+		"postal_code", "inventory_type", "inventory_status", "vdp_url",
+		"days_on_market", "distance", "exterior_color", "interior_color",
+		"name", "title", "status", "type", "url", "created_at", "updated_at",
+	}
+	for _, h := range preferred {
+		for _, item := range items {
+			if _, ok := item[h]; ok && !seen[h] {
+				seen[h] = true
+				headers = append(headers, h)
+				break
+			}
+		}
+	}
+	extra := make([]string, 0)
+	for _, item := range items {
+		for h := range item {
+			if !seen[h] {
+				seen[h] = true
+				extra = append(extra, h)
+			}
+		}
+	}
+	sort.Strings(extra)
+	headers = append(headers, extra...)
+	return headers
+}
+
+func markdownObjectArray(items []any) ([]map[string]any, bool) {
+	if len(items) == 0 {
+		return []map[string]any{}, true
+	}
+	out := make([]map[string]any, 0, len(items))
+	for _, item := range items {
+		obj, ok := item.(map[string]any)
+		if !ok {
+			return nil, false
+		}
+		out = append(out, obj)
+	}
+	return out, true
+}
+
+func splitMarkdownObject(obj map[string]any) (map[string]any, map[string]any) {
+	scalars := map[string]any{}
+	nested := map[string]any{}
+	for key, value := range obj {
+		switch value.(type) {
+		case map[string]any, []any:
+			nested[key] = value
+		default:
+			scalars[key] = value
+		}
+	}
+	return scalars, nested
+}
+
+func markdownNestedKeys(obj map[string]any) []string {
+	preferred := []string{"stats", "facets", "latest_listing", "listing", "dealer", "build", "price_history", "options", "features"}
+	seen := map[string]bool{}
+	keys := make([]string, 0, len(obj))
+	for _, key := range preferred {
+		if _, ok := obj[key]; ok {
+			seen[key] = true
+			keys = append(keys, key)
+		}
+	}
+	extra := make([]string, 0)
+	for key := range obj {
+		if !seen[key] {
+			extra = append(extra, key)
+		}
+	}
+	sort.Strings(extra)
+	return append(keys, extra...)
+}
+
+func markdownTitle(v any, plural bool) string {
+	switch val := v.(type) {
+	case []map[string]any:
+		if len(val) > 0 {
+			return markdownRowTitle(val[0], true)
+		}
+	case []any:
+		if items, ok := markdownObjectArray(val); ok && len(items) > 0 {
+			return markdownRowTitle(items[0], true)
+		}
+	case map[string]any:
+		if isFacetResponse(val) {
+			return "Facets"
+		}
+		return markdownRowTitle(val, plural)
+	}
+	return "Results"
+}
+
+func markdownDisplayTitle(preferred, inferred string) string {
+	if inferred != "" && inferred != "Results" {
+		return inferred
+	}
+	if strings.TrimSpace(preferred) != "" {
+		return preferred
+	}
+	return "Results"
+}
+
+func markdownRowTitle(obj map[string]any, plural bool) string {
+	has := func(keys ...string) bool {
+		for _, key := range keys {
+			if _, ok := obj[key]; ok {
+				return true
+			}
+		}
+		return false
+	}
+	switch {
+	case has("vin") && has("year", "make", "model", "price", "miles", "vdp_url"):
+		if plural {
+			return "Listings"
+		}
+		return "Vehicle"
+	case has("vin"):
+		if plural {
+			return "Vehicles"
+		}
+		return "Vehicle"
+	case has("dealer_id") || (has("name", "dealer_name") && has("city", "state")):
+		if plural {
+			return "Dealers"
+		}
+		return "Dealer"
+	case has("command", "description", "score"):
+		return "Commands"
+	default:
+		return "Results"
+	}
+}
+
+func isFacetResponse(obj map[string]any) bool {
+	_, hasFacets := obj["facets"]
+	_, hasStats := obj["stats"]
+	return hasFacets || hasStats
+}
+
+func markdownHumanTitle(key string) string {
+	key = strings.TrimSpace(key)
+	if key == "" {
+		return "Values"
+	}
+	parts := strings.FieldsFunc(key, func(r rune) bool {
+		return r == '_' || r == '-'
+	})
+	for i, part := range parts {
+		if part == "" {
+			continue
+		}
+		parts[i] = strings.ToUpper(part[:1]) + part[1:]
+	}
+	return strings.Join(parts, " ")
+}
+
+func pluralSuffix(count int) string {
+	if count == 1 {
+		return ""
+	}
+	return "s"
+}
+
+func markdownCellValue(field string, v any) string {
+	if s, ok := v.(string); ok && isURLField(field) && isHTTPURL(s) {
+		return fmt.Sprintf("[link](%s)", escapeMarkdownURL(s))
+	}
+	return escapeMarkdownTableCell(formatCellValue(v))
+}
+
+func isURLField(field string) bool {
+	field = strings.ToLower(field)
+	return field == "url" || strings.HasSuffix(field, "_url") || strings.HasSuffix(field, "url")
+}
+
+func isHTTPURL(s string) bool {
+	return strings.HasPrefix(s, "https://") || strings.HasPrefix(s, "http://")
+}
+
+func escapeMarkdownURL(s string) string {
+	s = strings.ReplaceAll(s, " ", "%20")
+	s = strings.ReplaceAll(s, ")", "%29")
+	return s
+}
+
+func escapeMarkdownText(s string) string {
+	s = strings.ReplaceAll(s, "\\", "\\\\")
+	s = strings.ReplaceAll(s, "`", "\\`")
+	return s
+}
+
+func escapeMarkdownTableCell(s string) string {
+	s = strings.ReplaceAll(s, "\\", "\\\\")
+	s = strings.ReplaceAll(s, "|", "\\|")
+	s = strings.ReplaceAll(s, "\r\n", "<br>")
+	s = strings.ReplaceAll(s, "\n", "<br>")
+	return s
+}
+
 // printOutput auto-detects arrays and renders as tables, or prints raw JSON for objects.
 func printOutput(w io.Writer, data json.RawMessage, asJSON bool) error {
 	if !asJSON && !isTerminal(w) {
@@ -900,9 +1371,9 @@ func suggestFlag(unknown string, cmd *cobra.Command) string {
 // Smart default: terminal=table, pipe=JSON.
 // - Human in terminal: isTerminal()=true → table
 // - Claude Code/Codex bash tool: stdout piped → JSON
-// - --json/--csv/--compact/--agent: machine format → JSON
+// - --json/--csv/--markdown/--compact/--agent: explicit output format
 func wantsHumanTable(w io.Writer, flags *rootFlags) bool {
-	if flags.asJSON || flags.csv || flags.compact || flags.quiet || flags.plain {
+	if flags.asJSON || flags.csv || flags.markdown || flags.compact || flags.quiet || flags.plain {
 		return false
 	}
 	if flags.selectFields != "" {

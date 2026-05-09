@@ -177,7 +177,7 @@ func outputSearchResults(cmd *cobra.Command, flags *rootFlags, results []json.Ra
 		results = results[:limit]
 	}
 
-	jsonMode := flags.asJSON || !isTerminal(cmd.OutOrStdout())
+	jsonMode := flags.asJSON || flags.markdown || !isTerminal(cmd.OutOrStdout())
 
 	// JSON mode always emits a valid envelope, including on no matches —
 	// agents pipe stdout through json.loads / jq and need parseable output
@@ -193,7 +193,7 @@ func outputSearchResults(cmd *cobra.Command, flags *rootFlags, results []json.Ra
 		if err != nil {
 			return err
 		}
-		return printOutput(cmd.OutOrStdout(), wrapped, true)
+		return printOutputWithFlags(cmd.OutOrStdout(), wrapped, flags)
 	}
 
 	if len(results) == 0 {

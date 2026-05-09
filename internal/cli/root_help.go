@@ -44,6 +44,7 @@ Other Commands:
 Common Flags:
       --agent          JSON + compact + non-interactive mode
       --json           Output JSON
+      --markdown       Output Markdown
       --select string  Select output fields, e.g. vin,price,miles
       --config string  Config file path
   -h, --help           help for visor
@@ -189,7 +190,7 @@ func cleanLocalFlags(cmd *cobra.Command) ([]*pflag.Flag, []*pflag.Flag) {
 }
 
 func cleanOutputFlags(cmd *cobra.Command) []*pflag.Flag {
-	names := []string{"agent", "json", "select", "config"}
+	names := []string{"agent", "json", "markdown", "select", "config"}
 	return lookupVisibleFlags(cmd.Root().PersistentFlags(), names)
 }
 
@@ -222,6 +223,7 @@ func cleanFlagUsage(flag *pflag.Flag) string {
 	usage := map[string]string{
 		"agent":             "JSON + compact + non-interactive mode",
 		"json":              "Output JSON",
+		"markdown":          "Output Markdown",
 		"select":            "Select output fields, e.g. vin,price,miles",
 		"config":            "Config file path",
 		"make":              "Filter by make",
@@ -271,6 +273,7 @@ Advanced Flags:
       --dry-run              Show request without sending
       --human-friendly       Enable colored output and rich formatting
       --idempotent           Treat already-existing create results as a successful no-op
+      --markdown             Output Markdown
       --no-cache             Bypass response cache
       --no-color             Disable colored output
       --no-input             Disable interactive prompts

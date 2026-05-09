@@ -18,12 +18,13 @@ import (
 	"github.com/visorvin/cli/internal/config"
 )
 
-var version = "1.0.0"
+var version = "1.0.10"
 
 type rootFlags struct {
 	asJSON        bool
 	compact       bool
 	csv           bool
+	markdown      bool
 	plain         bool
 	quiet         bool
 	dryRun        bool
@@ -103,6 +104,7 @@ Run 'visor doctor' to verify auth and connectivity.`,
 	rootCmd.PersistentFlags().BoolVar(&flags.asJSON, "json", false, "Output as JSON")
 	rootCmd.PersistentFlags().BoolVar(&flags.compact, "compact", false, "Return only key fields (id, name, status, timestamps) for minimal token usage")
 	rootCmd.PersistentFlags().BoolVar(&flags.csv, "csv", false, "Output as CSV (table and array responses)")
+	rootCmd.PersistentFlags().BoolVar(&flags.markdown, "markdown", false, "Output as Markdown")
 	rootCmd.PersistentFlags().BoolVar(&flags.plain, "plain", false, "Output as plain tab-separated text")
 	rootCmd.PersistentFlags().BoolVar(&flags.quiet, "quiet", false, "Bare output, one value per line")
 	rootCmd.PersistentFlags().StringVar(&flags.configPath, "config", "", "Config file path")
@@ -150,7 +152,7 @@ Run 'visor doctor' to verify auth and connectivity.`,
 			}
 		}
 		if flags.agent {
-			if !cmd.Flags().Changed("json") {
+			if !cmd.Flags().Changed("json") && !cmd.Flags().Changed("markdown") {
 				flags.asJSON = true
 			}
 			if !cmd.Flags().Changed("compact") {

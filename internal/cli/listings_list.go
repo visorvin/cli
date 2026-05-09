@@ -204,7 +204,7 @@ func newListingsListCmd(flags *rootFlags) *cobra.Command {
 			}
 			// For JSON output, wrap with provenance first so --select paths match
 			// the documented envelope shape, e.g. results.data.vin.
-			if flags.asJSON || !isTerminal(cmd.OutOrStdout()) {
+			if flags.asJSON || flags.markdown || !isTerminal(cmd.OutOrStdout()) {
 				wrapped, wrapErr := wrapWithProvenance(data, prov)
 				if wrapErr != nil {
 					return wrapErr

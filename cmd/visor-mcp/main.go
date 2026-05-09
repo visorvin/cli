@@ -14,7 +14,7 @@ import (
 func main() {
 	s := server.NewMCPServer(
 		"Visor Public",
-		"1.0.0",
+		"1.0.10",
 		server.WithToolCapabilities(false),
 	)
 

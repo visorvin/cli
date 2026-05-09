@@ -36,12 +36,15 @@ printf '%s' "$VISOR_API_KEY" | visor auth set-token --stdin
 ## Agent Patterns
 
 Use `--agent` for compact, automation-safe JSON. For listings, compact output keeps useful row fields and excludes `photo_urls`.
+Use `--markdown` only when the caller explicitly wants transcript-friendly Markdown; `--agent` should remain the default for machine parsing.
 
 ```bash
 visor listings list --make ford --model mustang --max-price 20000 --limit 10 --agent
 
 visor listings list --make ford --model mustang --max-price 20000 --limit 10 --agent \
   --select id,vin,year,price,miles,vdp_url
+
+visor listings list --make ford --model mustang --max-price 20000 --limit 10 --agent --markdown
 
 visor facets --make ford --model f-150 --facets year,trim,fuel_type --json \
   --select results.data.facets,results.data.stats

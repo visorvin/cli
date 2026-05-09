@@ -2,7 +2,7 @@
 
 A scriptable command-line client for the [Visor Public API](https://api.visor.vin/v1/openapi.json): vehicle listings, facets, VIN detail, dealers, and dealer inventory.
 
-The CLI is read-only. It is built for customer workflows, shell scripts, and AI agents that need compact JSON, field selection, CSV export, dry-run previews, and repeatable checks against Visor data.
+The CLI is read-only. It is built for customer workflows, shell scripts, and AI agents that need compact JSON, explicit Markdown output, field selection, CSV export, dry-run previews, and repeatable checks against Visor data.
 
 ## Install
 
@@ -108,12 +108,13 @@ All endpoint commands support common output controls:
 ```bash
 visor listings list --json
 visor listings list --json --select vin,price
+visor listings list --markdown
 visor listings list --csv
 visor listings list --dry-run
 visor listings list --agent
 ```
 
-`--agent` expands to JSON, compact output, no prompts, no color, and yes-to-confirmations. For listing rows, compact output keeps useful fields such as `vin`, `year`, `make`, `model`, `price`, `miles`, `dealer_name`, and `vdp_url`, and omits `photo_urls` unless you request full JSON without compact mode.
+`--agent` expands to JSON, compact output, no prompts, no color, and yes-to-confirmations. That keeps the default agent contract parseable for scripts and tools. Use `--markdown` when you want transcript-friendly Markdown instead; `--agent --markdown` gives compact Markdown while preserving the other agent defaults. For listing rows, compact output keeps useful fields such as `vin`, `year`, `make`, `model`, `price`, `miles`, `dealer_name`, and `vdp_url`, and omits `photo_urls` unless you request full JSON without compact mode.
 
 Responses are wrapped with provenance:
 
