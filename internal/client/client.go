@@ -28,6 +28,8 @@ type Client struct {
 	HTTPClient *http.Client
 	DryRun     bool
 	NoCache    bool
+	UserAgent  string
+	Telemetry  map[string]string
 	cacheDir   string
 	limiter    *cliutil.AdaptiveLimiter
 }
@@ -56,6 +58,7 @@ func New(cfg *config.Config, timeout time.Duration, rateLimit float64) *Client {
 		BaseURL:    strings.TrimRight(cfg.BaseURL, "/"),
 		Config:     cfg,
 		HTTPClient: httpClient,
+		UserAgent:  "visor-cli",
 		cacheDir:   cacheDir,
 		limiter:    cliutil.NewAdaptiveLimiter(rateLimit),
 	}
@@ -205,10 +208,6 @@ func (c *Client) do(method, path string, params map[string]string, body any, hea
 		if err != nil {
 			return nil, 0, fmt.Errorf("creating request: %w", err)
 		}
-		if bodyBytes != nil {
-			req.Header.Set("Content-Type", "application/json")
-		}
-
 		if params != nil {
 			q := req.URL.Query()
 			for k, v := range params {
@@ -222,11 +221,7 @@ func (c *Client) do(method, path string, params map[string]string, body any, hea
 		if authHeader != "" {
 			req.Header.Set("Authorization", authHeader)
 		}
-		// Per-endpoint header overrides (e.g., different API version per resource)
-		for k, v := range headerOverrides {
-			req.Header.Set(k, v)
-		}
-		req.Header.Set("User-Agent", "visor/1.0.0-beta")
+		c.applyRequestHeaders(req.Header, bodyBytes != nil, headerOverrides)
 
 		resp, err := c.HTTPClient.Do(req)
 		if err != nil {
@@ -319,8 +314,44 @@ func (c *Client) dryRun(method, targetURL, path string, params map[string]string
 	if authHeader != "" {
 		fmt.Fprintf(os.Stderr, "  %s: %s\n", "Authorization", maskToken(authHeader))
 	}
+	headers := http.Header{}
+	c.applyRequestHeaders(headers, body != nil, headerOverrides)
+	headerKeys := make([]string, 0, len(headers))
+	for k := range headers {
+		if strings.EqualFold(k, "Authorization") {
+			continue
+		}
+		headerKeys = append(headerKeys, k)
+	}
+	sort.Strings(headerKeys)
+	for _, k := range headerKeys {
+		fmt.Fprintf(os.Stderr, "  %s: %s\n", k, headers.Get(k))
+	}
 	fmt.Fprintf(os.Stderr, "\n(dry run - no request sent)\n")
 	return json.RawMessage(`{"dry_run": true}`), 0, nil
+}
+
+func (c *Client) applyRequestHeaders(h http.Header, hasBody bool, headerOverrides map[string]string) {
+	if hasBody {
+		h.Set("Content-Type", "application/json")
+	}
+	// Per-endpoint header overrides (e.g., different API version per resource).
+	for k, v := range headerOverrides {
+		h.Set(k, v)
+	}
+	if c.UserAgent != "" {
+		h.Set("User-Agent", c.UserAgent)
+	}
+	keys := make([]string, 0, len(c.Telemetry))
+	for k := range c.Telemetry {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	for _, k := range keys {
+		if c.Telemetry[k] != "" {
+			h.Set(k, c.Telemetry[k])
+		}
+	}
 }
 
 func (c *Client) ConfiguredTimeout() time.Duration {

@@ -471,6 +471,11 @@ func newMCPClient() (*client.Client, error) {
 		return nil, fmt.Errorf("loading config: %w", err)
 	}
 	c := client.New(cfg, 30*time.Second, 0)
+	c.UserAgent = "visor-mcp"
+	c.Telemetry = map[string]string{
+		"X-Visor-Client":      "mcp",
+		"X-Visor-CLI-Context": "agent,mcp,json,compact",
+	}
 	// Agents calling through MCP need fresh data every call. The on-disk
 	// response cache survives across MCP server invocations, so a
 	// DELETE/PATCH followed by a GET would otherwise return the

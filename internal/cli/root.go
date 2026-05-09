@@ -18,7 +18,7 @@ import (
 	"github.com/visorvin/cli/internal/config"
 )
 
-var version = "1.0.10"
+var version = "1.0.11"
 
 type rootFlags struct {
 	asJSON        bool
@@ -214,7 +214,46 @@ func (f *rootFlags) newClient() (*client.Client, error) {
 	c := client.New(cfg, f.timeout, f.rateLimit)
 	c.DryRun = f.dryRun
 	c.NoCache = f.noCache
+	c.UserAgent = "visor-cli/" + version
+	c.Telemetry = f.telemetryHeaders()
 	return c, nil
+}
+
+func (f *rootFlags) telemetryHeaders() map[string]string {
+	context := []string{}
+	if f.agent {
+		context = append(context, "agent")
+	}
+	if f.compact {
+		context = append(context, "compact")
+	}
+	if f.asJSON {
+		context = append(context, "json")
+	}
+	if f.markdown {
+		context = append(context, "markdown")
+	}
+	if f.csv {
+		context = append(context, "csv")
+	}
+	if f.plain {
+		context = append(context, "plain")
+	}
+	if f.quiet {
+		context = append(context, "quiet")
+	}
+	if f.noCache {
+		context = append(context, "no-cache")
+	}
+
+	headers := map[string]string{
+		"X-Visor-Client":      "cli",
+		"X-Visor-CLI-Version": version,
+	}
+	if len(context) > 0 {
+		headers["X-Visor-CLI-Context"] = strings.Join(context, ",")
+	}
+	return headers
 }
 
 func (f *rootFlags) printJSON(w *cobra.Command, v any) error {
