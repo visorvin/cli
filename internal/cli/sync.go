@@ -852,7 +852,6 @@ func defaultSyncResources() []string {
 func syncResourcePath(resource string) (string, error) {
 	paths := map[string]string{
 		"dealers":  "/v1/dealers",
-		"facets":   "/v1/facets",
 		"listings": "/v1/listings",
 	}
 	if p, ok := paths[resource]; ok {

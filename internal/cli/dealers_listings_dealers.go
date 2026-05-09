@@ -80,7 +80,7 @@ func newDealersListingsDealersCmd(flags *rootFlags) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:         "list <dealer_id>",
 		Aliases:     []string{"dealers", "get"},
-		Short:       "Returns listing summaries scoped to one dealer. Supports the listing filter and pagination surface.",
+		Short:       "Returns listing summaries scoped to one dealer after VIN-level listing deduplication and ownership assignment. If a...",
 		Example:     "  visor dealers listings list 550e8400-e29b-41d4-a716-446655440000",
 		Annotations: map[string]string{"pp:endpoint": "listings.dealers", "pp:method": "GET", "pp:path": "/v1/dealers/{dealer_id}/listings", "mcp:read-only": "true"},
 		RunE: func(cmd *cobra.Command, args []string) error {

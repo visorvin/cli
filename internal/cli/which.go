@@ -28,11 +28,11 @@ type whichEntry struct {
 // query to one of the commands the skill says matter most.
 var whichIndex = []whichEntry{
 	{Command: "dealers get", Description: "Returns one dealer summary by dealer_id. Missing dealers return 404 not_found_error.", Group: "dealers"},
-	{Command: "dealers list", Description: "Returns dealer summaries ordered by active listing count. Use state and q to narrow results.", Group: "dealers"},
-	{Command: "dealers listings dealers", Description: "Returns listing summaries scoped to one dealer. Supports the listing filter and pagination surface.", Group: "dealers"},
-	{Command: "facets list", Description: "Returns categorical facets, numeric range facets, and stats for the listing filter surface. Use facets=make,model,price to return a subset; omit facets for all supported facets.", Group: "facets"},
+	{Command: "dealers list", Description: "Returns dealer summaries ordered by active listing count. Listing counts use VIN-level listing deduplication and ownership assignment, so they can differ from raw dealer feed counts. Use state and q to narrow results.", Group: "dealers"},
+	{Command: "dealers listings dealers", Description: "Returns listing summaries scoped to one dealer after VIN-level listing deduplication and ownership assignment. If a dealer feed contains a VIN that Freeway attributes to another dealer, that VIN may not appear here. Supports the listing filter and pagination surface.", Group: "dealers"},
+	{Command: "facets list", Description: "Returns categorical facets, numeric range facets, and stats for an explicit listing filter surface facet selection. Use facets=make,model,price. Supported facets: make, model, inventory_type, year, trim, version, base_exterior_color, exterior_color, base_interior_color, interior_color, seating_capacity, doors, engine, state, drivetrain, assembly_location, assembly_country, transmission, fuel_type, body_type, cylinders, dealer_type, in_transit, options_packages, features, keywords, price, msrp, miles, dos_active.", Group: "facets"},
 	{Command: "listings get", Description: "Returns listing-centered detail by listing_id. Missing listings return 404 not_found_error.", Group: "listings"},
-	{Command: "listings list", Description: "Returns active, sold, or historical snapshot listing summaries using stable snake_case fields. Unknown filters fail closed with a validation_error.", Group: "listings"},
+	{Command: "listings list", Description: "Returns active, sold, or historical snapshot listing summaries using stable snake_case fields. Public inventory is deduplicated by VIN and assigned to the dealer Freeway believes owns the listing, so dealer-scoped counts can differ from raw dealer feed counts. Unknown filters fail closed with a validation_error.", Group: "listings"},
 	{Command: "vins get", Description: "Returns the current or latest known record for a VIN. Missing VINs return 404 not_found_error.", Group: "vins"},
 }
 

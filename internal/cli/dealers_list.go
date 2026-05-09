@@ -23,7 +23,7 @@ func newDealersListCmd(flags *rootFlags) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:         "list",
-		Short:       "Returns dealer summaries ordered by active listing count. Use state and q to narrow results.",
+		Short:       "Returns dealer summaries ordered by active listing count. Listing counts use VIN-level listing deduplication and...",
 		Example:     "  visor dealers list",
 		Annotations: map[string]string{"pp:endpoint": "dealers.list", "pp:method": "GET", "pp:path": "/v1/dealers", "mcp:read-only": "true"},
 		RunE: func(cmd *cobra.Command, args []string) error {

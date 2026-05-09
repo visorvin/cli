@@ -13,6 +13,7 @@ import (
 
 func newFacetsPromotedCmd(flags *rootFlags) *cobra.Command {
 	var flagFacets string
+	var flagFacetValueLimit string
 	var flagMake string
 	var flagModel string
 	var flagTrim string
@@ -76,11 +77,14 @@ func newFacetsPromotedCmd(flags *rootFlags) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:         "facets",
-		Short:       "Returns categorical facets, numeric range facets, and stats for the listing filter surface. Use...",
-		Long:        "Shortcut for 'facets list'. Returns categorical facets, numeric range facets, and stats for the listing filter surface. Use...",
-		Example:     "  visor facets",
+		Short:       "Returns categorical facets, numeric range facets, and stats for an explicit listing filter surface facet selection....",
+		Long:        "Shortcut for 'facets list'. Returns categorical facets, numeric range facets, and stats for an explicit listing filter surface facet selection....",
+		Example:     "  visor facets --facets example-value",
 		Annotations: map[string]string{"pp:endpoint": "facets.list", "pp:method": "GET", "pp:path": "/v1/facets", "mcp:read-only": "true"},
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if !cmd.Flags().Changed("facets") && !flags.dryRun {
+				return fmt.Errorf("required flag \"%s\" not set", "facets")
+			}
 			if cmd.Flags().Changed("in-transit") {
 				allowedInTransit := []string{"true", "false"}
 				validInTransit := false
@@ -116,6 +120,9 @@ func newFacetsPromotedCmd(flags *rootFlags) *cobra.Command {
 			params := map[string]string{}
 			if flagFacets != "" {
 				params["facets"] = fmt.Sprintf("%v", flagFacets)
+			}
+			if flagFacetValueLimit != "" {
+				params["facet_value_limit"] = fmt.Sprintf("%v", flagFacetValueLimit)
 			}
 			if flagMake != "" {
 				params["make"] = fmt.Sprintf("%v", flagMake)
@@ -349,7 +356,8 @@ func newFacetsPromotedCmd(flags *rootFlags) *cobra.Command {
 			return printOutputWithFlags(cmd.OutOrStdout(), data, flags)
 		},
 	}
-	cmd.Flags().StringVar(&flagFacets, "facets", "", "Comma-separated facet names to return. Defaults to all supported facets.")
+	cmd.Flags().StringVar(&flagFacets, "facets", "", "Required comma-separated facet names to return. Supported facets: make, model, inventory_type, year, trim, version,...")
+	cmd.Flags().StringVar(&flagFacetValueLimit, "facet-value-limit", "", "Maximum number of values returned per categorical facet. Defaults to 20; maximum 100. Numeric range facets always...")
 	cmd.Flags().StringVar(&flagMake, "make", "", "Comma-separated make names or slugs to apply before counting facet buckets.")
 	cmd.Flags().StringVar(&flagModel, "model", "", "Comma-separated model names or slugs to apply before counting facet buckets.")
 	cmd.Flags().StringVar(&flagTrim, "trim", "", "Comma-separated trim names to apply before counting facet buckets.")

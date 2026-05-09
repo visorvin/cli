@@ -1114,7 +1114,7 @@
             }
           }
         },
-        "description": "Returns active, sold, or historical snapshot listing summaries using stable snake_case fields. Unknown filters fail closed with a validation_error.",
+        "description": "Returns active, sold, or historical snapshot listing summaries using stable snake_case fields. Public inventory is deduplicated by VIN and assigned to the dealer Freeway believes owns the listing, so dealer-scoped counts can differ from raw dealer feed counts. Unknown filters fail closed with a validation_error.",
         "summary": "Filter listings"
       }
     },
@@ -1130,10 +1130,20 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "Comma-separated facet names to return. Defaults to all supported facets."
+              "description": "Required comma-separated facet names to return. Supported facets: make, model, inventory_type, year, trim, version, base_exterior_color, exterior_color, base_interior_color, interior_color, seating_capacity, doors, engine, state, drivetrain, assembly_location, assembly_country, transmission, fuel_type, body_type, cylinders, dealer_type, in_transit, options_packages, features, keywords, price, msrp, miles, dos_active."
+            },
+            "required": true,
+            "description": "Required comma-separated facet names to return. Supported facets: make, model, inventory_type, year, trim, version, base_exterior_color, exterior_color, base_interior_color, interior_color, seating_capacity, doors, engine, state, drivetrain, assembly_location, assembly_country, transmission, fuel_type, body_type, cylinders, dealer_type, in_transit, options_packages, features, keywords, price, msrp, miles, dos_active."
+          },
+          {
+            "name": "facet_value_limit",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "Maximum number of values returned per categorical facet. Defaults to 20; maximum 100. Numeric range facets always return fixed buckets."
             },
             "required": false,
-            "description": "Comma-separated facet names to return. Defaults to all supported facets."
+            "description": "Maximum number of values returned per categorical facet. Defaults to 20; maximum 100. Numeric range facets always return fixed buckets."
           },
           {
             "name": "make",
@@ -2082,7 +2092,7 @@
             }
           }
         },
-        "description": "Returns categorical facets, numeric range facets, and stats for the listing filter surface. Use facets=make,model,price to return a subset; omit facets for all supported facets.",
+        "description": "Returns categorical facets, numeric range facets, and stats for an explicit listing filter surface facet selection. Use facets=make,model,price. Supported facets: make, model, inventory_type, year, trim, version, base_exterior_color, exterior_color, base_interior_color, interior_color, seating_capacity, doors, engine, state, drivetrain, assembly_location, assembly_country, transmission, fuel_type, body_type, cylinders, dealer_type, in_transit, options_packages, features, keywords, price, msrp, miles, dos_active.",
         "summary": "Filter facets"
       }
     },
@@ -2171,8 +2181,8 @@
                           "type": "string",
                           "enum": [
                             "active",
-                            "inactive",
-                            "unknown"
+                            "missing",
+                            "sold"
                           ],
                           "description": "Listing availability classification."
                         },
@@ -2391,8 +2401,8 @@
                               "type": "string",
                               "enum": [
                                 "active",
-                                "inactive",
-                                "unknown"
+                                "missing",
+                                "sold"
                               ],
                               "description": "Public VIN availability classification for this listing's vehicle."
                             },
@@ -2979,10 +2989,10 @@
                           "type": "string",
                           "enum": [
                             "active",
-                            "inactive",
-                            "unknown"
+                            "missing",
+                            "sold"
                           ],
-                          "description": "Public VIN availability classification. Missing VINs return 404 instead of unknown."
+                          "description": "Public VIN availability classification. Unseen VINs return 404 instead of a status."
                         },
                         "latest_listing": {
                           "anyOf": [
@@ -3265,7 +3275,7 @@
                                 }
                               },
                               "additionalProperties": false,
-                              "description": "Latest known listing for the VIN, whether active or inactive."
+                              "description": "Latest known listing for the VIN, whether active, missing, or sold."
                             },
                             {
                               "type": "null"
@@ -3964,7 +3974,7 @@
                           },
                           "listing_count": {
                             "type": "number",
-                            "description": "Current active listing count for the dealer."
+                            "description": "Current active listing count for the dealer after VIN-level listing deduplication and ownership assignment."
                           }
                         },
                         "additionalProperties": false,
@@ -4148,7 +4158,7 @@
             }
           }
         },
-        "description": "Returns dealer summaries ordered by active listing count. Use state and q to narrow results.",
+        "description": "Returns dealer summaries ordered by active listing count. Listing counts use VIN-level listing deduplication and ownership assignment, so they can differ from raw dealer feed counts. Use state and q to narrow results.",
         "summary": "Search dealers"
       }
     },
@@ -5663,7 +5673,7 @@
             }
           }
         },
-        "description": "Returns listing summaries scoped to one dealer. Supports the listing filter and pagination surface.",
+        "description": "Returns listing summaries scoped to one dealer after VIN-level listing deduplication and ownership assignment. If a dealer feed contains a VIN that Freeway attributes to another dealer, that VIN may not appear here. Supports the listing filter and pagination surface.",
         "summary": "List a dealer's inventory"
       }
     }

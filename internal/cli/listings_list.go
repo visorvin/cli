@@ -79,7 +79,7 @@ func newListingsListCmd(flags *rootFlags) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:         "list",
-		Short:       "Returns active, sold, or historical snapshot listing summaries using stable snake_case fields. Unknown filters fail...",
+		Short:       "Returns active, sold, or historical snapshot listing summaries using stable snake_case fields. Public inventory is...",
 		Example:     "  visor listings list",
 		Annotations: map[string]string{"pp:endpoint": "listings.list", "pp:method": "GET", "pp:path": "/v1/listings", "mcp:read-only": "true"},
 		RunE: func(cmd *cobra.Command, args []string) error {

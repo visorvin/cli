@@ -152,6 +152,7 @@ func cleanCommandShort(cmd *cobra.Command) string {
 		"Returns dealer summaries with stable snake_case fields.":                                                                        "Search dealer summaries",
 		"Returns inventory listings for one dealer.":                                                                                     "List inventory for one dealer",
 		"Shortcut for 'facets list'. Returns categorical facets, numeric range facets, and stats for the listing filter surface. Use...": "Get listing filter facets",
+		"Returns categorical facets, numeric range facets, and stats for an explicit listing filter surface facet selection....":         "Get listing filter facets",
 		"Returns the current or latest known record for a VIN. Missing VINs return 404 not_found_error.":                                 "Look up a VIN record",
 	}
 	if cleaned, ok := replacements[short]; ok {
@@ -168,7 +169,7 @@ func cleanLocalFlags(cmd *cobra.Command) ([]*pflag.Flag, []*pflag.Flag) {
 		"make", "model", "year", "trim", "state",
 		"min-price", "max-price", "min-mileage", "max-mileage",
 		"postal-code", "radius", "limit", "sort",
-		"facets", "inventory-type", "inventory-status", "all",
+		"facets", "facet-value-limit", "inventory-type", "inventory-status", "all",
 	}
 	localFlagSet := cmd.LocalFlags()
 	keyFlags := lookupVisibleFlags(localFlagSet, names)
@@ -219,27 +220,28 @@ func printFlagList(w io.Writer, flags []*pflag.Flag) {
 
 func cleanFlagUsage(flag *pflag.Flag) string {
 	usage := map[string]string{
-		"agent":            "JSON + compact + non-interactive mode",
-		"json":             "Output JSON",
-		"select":           "Select output fields, e.g. vin,price,miles",
-		"config":           "Config file path",
-		"make":             "Filter by make",
-		"model":            "Filter by model",
-		"year":             "Filter by model year",
-		"trim":             "Filter by trim",
-		"state":            "Filter by dealer state",
-		"min-price":        "Minimum listed price",
-		"max-price":        "Maximum listed price",
-		"min-mileage":      "Minimum odometer mileage",
-		"max-mileage":      "Maximum odometer mileage",
-		"postal-code":      "Origin ZIP/postal code",
-		"radius":           "Maximum distance from origin",
-		"limit":            "Number of rows to return",
-		"sort":             "Sort order, e.g. price or -price",
-		"facets":           "Facet names to return",
-		"inventory-type":   "Inventory class, e.g. new or used",
-		"inventory-status": "Inventory mode, e.g. active or sold",
-		"all":              "Fetch all pages",
+		"agent":             "JSON + compact + non-interactive mode",
+		"json":              "Output JSON",
+		"select":            "Select output fields, e.g. vin,price,miles",
+		"config":            "Config file path",
+		"make":              "Filter by make",
+		"model":             "Filter by model",
+		"year":              "Filter by model year",
+		"trim":              "Filter by trim",
+		"state":             "Filter by dealer state",
+		"min-price":         "Minimum listed price",
+		"max-price":         "Maximum listed price",
+		"min-mileage":       "Minimum odometer mileage",
+		"max-mileage":       "Maximum odometer mileage",
+		"postal-code":       "Origin ZIP/postal code",
+		"radius":            "Maximum distance from origin",
+		"limit":             "Number of rows to return",
+		"sort":              "Sort order, e.g. price or -price",
+		"facets":            "Required facet names to return",
+		"facet-value-limit": "Max values per categorical facet",
+		"inventory-type":    "Inventory class, e.g. new or used",
+		"inventory-status":  "Inventory mode, e.g. active or sold",
+		"all":               "Fetch all pages",
 	}
 	if value, ok := usage[flag.Name]; ok {
 		return value

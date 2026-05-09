@@ -3,7 +3,293 @@
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-ROOT_HELP_GO = '// Copyright 2026 Visor. Licensed under Apache-2.0. See LICENSE.\n\npackage cli\n\nimport (\n\t"fmt"\n\t"io"\n\t"sort"\n\t"strings"\n\n\t"github.com/spf13/cobra"\n\t"github.com/spf13/pflag"\n)\n\nfunc printRootHelp(w io.Writer) {\n\tfmt.Fprint(w, `__      ___ ___ ___  ___  ___\n\\ \\    / /_ _/ __|/ _ \\| _ \\\n \\ \\  / / | |\\__ \\ (_) |   /\n  \\ \\/ / |___|___/\\___/|_|_\\\n   \\__/   see the whole market\n\nVisor CLI — read-only vehicle listings, VIN, dealer, and facet search.\n\nUsage:\n  visor [command]\n\nCore Commands:\n  listings      Search and fetch vehicle listings\n  vins          Look up VIN records\n  dealers       Search and fetch dealers\n  facets        Get listing filter facets\n  doctor        Check auth and connectivity\n  auth          Manage API credentials\n\nAgent Commands:\n  agent-context Emit CLI metadata for agents\n  which         Find the command for a task\n\nOther Commands:\n  completion    Generate shell completion\n  version       Print version\n  help          Help about any command\n\nCommon Flags:\n      --agent          JSON + compact + non-interactive mode\n      --json           Output JSON\n      --select string  Select output fields, e.g. vin,price,miles\n      --config string  Config file path\n  -h, --help           help for visor\n  -v, --version        version for visor\n\nRun "visor help advanced" for advanced flags and local-cache commands.\n`)\n}\n\nfunc newAdvancedHelpCmd(rootCmd *cobra.Command) *cobra.Command {\n\tcmd := &cobra.Command{\n\t\tUse:    "advanced",\n\t\tShort:  "Show advanced commands and flags",\n\t\tHidden: true,\n\t\tRun: func(cmd *cobra.Command, args []string) {\n\t\t\tprintAdvancedHelp(cmd.OutOrStdout(), rootCmd)\n\t\t},\n\t}\n\tcmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {\n\t\tprintAdvancedHelp(cmd.OutOrStdout(), rootCmd)\n\t})\n\treturn cmd\n}\n\nfunc installCleanHelp(rootCmd *cobra.Command) {\n\tvar visit func(*cobra.Command)\n\tvisit = func(cmd *cobra.Command) {\n\t\tif cmd == rootCmd {\n\t\t\tcmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {\n\t\t\t\tprintRootHelp(cmd.OutOrStdout())\n\t\t\t})\n\t\t} else if cmd.Name() != "advanced" {\n\t\t\tcmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {\n\t\t\t\tprintCleanCommandHelp(cmd.OutOrStdout(), cmd)\n\t\t\t})\n\t\t}\n\t\tfor _, child := range cmd.Commands() {\n\t\t\tvisit(child)\n\t\t}\n\t}\n\tvisit(rootCmd)\n}\n\nfunc printCleanCommandHelp(w io.Writer, cmd *cobra.Command) {\n\tif strings.TrimSpace(cmd.Short) != "" {\n\t\tfmt.Fprintf(w, "%s\\n\\n", strings.TrimSpace(cmd.Short))\n\t}\n\tfmt.Fprintf(w, "Usage:\\n  %s\\n", cmd.UseLine())\n\n\tchildren := visibleChildren(cmd)\n\tif len(children) > 0 {\n\t\tfmt.Fprint(w, "\\nCommands:\\n")\n\t\tfor _, child := range children {\n\t\t\tfmt.Fprintf(w, "  %-13s %s\\n", child.Name(), cleanCommandShort(child))\n\t\t}\n\t}\n\n\tif example := strings.TrimSpace(cmd.Example); example != "" {\n\t\tfmt.Fprintf(w, "\\nExamples:\\n%s\\n", example)\n\t}\n\n\tkeyFlags, filterFlags := cleanLocalFlags(cmd)\n\tif len(keyFlags) > 0 {\n\t\tfmt.Fprint(w, "\\nKey Flags:\\n")\n\t\tprintFlagList(w, keyFlags)\n\t}\n\n\tif len(filterFlags) > 0 {\n\t\tfmt.Fprint(w, "\\nFilter Flags:\\n")\n\t\tprintFlagList(w, filterFlags)\n\t}\n\n\toutputFlags := cleanOutputFlags(cmd)\n\tif len(outputFlags) > 0 {\n\t\tfmt.Fprint(w, "\\nOutput Flags:\\n")\n\t\tprintFlagList(w, outputFlags)\n\t}\n\n\tfmt.Fprintf(w, "\\nRun \\"visor help advanced\\" for advanced flags and local-cache commands.\\n")\n\tif len(children) > 0 {\n\t\tfmt.Fprintf(w, "Run \\"visor %s [command] --help\\" for command-specific help.\\n", strings.TrimPrefix(cmd.CommandPath(), "visor "))\n\t}\n}\n\nfunc visibleChildren(cmd *cobra.Command) []*cobra.Command {\n\tchildren := make([]*cobra.Command, 0)\n\tfor _, child := range cmd.Commands() {\n\t\tif child.Hidden || child.Name() == "help" {\n\t\t\tcontinue\n\t\t}\n\t\tchildren = append(children, child)\n\t}\n\tsort.Slice(children, func(i, j int) bool { return children[i].Name() < children[j].Name() })\n\treturn children\n}\n\nfunc cleanCommandShort(cmd *cobra.Command) string {\n\tshort := strings.TrimSpace(cmd.Short)\n\tif short == "" {\n\t\treturn ""\n\t}\n\treplacements := map[string]string{\n\t\t"Returns active, sold, or historical snapshot listing summaries using stable snake_case fields. Unknown filters fail...":         "Search listing summaries",\n\t\t"Returns listing-centered detail by listing_id. Missing listings return 404 not_found_error.":                                    "Get listing detail",\n\t\t"Returns dealer detail for a stable dealer_id. Missing dealers return 404 not_found_error.":                                      "Get dealer detail",\n\t\t"Returns dealer summaries with stable snake_case fields.":                                                                        "Search dealer summaries",\n\t\t"Returns inventory listings for one dealer.":                                                                                     "List inventory for one dealer",\n\t\t"Shortcut for \'facets list\'. Returns categorical facets, numeric range facets, and stats for the listing filter surface. Use...": "Get listing filter facets",\n\t\t"Returns the current or latest known record for a VIN. Missing VINs return 404 not_found_error.":                                 "Look up a VIN record",\n\t}\n\tif cleaned, ok := replacements[short]; ok {\n\t\treturn cleaned\n\t}\n\tif len(short) > 86 {\n\t\treturn strings.TrimSpace(short[:83]) + "..."\n\t}\n\treturn short\n}\n\nfunc cleanLocalFlags(cmd *cobra.Command) ([]*pflag.Flag, []*pflag.Flag) {\n\tnames := []string{\n\t\t"make", "model", "year", "trim", "state",\n\t\t"min-price", "max-price", "min-mileage", "max-mileage",\n\t\t"postal-code", "radius", "limit", "sort",\n\t\t"facets", "inventory-type", "inventory-status", "all",\n\t}\n\tlocalFlagSet := cmd.LocalFlags()\n\tkeyFlags := lookupVisibleFlags(localFlagSet, names)\n\tseen := map[string]bool{}\n\tfor _, flag := range keyFlags {\n\t\tseen[flag.Name] = true\n\t}\n\tvar filterFlags []*pflag.Flag\n\tlocalFlagSet.VisitAll(func(flag *pflag.Flag) {\n\t\tif flag.Hidden || seen[flag.Name] || flag.Name == "help" {\n\t\t\treturn\n\t\t}\n\t\tfilterFlags = append(filterFlags, flag)\n\t})\n\tsort.Slice(filterFlags, func(i, j int) bool { return filterFlags[i].Name < filterFlags[j].Name })\n\treturn keyFlags, filterFlags\n}\n\nfunc cleanOutputFlags(cmd *cobra.Command) []*pflag.Flag {\n\tnames := []string{"agent", "json", "select", "config"}\n\treturn lookupVisibleFlags(cmd.Root().PersistentFlags(), names)\n}\n\nfunc lookupVisibleFlags(flags *pflag.FlagSet, names []string) []*pflag.Flag {\n\tout := make([]*pflag.Flag, 0, len(names))\n\tfor _, name := range names {\n\t\tflag := flags.Lookup(name)\n\t\tif flag == nil || flag.Hidden {\n\t\t\tcontinue\n\t\t}\n\t\tout = append(out, flag)\n\t}\n\treturn out\n}\n\nfunc printFlagList(w io.Writer, flags []*pflag.Flag) {\n\tfor _, flag := range flags {\n\t\tname := "--" + flag.Name\n\t\tif flag.Value.Type() != "bool" {\n\t\t\tname += " " + flag.Value.Type()\n\t\t}\n\t\tif flag.Shorthand != "" {\n\t\t\tname = "-" + flag.Shorthand + ", " + name\n\t\t}\n\t\tfmt.Fprintf(w, "  %-28s %s\\n", name, cleanFlagUsage(flag))\n\t}\n}\n\nfunc cleanFlagUsage(flag *pflag.Flag) string {\n\tusage := map[string]string{\n\t\t"agent":            "JSON + compact + non-interactive mode",\n\t\t"json":             "Output JSON",\n\t\t"select":           "Select output fields, e.g. vin,price,miles",\n\t\t"config":           "Config file path",\n\t\t"make":             "Filter by make",\n\t\t"model":            "Filter by model",\n\t\t"year":             "Filter by model year",\n\t\t"trim":             "Filter by trim",\n\t\t"state":            "Filter by dealer state",\n\t\t"min-price":        "Minimum listed price",\n\t\t"max-price":        "Maximum listed price",\n\t\t"min-mileage":      "Minimum odometer mileage",\n\t\t"max-mileage":      "Maximum odometer mileage",\n\t\t"postal-code":      "Origin ZIP/postal code",\n\t\t"radius":           "Maximum distance from origin",\n\t\t"limit":            "Number of rows to return",\n\t\t"sort":             "Sort order, e.g. price or -price",\n\t\t"facets":           "Facet names to return",\n\t\t"inventory-type":   "Inventory class, e.g. new or used",\n\t\t"inventory-status": "Inventory mode, e.g. active or sold",\n\t\t"all":              "Fetch all pages",\n\t}\n\tif value, ok := usage[flag.Name]; ok {\n\t\treturn value\n\t}\n\treturn flag.Usage\n}\n\nfunc printAdvancedHelp(w io.Writer, rootCmd *cobra.Command) {\n\tfmt.Fprint(w, `Advanced Visor CLI commands and flags.\n\nLocal Cache Commands:\n  sync          Sync API data to local SQLite for offline search\n  search        Full-text search across synced data or live API\n  profile       Named sets of flags saved for reuse\n  workflow      Compound local/archive workflows\n\nDeveloper Commands:\n  api           Browse generated API endpoint metadata\n  feedback      Record local CLI feedback\n  import        Import JSONL records through API write paths\n\nAdvanced Flags:\n      --compact              Return compact JSON fields\n      --csv                  Output CSV\n      --data-source string   auto, live, or local data source\n      --deliver string       Route output to stdout, file:<path>, or webhook:<url>\n      --dry-run              Show request without sending\n      --human-friendly       Enable colored output and rich formatting\n      --idempotent           Treat already-existing create results as a successful no-op\n      --no-cache             Bypass response cache\n      --no-color             Disable colored output\n      --no-input             Disable interactive prompts\n      --plain                Output plain tab-separated text\n      --profile string       Apply values from a saved profile\n      --quiet                Suppress normal output\n      --rate-limit float     Max requests per second\n      --timeout duration     Request timeout\n      --yes                  Skip confirmation prompts\n\nRun "visor <command> --help" for command-specific flags.\n`)\n}\n'
+ROOT_HELP_GO = r'''// Copyright 2026 Visor. Licensed under Apache-2.0. See LICENSE.
+
+package cli
+
+import (
+	"fmt"
+	"io"
+	"sort"
+	"strings"
+
+	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
+)
+
+func printRootHelp(w io.Writer) {
+	fmt.Fprint(w, `__      ___ ___ ___  ___  ___
+\ \    / /_ _/ __|/ _ \| _ \
+ \ \  / / | |\__ \ (_) |   /
+  \ \/ / |___|___/\___/|_|_\
+   \__/   see the whole market
+
+Visor CLI — read-only vehicle listings, VIN, dealer, and facet search.
+
+Usage:
+  visor [command]
+
+Core Commands:
+  listings      Search and fetch vehicle listings
+  vins          Look up VIN records
+  dealers       Search and fetch dealers
+  facets        Get listing filter facets
+  doctor        Check auth and connectivity
+  auth          Manage API credentials
+
+Agent Commands:
+  agent-context Emit CLI metadata for agents
+  which         Find the command for a task
+
+Other Commands:
+  completion    Generate shell completion
+  version       Print version
+  help          Help about any command
+
+Common Flags:
+      --agent          JSON + compact + non-interactive mode
+      --json           Output JSON
+      --select string  Select output fields, e.g. vin,price,miles
+      --config string  Config file path
+  -h, --help           help for visor
+  -v, --version        version for visor
+
+Run "visor help advanced" for advanced flags and local-cache commands.
+`)
+}
+
+func newAdvancedHelpCmd(rootCmd *cobra.Command) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:    "advanced",
+		Short:  "Show advanced commands and flags",
+		Hidden: true,
+		Run: func(cmd *cobra.Command, args []string) {
+			printAdvancedHelp(cmd.OutOrStdout(), rootCmd)
+		},
+	}
+	cmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
+		printAdvancedHelp(cmd.OutOrStdout(), rootCmd)
+	})
+	return cmd
+}
+
+func installCleanHelp(rootCmd *cobra.Command) {
+	var visit func(*cobra.Command)
+	visit = func(cmd *cobra.Command) {
+		if cmd == rootCmd {
+			cmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
+				printRootHelp(cmd.OutOrStdout())
+			})
+		} else if cmd.Name() != "advanced" {
+			cmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
+				printCleanCommandHelp(cmd.OutOrStdout(), cmd)
+			})
+		}
+		for _, child := range cmd.Commands() {
+			visit(child)
+		}
+	}
+	visit(rootCmd)
+}
+
+func printCleanCommandHelp(w io.Writer, cmd *cobra.Command) {
+	if strings.TrimSpace(cmd.Short) != "" {
+		fmt.Fprintf(w, "%s\n\n", strings.TrimSpace(cmd.Short))
+	}
+	fmt.Fprintf(w, "Usage:\n  %s\n", cmd.UseLine())
+
+	children := visibleChildren(cmd)
+	if len(children) > 0 {
+		fmt.Fprint(w, "\nCommands:\n")
+		for _, child := range children {
+			fmt.Fprintf(w, "  %-13s %s\n", child.Name(), cleanCommandShort(child))
+		}
+	}
+
+	if example := strings.TrimSpace(cmd.Example); example != "" {
+		fmt.Fprintf(w, "\nExamples:\n%s\n", example)
+	}
+
+	keyFlags, filterFlags := cleanLocalFlags(cmd)
+	if len(keyFlags) > 0 {
+		fmt.Fprint(w, "\nKey Flags:\n")
+		printFlagList(w, keyFlags)
+	}
+
+	if len(filterFlags) > 0 {
+		fmt.Fprint(w, "\nFilter Flags:\n")
+		printFlagList(w, filterFlags)
+	}
+
+	outputFlags := cleanOutputFlags(cmd)
+	if len(outputFlags) > 0 {
+		fmt.Fprint(w, "\nOutput Flags:\n")
+		printFlagList(w, outputFlags)
+	}
+
+	fmt.Fprintf(w, "\nRun \"visor help advanced\" for advanced flags and local-cache commands.\n")
+	if len(children) > 0 {
+		fmt.Fprintf(w, "Run \"visor %s [command] --help\" for command-specific help.\n", strings.TrimPrefix(cmd.CommandPath(), "visor "))
+	}
+}
+
+func visibleChildren(cmd *cobra.Command) []*cobra.Command {
+	children := make([]*cobra.Command, 0)
+	for _, child := range cmd.Commands() {
+		if child.Hidden || child.Name() == "help" {
+			continue
+		}
+		children = append(children, child)
+	}
+	sort.Slice(children, func(i, j int) bool { return children[i].Name() < children[j].Name() })
+	return children
+}
+
+func cleanCommandShort(cmd *cobra.Command) string {
+	short := strings.TrimSpace(cmd.Short)
+	if short == "" {
+		return ""
+	}
+	replacements := map[string]string{
+		"Returns active, sold, or historical snapshot listing summaries using stable snake_case fields. Unknown filters fail...":         "Search listing summaries",
+		"Returns listing-centered detail by listing_id. Missing listings return 404 not_found_error.":                                    "Get listing detail",
+		"Returns dealer detail for a stable dealer_id. Missing dealers return 404 not_found_error.":                                      "Get dealer detail",
+		"Returns dealer summaries with stable snake_case fields.":                                                                        "Search dealer summaries",
+		"Returns inventory listings for one dealer.":                                                                                     "List inventory for one dealer",
+		"Shortcut for 'facets list'. Returns categorical facets, numeric range facets, and stats for the listing filter surface. Use...": "Get listing filter facets",
+		"Returns categorical facets, numeric range facets, and stats for an explicit listing filter surface facet selection....":        "Get listing filter facets",
+		"Returns the current or latest known record for a VIN. Missing VINs return 404 not_found_error.":                                 "Look up a VIN record",
+	}
+	if cleaned, ok := replacements[short]; ok {
+		return cleaned
+	}
+	if len(short) > 86 {
+		return strings.TrimSpace(short[:83]) + "..."
+	}
+	return short
+}
+
+func cleanLocalFlags(cmd *cobra.Command) ([]*pflag.Flag, []*pflag.Flag) {
+	names := []string{
+		"make", "model", "year", "trim", "state",
+		"min-price", "max-price", "min-mileage", "max-mileage",
+		"postal-code", "radius", "limit", "sort",
+		"facets", "facet-value-limit", "inventory-type", "inventory-status", "all",
+	}
+	localFlagSet := cmd.LocalFlags()
+	keyFlags := lookupVisibleFlags(localFlagSet, names)
+	seen := map[string]bool{}
+	for _, flag := range keyFlags {
+		seen[flag.Name] = true
+	}
+	var filterFlags []*pflag.Flag
+	localFlagSet.VisitAll(func(flag *pflag.Flag) {
+		if flag.Hidden || seen[flag.Name] || flag.Name == "help" {
+			return
+		}
+		filterFlags = append(filterFlags, flag)
+	})
+	sort.Slice(filterFlags, func(i, j int) bool { return filterFlags[i].Name < filterFlags[j].Name })
+	return keyFlags, filterFlags
+}
+
+func cleanOutputFlags(cmd *cobra.Command) []*pflag.Flag {
+	names := []string{"agent", "json", "select", "config"}
+	return lookupVisibleFlags(cmd.Root().PersistentFlags(), names)
+}
+
+func lookupVisibleFlags(flags *pflag.FlagSet, names []string) []*pflag.Flag {
+	out := make([]*pflag.Flag, 0, len(names))
+	for _, name := range names {
+		flag := flags.Lookup(name)
+		if flag == nil || flag.Hidden {
+			continue
+		}
+		out = append(out, flag)
+	}
+	return out
+}
+
+func printFlagList(w io.Writer, flags []*pflag.Flag) {
+	for _, flag := range flags {
+		name := "--" + flag.Name
+		if flag.Value.Type() != "bool" {
+			name += " " + flag.Value.Type()
+		}
+		if flag.Shorthand != "" {
+			name = "-" + flag.Shorthand + ", " + name
+		}
+		fmt.Fprintf(w, "  %-28s %s\n", name, cleanFlagUsage(flag))
+	}
+}
+
+func cleanFlagUsage(flag *pflag.Flag) string {
+	usage := map[string]string{
+		"agent":             "JSON + compact + non-interactive mode",
+		"json":              "Output JSON",
+		"select":            "Select output fields, e.g. vin,price,miles",
+		"config":            "Config file path",
+		"make":              "Filter by make",
+		"model":             "Filter by model",
+		"year":              "Filter by model year",
+		"trim":              "Filter by trim",
+		"state":             "Filter by dealer state",
+		"min-price":         "Minimum listed price",
+		"max-price":         "Maximum listed price",
+		"min-mileage":       "Minimum odometer mileage",
+		"max-mileage":       "Maximum odometer mileage",
+		"postal-code":       "Origin ZIP/postal code",
+		"radius":            "Maximum distance from origin",
+		"limit":             "Number of rows to return",
+		"sort":              "Sort order, e.g. price or -price",
+		"facets":            "Required facet names to return",
+		"facet-value-limit": "Max values per categorical facet",
+		"inventory-type":    "Inventory class, e.g. new or used",
+		"inventory-status":  "Inventory mode, e.g. active or sold",
+		"all":               "Fetch all pages",
+	}
+	if value, ok := usage[flag.Name]; ok {
+		return value
+	}
+	return flag.Usage
+}
+
+func printAdvancedHelp(w io.Writer, rootCmd *cobra.Command) {
+	fmt.Fprint(w, `Advanced Visor CLI commands and flags.
+
+Local Cache Commands:
+  sync          Sync API data to local SQLite for offline search
+  search        Full-text search across synced data or live API
+  profile       Named sets of flags saved for reuse
+  workflow      Compound local/archive workflows
+
+Developer Commands:
+  api           Browse generated API endpoint metadata
+  feedback      Record local CLI feedback
+  import        Import JSONL records through API write paths
+
+Advanced Flags:
+      --compact              Return compact JSON fields
+      --csv                  Output CSV
+      --data-source string   auto, live, or local data source
+      --deliver string       Route output to stdout, file:<path>, or webhook:<url>
+      --dry-run              Show request without sending
+      --human-friendly       Enable colored output and rich formatting
+      --idempotent           Treat already-existing create results as a successful no-op
+      --no-cache             Bypass response cache
+      --no-color             Disable colored output
+      --no-input             Disable interactive prompts
+      --plain                Output plain tab-separated text
+      --profile string       Apply values from a saved profile
+      --quiet                Suppress normal output
+      --rate-limit float     Max requests per second
+      --timeout duration     Request timeout
+      --yes                  Skip confirmation prompts
+
+Run "visor <command> --help" for command-specific flags.
+`)
+}
+'''
 
 
 def main() -> None:
@@ -16,7 +302,15 @@ def main() -> None:
         'Long: `Manage visor resources via the visor API.\n\nAdd --agent to any command for JSON output + non-interactive mode.\nRun \'visor doctor\' to verify auth and connectivity.`,',
         'Long: `Visor CLI — read-only vehicle listings, VIN, dealer, and facet search.\n\nAdd --agent to any command for JSON output + non-interactive mode.\nRun \'visor doctor\' to verify auth and connectivity.`,',
     )
-    hook = '''\tdefaultHelpFunc := rootCmd.HelpFunc()\n\trootCmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {\n\t\tif cmd == rootCmd {\n\t\t\tprintRootHelp(cmd.OutOrStdout())\n\t\t\treturn\n\t\t}\n\t\tdefaultHelpFunc(cmd, args)\n\t})\n'''
+    hook = '''\tdefaultHelpFunc := rootCmd.HelpFunc()
+\trootCmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
+\t\tif cmd == rootCmd {
+\t\t\tprintRootHelp(cmd.OutOrStdout())
+\t\t\treturn
+\t\t}
+\t\tdefaultHelpFunc(cmd, args)
+\t})
+'''
     if 'printRootHelp(cmd.OutOrStdout())' not in text:
         text = text.replace('\trootCmd.SetVersionTemplate("visor {{ .Version }}\\n")\n', '\trootCmd.SetVersionTemplate("visor {{ .Version }}\\n")\n' + hook)
     if 'newAdvancedHelpCmd(rootCmd)' not in text:
