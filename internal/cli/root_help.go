@@ -105,10 +105,15 @@ func printCleanCommandHelp(w io.Writer, cmd *cobra.Command) {
 		fmt.Fprintf(w, "\nExamples:\n%s\n", example)
 	}
 
-	localFlags := cleanLocalFlags(cmd)
-	if len(localFlags) > 0 {
+	keyFlags, filterFlags := cleanLocalFlags(cmd)
+	if len(keyFlags) > 0 {
 		fmt.Fprint(w, "\nKey Flags:\n")
-		printFlagList(w, localFlags)
+		printFlagList(w, keyFlags)
+	}
+
+	if len(filterFlags) > 0 {
+		fmt.Fprint(w, "\nFilter Flags:\n")
+		printFlagList(w, filterFlags)
 	}
 
 	outputFlags := cleanOutputFlags(cmd)
@@ -158,14 +163,28 @@ func cleanCommandShort(cmd *cobra.Command) string {
 	return short
 }
 
-func cleanLocalFlags(cmd *cobra.Command) []*pflag.Flag {
+func cleanLocalFlags(cmd *cobra.Command) ([]*pflag.Flag, []*pflag.Flag) {
 	names := []string{
 		"make", "model", "year", "trim", "state",
 		"min-price", "max-price", "min-mileage", "max-mileage",
 		"postal-code", "radius", "limit", "sort",
 		"facets", "inventory-type", "inventory-status", "all",
 	}
-	return lookupVisibleFlags(cmd.Flags(), names)
+	localFlagSet := cmd.LocalFlags()
+	keyFlags := lookupVisibleFlags(localFlagSet, names)
+	seen := map[string]bool{}
+	for _, flag := range keyFlags {
+		seen[flag.Name] = true
+	}
+	var filterFlags []*pflag.Flag
+	localFlagSet.VisitAll(func(flag *pflag.Flag) {
+		if flag.Hidden || seen[flag.Name] || flag.Name == "help" {
+			return
+		}
+		filterFlags = append(filterFlags, flag)
+	})
+	sort.Slice(filterFlags, func(i, j int) bool { return filterFlags[i].Name < filterFlags[j].Name })
+	return keyFlags, filterFlags
 }
 
 func cleanOutputFlags(cmd *cobra.Command) []*pflag.Flag {

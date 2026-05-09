@@ -106,6 +106,8 @@ func TestEndpointHelpShowsCuratedFlagsOnly(t *testing.T) {
 		"Key Flags:",
 		"--make string",
 		"--max-price string",
+		"Filter Flags:",
+		"--exclude-assembly-country",
 		"Output Flags:",
 		"--agent",
 		"--select string",
@@ -114,7 +116,7 @@ func TestEndpointHelpShowsCuratedFlagsOnly(t *testing.T) {
 			t.Fatalf("listings list help missing %q:\n%s", want, got)
 		}
 	}
-	for _, clutter := range []string{"Global Flags:", "--exclude-assembly-country", "--deliver string", "--rate-limit float"} {
+	for _, clutter := range []string{"Global Flags:", "--deliver string", "--rate-limit float"} {
 		if strings.Contains(got, clutter) {
 			t.Fatalf("listings list help includes clutter %q:\n%s", clutter, got)
 		}
