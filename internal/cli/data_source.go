@@ -76,6 +76,24 @@ func attachFreshness(prov DataProvenance, flags *rootFlags) DataProvenance {
 	return prov
 }
 
+func attachQuery(prov DataProvenance, params map[string]string) DataProvenance {
+	query := cleanQueryParams(params)
+	if len(query) > 0 {
+		prov.Query = query
+	}
+	return prov
+}
+
+func cleanQueryParams(params map[string]string) map[string]string {
+	query := map[string]string{}
+	for k, v := range params {
+		if v != "" && v != "0" && v != "false" {
+			query[k] = v
+		}
+	}
+	return query
+}
+
 // resolveRead dispatches a GET request to either the live API or local store
 // based on the --data-source flag. Returns the response data and provenance metadata.
 //
@@ -95,20 +113,20 @@ func resolveRead(ctx context.Context, c *client.Client, flags *rootFlags, resour
 	switch flags.dataSource {
 	case "local":
 		data, prov, err := resolveLocal(ctx, resourceType, isList, path, params, "user_requested")
-		return data, attachFreshness(prov, flags), err
+		return data, attachFreshness(attachQuery(prov, params), flags), err
 
 	case "live":
 		data, err := c.GetWithHeaders(path, params, headers)
 		if err != nil {
 			return nil, DataProvenance{}, err
 		}
-		return data, attachFreshness(DataProvenance{Source: "live"}, flags), nil
+		return data, attachFreshness(attachQuery(DataProvenance{Source: "live"}, params), flags), nil
 
 	default: // "auto"
 		data, err := c.GetWithHeaders(path, params, headers)
 		if err == nil {
 			writeThroughCache(ctx, resourceType, data)
-			return data, attachFreshness(DataProvenance{Source: "live"}, flags), nil
+			return data, attachFreshness(attachQuery(DataProvenance{Source: "live"}, params), flags), nil
 		}
 		if !isNetworkError(err) {
 			// HTTP 4xx/5xx errors propagate — not a fallback case
@@ -119,7 +137,7 @@ func resolveRead(ctx context.Context, c *client.Client, flags *rootFlags, resour
 		if fallbackErr != nil {
 			return nil, DataProvenance{}, fmt.Errorf("API unreachable and no local data. Run 'visor sync' to enable offline access.\n\nOriginal error: %w", err)
 		}
-		return fallbackData, attachFreshness(fallbackProv, flags), nil
+		return fallbackData, attachFreshness(attachQuery(fallbackProv, params), flags), nil
 	}
 }
 
@@ -131,20 +149,20 @@ func resolvePaginatedRead(ctx context.Context, c *client.Client, flags *rootFlag
 	switch flags.dataSource {
 	case "local":
 		data, prov, err := resolveLocal(ctx, resourceType, true, path, params, "user_requested")
-		return data, attachFreshness(prov, flags), err
+		return data, attachFreshness(attachQuery(prov, params), flags), err
 
 	case "live":
 		data, err := paginatedGet(c, path, params, headers, fetchAll, cursorParam, nextCursorPath, hasMoreField)
 		if err != nil {
 			return nil, DataProvenance{}, err
 		}
-		return data, attachFreshness(DataProvenance{Source: "live"}, flags), nil
+		return data, attachFreshness(attachQuery(DataProvenance{Source: "live"}, params), flags), nil
 
 	default: // "auto"
 		data, err := paginatedGet(c, path, params, headers, fetchAll, cursorParam, nextCursorPath, hasMoreField)
 		if err == nil {
 			writeThroughCache(ctx, resourceType, data)
-			return data, attachFreshness(DataProvenance{Source: "live"}, flags), nil
+			return data, attachFreshness(attachQuery(DataProvenance{Source: "live"}, params), flags), nil
 		}
 		if !isNetworkError(err) {
 			return nil, DataProvenance{}, err
@@ -153,7 +171,7 @@ func resolvePaginatedRead(ctx context.Context, c *client.Client, flags *rootFlag
 		if fallbackErr != nil {
 			return nil, DataProvenance{}, fmt.Errorf("API unreachable and no local data. Run 'visor sync' to enable offline access.\n\nOriginal error: %w", err)
 		}
-		return fallbackData, attachFreshness(fallbackProv, flags), nil
+		return fallbackData, attachFreshness(attachQuery(fallbackProv, params), flags), nil
 	}
 }
 

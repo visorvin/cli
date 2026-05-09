@@ -16,6 +16,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 	"text/tabwriter"
 	"time"
@@ -311,6 +312,7 @@ func paginatedGet(c interface {
 			// Response is an object - look for array inside
 			var obj map[string]json.RawMessage
 			if json.Unmarshal(data, &obj) == nil {
+				itemsBefore := len(allItems)
 				// Try common data fields
 				for _, field := range []string{"data", "items", "results", "messages", "members", "values"} {
 					if arr, ok := obj[field]; ok {
@@ -321,6 +323,7 @@ func paginatedGet(c interface {
 						}
 					}
 				}
+				itemsAdded := len(allItems) - itemsBefore
 
 				// Check for next cursor
 				if nextCursorPath != "" {
@@ -342,6 +345,11 @@ func paginatedGet(c interface {
 						}
 					}
 				}
+
+				if nextOffset, ok := nextOffsetFromEnvelope(obj, clean, itemsAdded); ok {
+					clean["offset"] = fmt.Sprintf("%d", nextOffset)
+					continue
+				}
 			}
 			// No more pages
 			break
@@ -358,6 +366,80 @@ func paginatedGet(c interface {
 	}
 	result, _ := json.Marshal(allItems)
 	return json.RawMessage(result), nil
+}
+
+func nextOffsetFromEnvelope(obj map[string]json.RawMessage, params map[string]string, itemsAdded int) (int, bool) {
+	if itemsAdded <= 0 {
+		return 0, false
+	}
+	paginationRaw, ok := obj["pagination"]
+	if !ok {
+		if metaRaw, hasMeta := obj["meta"]; hasMeta {
+			paginationRaw = metaRaw
+		}
+	}
+	if len(paginationRaw) == 0 {
+		return 0, false
+	}
+	var pagination map[string]json.RawMessage
+	if json.Unmarshal(paginationRaw, &pagination) != nil {
+		return 0, false
+	}
+	total, hasTotal := intFromJSONFields(pagination, "total", "total_available", "total_count", "count")
+	limit, hasLimit := intFromJSONFields(pagination, "limit", "page_size", "per_page")
+	offset, hasOffset := intFromJSONFields(pagination, "offset", "skip")
+	if !hasOffset {
+		offset, _ = atoiDefault(params["offset"], 0)
+	}
+	if !hasLimit {
+		limit, _ = atoiDefault(params["limit"], itemsAdded)
+	}
+	if limit <= 0 {
+		limit = itemsAdded
+	}
+	next := offset + limit
+	if itemsAdded < limit {
+		return 0, false
+	}
+	if hasTotal && next >= total {
+		return 0, false
+	}
+	return next, true
+}
+
+func intFromJSONFields(obj map[string]json.RawMessage, names ...string) (int, bool) {
+	for _, name := range names {
+		raw, ok := obj[name]
+		if !ok {
+			continue
+		}
+		var n int
+		if json.Unmarshal(raw, &n) == nil {
+			return n, true
+		}
+		var f float64
+		if json.Unmarshal(raw, &f) == nil {
+			return int(f), true
+		}
+		var s string
+		if json.Unmarshal(raw, &s) == nil {
+			if parsed, err := atoiDefault(s, 0); err == nil {
+				return parsed, true
+			}
+		}
+	}
+	return 0, false
+}
+
+func atoiDefault(s string, fallback int) (int, error) {
+	if strings.TrimSpace(s) == "" {
+		return fallback, nil
+	}
+	n, err := strconv.Atoi(strings.TrimSpace(s))
+	if err != nil {
+		return fallback, err
+	}
+	return n, nil
 }
 
 // printJSONFiltered marshals a Go-typed value through the same output
@@ -406,7 +488,7 @@ func filterFieldsValidated(data json.RawMessage, fields string) (json.RawMessage
 }
 
 func expandRowRelativeSelectPaths(data json.RawMessage, paths [][]string) [][]string {
-	if len(paths) == 0 || !selectPathExists(data, []string{"results", "data"}) {
+	if len(paths) == 0 || (!selectPathExists(data, []string{"results", "data"}) && !selectPathExists(data, []string{"data"})) {
 		return paths
 	}
 	expanded := make([][]string, 0, len(paths))
@@ -416,6 +498,11 @@ func expandRowRelativeSelectPaths(data json.RawMessage, paths [][]string) [][]st
 			continue
 		}
 		candidate := append([]string{"results", "data"}, p...)
+		if selectPathExists(data, candidate) {
+			expanded = append(expanded, candidate)
+			continue
+		}
+		candidate = append([]string{"data"}, p...)
 		if selectPathExists(data, candidate) {
 			expanded = append(expanded, candidate)
 			continue
@@ -612,31 +699,165 @@ func camelToKebab(s string) string {
 
 // printOutputWithFlags routes output through the right format based on flags.
 func printOutputWithFlags(w io.Writer, data json.RawMessage, flags *rootFlags) error {
+	if flags != nil && flags.agent {
+		data = agentEnvelope(data)
+	}
 	// --select wins over --compact when both are set: an explicit field list
 	// is the user's authoritative request, so compacting must not strip those
 	// fields before --select can pick them.
-	if flags.selectFields != "" {
-		filtered, err := filterFieldsValidated(data, flags.selectFields)
+	if flags != nil && flags.selectFields != "" {
+		filtered, err := filterFieldsForOutput(data, flags.selectFields, flags)
 		if err != nil {
 			return err
 		}
 		data = filtered
-	} else if flags.compact {
+	} else if flags != nil && flags.compact {
 		data = compactFields(data)
 	}
 	// --quiet: suppress all output, exit code communicates result
-	if flags.quiet {
+	if flags != nil && flags.quiet {
 		return nil
 	}
 	// --csv: render as CSV
-	if flags.csv {
+	if flags != nil && flags.csv {
 		return printCSV(w, data)
 	}
 	// --markdown: render as Markdown for transcript-friendly output
-	if flags.markdown {
+	if flags != nil && flags.markdown {
 		return printMarkdown(w, data)
 	}
-	return printOutput(w, data, flags.asJSON)
+	return printOutput(w, data, flags != nil && flags.asJSON)
+}
+
+func filterFieldsForOutput(data json.RawMessage, fields string, flags *rootFlags) (json.RawMessage, error) {
+	if flags != nil && flags.agent {
+		return filterAgentDataFields(data, fields)
+	}
+	return filterFieldsValidated(data, fields)
+}
+
+func filterAgentDataFields(data json.RawMessage, fields string) (json.RawMessage, error) {
+	var obj map[string]json.RawMessage
+	if json.Unmarshal(data, &obj) != nil {
+		return filterFieldsValidated(data, fields)
+	}
+	dataRaw, ok := obj["data"]
+	if !ok {
+		return filterFieldsValidated(data, fields)
+	}
+	filtered, err := filterFieldsValidated(dataRaw, agentDataSelectFields(fields))
+	if err != nil {
+		return nil, err
+	}
+	obj["data"] = filtered
+	return json.Marshal(obj)
+}
+
+func agentDataSelectFields(fields string) string {
+	paths := parseSelectPaths(fields)
+	out := make([]string, 0, len(paths))
+	for _, p := range paths {
+		if len(p) >= 2 && p[0] == "data" {
+			p = p[1:]
+		}
+		if len(p) >= 3 && p[0] == "results" && p[1] == "data" {
+			p = p[2:]
+		}
+		if len(p) == 0 {
+			continue
+		}
+		out = append(out, strings.Join(p, "."))
+	}
+	return strings.Join(out, ",")
+}
+
+func agentEnvelope(data json.RawMessage) json.RawMessage {
+	var obj map[string]json.RawMessage
+	if json.Unmarshal(data, &obj) != nil {
+		out, _ := json.Marshal(map[string]any{
+			"data":            rawJSONToAny(data),
+			"pagination":      map[string]any{},
+			"query":           map[string]any{},
+			"warnings":        []any{},
+			"facets_used":     []any{},
+			"total_available": nil,
+		})
+		return out
+	}
+
+	payload := data
+	if results, ok := obj["results"]; ok {
+		payload = results
+	}
+	payloadObj := map[string]json.RawMessage{}
+	_ = json.Unmarshal(payload, &payloadObj)
+
+	rows := payload
+	if nestedData, ok := payloadObj["data"]; ok {
+		rows = nestedData
+	}
+	pagination := json.RawMessage(`{}`)
+	if raw, ok := payloadObj["pagination"]; ok {
+		pagination = raw
+	} else if raw, ok := payloadObj["meta"]; ok {
+		pagination = raw
+	}
+	totalAvailable := any(nil)
+	if pmap := map[string]json.RawMessage{}; json.Unmarshal(pagination, &pmap) == nil {
+		if n, ok := intFromJSONFields(pmap, "total_available", "total", "total_count", "count"); ok {
+			totalAvailable = n
+		}
+	}
+	if totalAvailable == nil {
+		var arr []json.RawMessage
+		if json.Unmarshal(rows, &arr) == nil {
+			totalAvailable = len(arr)
+		}
+	}
+
+	envelope := map[string]any{
+		"data":            rawJSONToAny(rows),
+		"pagination":      rawJSONToAny(pagination),
+		"query":           map[string]any{},
+		"warnings":        []any{},
+		"facets_used":     []any{},
+		"total_available": totalAvailable,
+	}
+	if meta, ok := obj["meta"]; ok {
+		metaAny := rawJSONToAny(meta)
+		envelope["meta"] = metaAny
+		if metaObj, ok := metaAny.(map[string]any); ok {
+			if query, ok := metaObj["query"]; ok {
+				envelope["query"] = query
+				envelope["facets_used"] = facetsUsedFromQuery(query)
+			}
+		}
+	}
+	result, _ := json.Marshal(envelope)
+	return result
+}
+
+func facetsUsedFromQuery(query any) []string {
+	queryObj, ok := query.(map[string]any)
+	if !ok {
+		return []string{}
+	}
+	raw, ok := queryObj["facets"]
+	if !ok {
+		return []string{}
+	}
+	facets, ok := raw.(string)
+	if !ok {
+		return []string{}
+	}
+	out := make([]string, 0)
+	for _, facet := range strings.Split(facets, ",") {
+		facet = strings.TrimSpace(facet)
+		if facet != "" {
+			out = append(out, facet)
+		}
+	}
+	return out
 }
 
 // extractResponseData unwraps common API response envelopes for display.
@@ -1773,6 +1994,7 @@ type DataProvenance struct {
 	Reason       string     `json:"reason,omitempty"`        // why local was used: "user_requested", "api_unreachable", "no_search_endpoint"
 	ResourceType string     `json:"resource_type,omitempty"` // which resource type was queried
 	Freshness    any        `json:"freshness,omitempty"`     // optional machine-owned freshness metadata for covered command paths
+	Query        any        `json:"query,omitempty"`         // cleaned request query params for agent envelopes
 }
 
 // printProvenance writes a one-line provenance message to stderr for TTY users.
@@ -1827,6 +2049,9 @@ func wrapWithProvenance(data json.RawMessage, prov DataProvenance) (json.RawMess
 	}
 	if prov.Freshness != nil {
 		meta["freshness"] = prov.Freshness
+	}
+	if prov.Query != nil {
+		meta["query"] = prov.Query
 	}
 	var results any = json.RawMessage(data)
 	if !json.Valid(data) {

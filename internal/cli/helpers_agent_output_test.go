@@ -5,6 +5,7 @@ package cli
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"strings"
 	"testing"
 )
@@ -59,6 +60,141 @@ func TestFilterFieldsValidatedAcceptsRowRelativeListFields(t *testing.T) {
 	if _, ok := row["photo_urls"]; ok {
 		t.Fatalf("row-relative select should not include unselected photo_urls: %#v", row)
 	}
+}
+
+func TestFilterFieldsValidatedAcceptsAgentDataRowFields(t *testing.T) {
+	input := json.RawMessage(`{
+		"data":[{"vin":"1FA","price":39995,"miles":12000,"photo_urls":["https://example.test/photo.jpg"]}],
+		"pagination":{"total":1},
+		"query":{},
+		"warnings":[],
+		"facets_used":[],
+		"total_available":1
+	}`)
+
+	got, err := filterFieldsValidated(input, "vin,price,miles")
+	if err != nil {
+		t.Fatalf("filterFieldsValidated returned error: %v", err)
+	}
+
+	var out map[string]any
+	if err := json.Unmarshal(got, &out); err != nil {
+		t.Fatalf("unmarshal output: %v", err)
+	}
+	row := out["data"].([]any)[0].(map[string]any)
+	for _, want := range []string{"vin", "price", "miles"} {
+		if _, ok := row[want]; !ok {
+			t.Fatalf("agent data row-relative select missing %s: %#v", want, row)
+		}
+	}
+	if _, ok := row["photo_urls"]; ok {
+		t.Fatalf("agent data row-relative select should not include unselected photo_urls: %#v", row)
+	}
+}
+
+func TestPrintOutputWithFlagsAgentEnvelopeIsStable(t *testing.T) {
+	var buf bytes.Buffer
+	flags := &rootFlags{agent: true, asJSON: true, compact: true}
+	input := json.RawMessage(`{
+		"meta":{"source":"live","query":{"make":"ford","model":"mustang","year":"2024","facets":"price,miles"}},
+		"results":{"data":[{"vin":"1FA","price":39995,"miles":12000}],"pagination":{"total":341,"limit":50,"offset":0}}
+	}`)
+
+	if err := printOutputWithFlags(&buf, input, flags); err != nil {
+		t.Fatalf("printOutputWithFlags returned error: %v", err)
+	}
+	var out map[string]any
+	if err := json.Unmarshal(buf.Bytes(), &out); err != nil {
+		t.Fatalf("unmarshal output: %v\n%s", err, buf.String())
+	}
+	for _, want := range []string{"data", "pagination", "query", "warnings", "facets_used", "total_available"} {
+		if _, ok := out[want]; !ok {
+			t.Fatalf("agent envelope missing %s: %#v", want, out)
+		}
+	}
+	if out["total_available"].(float64) != 341 {
+		t.Fatalf("total_available = %#v, want 341", out["total_available"])
+	}
+	query := out["query"].(map[string]any)
+	if query["make"] != "ford" || query["model"] != "mustang" || query["year"] != "2024" {
+		t.Fatalf("query not preserved: %#v", query)
+	}
+	facets := out["facets_used"].([]any)
+	if fmt.Sprint(facets) != "[price miles]" {
+		t.Fatalf("facets_used = %#v, want [price miles]", facets)
+	}
+}
+
+func TestPrintOutputWithFlagsAgentSelectPreservesEnvelope(t *testing.T) {
+	var buf bytes.Buffer
+	flags := &rootFlags{agent: true, asJSON: true, compact: true, selectFields: "vin,price,miles"}
+	input := json.RawMessage(`{
+		"meta":{"source":"live"},
+		"results":{"data":[{"vin":"1FA","price":39995,"miles":12000,"photo_urls":["https://example.test/photo.jpg"]}],"pagination":{"total":341,"limit":50,"offset":0}}
+	}`)
+
+	if err := printOutputWithFlags(&buf, input, flags); err != nil {
+		t.Fatalf("printOutputWithFlags returned error: %v", err)
+	}
+	var out map[string]any
+	if err := json.Unmarshal(buf.Bytes(), &out); err != nil {
+		t.Fatalf("unmarshal output: %v\n%s", err, buf.String())
+	}
+	for _, want := range []string{"data", "pagination", "query", "warnings", "facets_used", "total_available"} {
+		if _, ok := out[want]; !ok {
+			t.Fatalf("agent select envelope missing %s: %#v", want, out)
+		}
+	}
+	row := out["data"].([]any)[0].(map[string]any)
+	for _, want := range []string{"vin", "price", "miles"} {
+		if _, ok := row[want]; !ok {
+			t.Fatalf("agent selected data missing %s: %#v", want, row)
+		}
+	}
+	if _, ok := row["photo_urls"]; ok {
+		t.Fatalf("agent selected data should omit photo_urls: %#v", row)
+	}
+}
+
+func TestPaginatedGetAllFollowsOffsetPagination(t *testing.T) {
+	c := &fakePaginatedClient{
+		pages: map[int]string{
+			0:  `{"data":[{"vin":"A"},{"vin":"B"}],"pagination":{"total":5,"limit":2,"offset":0}}`,
+			2:  `{"data":[{"vin":"C"},{"vin":"D"}],"pagination":{"total":5,"limit":2,"offset":2}}`,
+			4:  `{"data":[{"vin":"E"}],"pagination":{"total":5,"limit":2,"offset":4}}`,
+			50: `{"data":[{"vin":"wrong"}],"pagination":{"total":5,"limit":2,"offset":50}}`,
+		},
+	}
+
+	got, err := paginatedGet(c, "/v1/listings", map[string]string{"limit": "2"}, nil, true, "offset", "", "")
+	if err != nil {
+		t.Fatalf("paginatedGet returned error: %v", err)
+	}
+	var rows []map[string]any
+	if err := json.Unmarshal(got, &rows); err != nil {
+		t.Fatalf("unmarshal rows: %v", err)
+	}
+	if len(rows) != 5 {
+		t.Fatalf("got %d rows, want 5: %#v", len(rows), rows)
+	}
+	if gotOffsets := fmt.Sprint(c.offsets); gotOffsets != "[0 2 4]" {
+		t.Fatalf("offsets = %s, want [0 2 4]", gotOffsets)
+	}
+}
+
+type fakePaginatedClient struct {
+	pages   map[int]string
+	offsets []int
+}
+
+func (f *fakePaginatedClient) GetWithHeaders(_ string, params map[string]string, _ map[string]string) (json.RawMessage, error) {
+	offset, _ := atoiDefault(params["offset"], 0)
+	f.offsets = append(f.offsets, offset)
+	page, ok := f.pages[offset]
+	if !ok {
+		return nil, fmt.Errorf("unexpected offset %d", offset)
+	}
+	return json.RawMessage(page), nil
 }
 
 func TestFilterFieldsValidatedErrorsOnUnknownFieldWithValidExamples(t *testing.T) {
