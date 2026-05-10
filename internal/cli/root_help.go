@@ -29,6 +29,7 @@ Core Commands:
   vins          Look up VIN records
   dealers       Search and fetch dealers
   facets        Get listing filter facets
+  usage         Review API usage totals
   doctor        Check auth and connectivity
   auth          Manage API credentials
 
@@ -154,6 +155,7 @@ func cleanCommandShort(cmd *cobra.Command) string {
 		"Returns inventory listings for one dealer.":                                                                                     "List inventory for one dealer",
 		"Shortcut for 'facets list'. Returns categorical facets, numeric range facets, and stats for the listing filter surface. Use...": "Get listing filter facets",
 		"Returns categorical facets, numeric range facets, and stats for an explicit listing filter surface facet selection....":         "Get listing filter facets",
+		"Returns daily billable usage totals for the authenticated API account. Usage analytics are eventually consistent...":            "Review API usage totals",
 		"Returns the current or latest known record for a VIN. Missing VINs return 404 not_found_error.":                                 "Look up a VIN record",
 	}
 	if cleaned, ok := replacements[short]; ok {

@@ -33,6 +33,7 @@ var whichIndex = []whichEntry{
 	{Command: "facets list", Description: "Returns categorical facets, numeric range facets, and stats for an explicit listing filter surface facet selection. Use facets=make,model,price. Supported facets: make, model, inventory_type, year, trim, version, base_exterior_color, exterior_color, base_interior_color, interior_color, seating_capacity, doors, engine, state, drivetrain, assembly_location, assembly_country, transmission, fuel_type, body_type, cylinders, dealer_type, in_transit, options_packages, features, keywords, price, msrp, miles, dos_active.", Group: "facets"},
 	{Command: "listings get", Description: "Returns listing-centered detail by listing_id. Missing listings return 404 not_found_error.", Group: "listings"},
 	{Command: "listings list", Description: "Returns active, sold, or historical snapshot listing summaries using stable snake_case fields. Public inventory is deduplicated by VIN and assigned to the dealer Freeway believes owns the listing, so dealer-scoped counts can differ from raw dealer feed counts. Unknown filters fail closed with a validation_error.", Group: "listings"},
+	{Command: "usage", Description: "Returns daily billable usage totals for the authenticated API account. Usage analytics are eventually consistent with the billing ledger and are intended for customer dashboards and reconciliation.", Group: "usage"},
 	{Command: "vins get", Description: "Returns the current or latest known record for a VIN. Missing VINs return 404 not_found_error.", Group: "vins"},
 }
 

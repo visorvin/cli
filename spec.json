@@ -1007,6 +1007,36 @@
                 "schema": {
                   "type": "string"
                 }
+              },
+              "X-RateLimit-Tier": {
+                "description": "Effective account Usage Tier code used for rate limiting.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit-10s": {
+                "description": "Maximum requests allowed in the 10-second burst window.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Remaining-10s": {
+                "description": "Remaining requests in the current 10-second burst window after this request.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit-60s": {
+                "description": "Maximum requests allowed in the 60-second sustained window.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Remaining-60s": {
+                "description": "Remaining requests in the current 60-second sustained window after this request.",
+                "schema": {
+                  "type": "string"
+                }
               }
             }
           },
@@ -1805,6 +1835,21 @@
                                   "type": "number",
                                   "description": "Number of matching records for the value."
                                 },
+                                "name": {
+                                  "type": "string",
+                                  "description": "Display name for enriched option package buckets."
+                                },
+                                "msrp": {
+                                  "anyOf": [
+                                    {
+                                      "type": "number"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ],
+                                  "description": "Median MSRP for enriched option package buckets when available."
+                                },
                                 "avg_price": {
                                   "type": "number",
                                   "description": "Median listed price for this bucket when option sort enrichment is enabled internally."
@@ -1982,6 +2027,36 @@
               },
               "X-Pricing-Version": {
                 "description": "Pricing catalog version UUID used to calculate the request cost.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Tier": {
+                "description": "Effective account Usage Tier code used for rate limiting.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit-10s": {
+                "description": "Maximum requests allowed in the 10-second burst window.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Remaining-10s": {
+                "description": "Remaining requests in the current 10-second burst window after this request.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit-60s": {
+                "description": "Maximum requests allowed in the 60-second sustained window.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Remaining-60s": {
+                "description": "Remaining requests in the current 60-second sustained window after this request.",
                 "schema": {
                   "type": "string"
                 }
@@ -2803,6 +2878,36 @@
               },
               "X-Pricing-Version": {
                 "description": "Pricing catalog version UUID used to calculate the request cost.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Tier": {
+                "description": "Effective account Usage Tier code used for rate limiting.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit-10s": {
+                "description": "Maximum requests allowed in the 10-second burst window.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Remaining-10s": {
+                "description": "Remaining requests in the current 10-second burst window after this request.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit-60s": {
+                "description": "Maximum requests allowed in the 60-second sustained window.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Remaining-60s": {
+                "description": "Remaining requests in the current 60-second sustained window after this request.",
                 "schema": {
                   "type": "string"
                 }
@@ -3630,6 +3735,36 @@
                 "schema": {
                   "type": "string"
                 }
+              },
+              "X-RateLimit-Tier": {
+                "description": "Effective account Usage Tier code used for rate limiting.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit-10s": {
+                "description": "Maximum requests allowed in the 10-second burst window.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Remaining-10s": {
+                "description": "Remaining requests in the current 10-second burst window after this request.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit-60s": {
+                "description": "Maximum requests allowed in the 60-second sustained window.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Remaining-60s": {
+                "description": "Remaining requests in the current 60-second sustained window after this request.",
+                "schema": {
+                  "type": "string"
+                }
               }
             }
           },
@@ -4051,6 +4186,36 @@
                 "schema": {
                   "type": "string"
                 }
+              },
+              "X-RateLimit-Tier": {
+                "description": "Effective account Usage Tier code used for rate limiting.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit-10s": {
+                "description": "Maximum requests allowed in the 10-second burst window.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Remaining-10s": {
+                "description": "Remaining requests in the current 10-second burst window after this request.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit-60s": {
+                "description": "Maximum requests allowed in the 60-second sustained window.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Remaining-60s": {
+                "description": "Remaining requests in the current 60-second sustained window after this request.",
+                "schema": {
+                  "type": "string"
+                }
               }
             }
           },
@@ -4433,6 +4598,36 @@
               },
               "X-Pricing-Version": {
                 "description": "Pricing catalog version UUID used to calculate the request cost.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Tier": {
+                "description": "Effective account Usage Tier code used for rate limiting.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit-10s": {
+                "description": "Maximum requests allowed in the 10-second burst window.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Remaining-10s": {
+                "description": "Remaining requests in the current 10-second burst window after this request.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit-60s": {
+                "description": "Maximum requests allowed in the 60-second sustained window.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Remaining-60s": {
+                "description": "Remaining requests in the current 60-second sustained window after this request.",
                 "schema": {
                   "type": "string"
                 }
@@ -5566,6 +5761,36 @@
                 "schema": {
                   "type": "string"
                 }
+              },
+              "X-RateLimit-Tier": {
+                "description": "Effective account Usage Tier code used for rate limiting.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit-10s": {
+                "description": "Maximum requests allowed in the 10-second burst window.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Remaining-10s": {
+                "description": "Remaining requests in the current 10-second burst window after this request.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit-60s": {
+                "description": "Maximum requests allowed in the 60-second sustained window.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Remaining-60s": {
+                "description": "Remaining requests in the current 60-second sustained window after this request.",
+                "schema": {
+                  "type": "string"
+                }
               }
             }
           },
@@ -5675,6 +5900,315 @@
         },
         "description": "Returns listing summaries scoped to one dealer after VIN-level listing deduplication and ownership assignment. If a dealer feed contains a VIN that Freeway attributes to another dealer, that VIN may not appear here. Supports the listing filter and pagination surface.",
         "summary": "List a dealer's inventory"
+      }
+    },
+    "/v1/usage": {
+      "get": {
+        "tags": [
+          "Usage"
+        ],
+        "operationId": "publicUsage.usage",
+        "parameters": [
+          {
+            "name": "start_date",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "Inclusive UTC start date in YYYY-MM-DD format. Defaults to 29 days before end_date."
+            },
+            "required": false,
+            "description": "Inclusive UTC start date in YYYY-MM-DD format. Defaults to 29 days before end_date."
+          },
+          {
+            "name": "end_date",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "Inclusive UTC end date in YYYY-MM-DD format. Defaults to today."
+            },
+            "required": false,
+            "description": "Inclusive UTC end date in YYYY-MM-DD format. Defaults to today."
+          },
+          {
+            "name": "metering_class",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "Optional comma-separated metering classes to include."
+            },
+            "required": false,
+            "description": "Optional comma-separated metering classes to include."
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful public API response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "totals",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "date",
+                          "metering_class",
+                          "requests",
+                          "charged_micros"
+                        ],
+                        "properties": {
+                          "date": {
+                            "type": "string",
+                            "description": "UTC usage date in YYYY-MM-DD format."
+                          },
+                          "metering_class": {
+                            "type": "string",
+                            "enum": [
+                              "listing_search",
+                              "listing_search_historical",
+                              "dealer_inventory_search",
+                              "dealer_inventory_search_historical",
+                              "facet_counts",
+                              "facet_counts_historical",
+                              "vehicle_detail",
+                              "vehicle_detail_enriched",
+                              "dealer_lookup"
+                            ],
+                            "description": "Metering class for this daily usage bucket."
+                          },
+                          "requests": {
+                            "type": "number",
+                            "description": "Billable request count in this bucket."
+                          },
+                          "charged_micros": {
+                            "type": "number",
+                            "description": "Total charged USD micros in this bucket."
+                          }
+                        },
+                        "additionalProperties": false,
+                        "description": "Daily public API usage bucket."
+                      },
+                      "description": "Daily usage buckets ordered by date and metering class."
+                    },
+                    "totals": {
+                      "type": "object",
+                      "required": [
+                        "requests",
+                        "charged_micros"
+                      ],
+                      "properties": {
+                        "requests": {
+                          "type": "number",
+                          "description": "Total billable requests in the response range."
+                        },
+                        "charged_micros": {
+                          "type": "number",
+                          "description": "Total charged USD micros in the response range."
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    "meta": {
+                      "type": "object",
+                      "required": [
+                        "start_date",
+                        "end_date",
+                        "interval",
+                        "currency",
+                        "source",
+                        "freshness"
+                      ],
+                      "properties": {
+                        "start_date": {
+                          "type": "string",
+                          "description": "Inclusive UTC start date used for the summary."
+                        },
+                        "end_date": {
+                          "type": "string",
+                          "description": "Inclusive UTC end date used for the summary."
+                        },
+                        "interval": {
+                          "type": "string",
+                          "enum": [
+                            "day"
+                          ],
+                          "description": "Aggregation interval."
+                        },
+                        "currency": {
+                          "type": "string",
+                          "enum": [
+                            "USD"
+                          ],
+                          "description": "Currency used by charged_micros."
+                        },
+                        "source": {
+                          "type": "string",
+                          "description": "Analytics source table used for the summary."
+                        },
+                        "freshness": {
+                          "type": "string",
+                          "description": "Freshness note for usage analytics."
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  },
+                  "additionalProperties": false,
+                  "description": "Public API usage summary response envelope."
+                }
+              }
+            },
+            "headers": {
+              "X-RateLimit-Tier": {
+                "description": "Effective account Usage Tier code used for rate limiting.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit-10s": {
+                "description": "Maximum requests allowed in the 10-second burst window.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Remaining-10s": {
+                "description": "Remaining requests in the current 10-second burst window after this request.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Limit-60s": {
+                "description": "Maximum requests allowed in the 60-second sustained window.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-RateLimit-Remaining-60s": {
+                "description": "Remaining requests in the current 60-second sustained window after this request.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid path or query parameter. Unknown query parameters are rejected.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/HttpApiDecodeError"
+                    },
+                    {
+                      "$ref": "#/components/schemas/PublicApiValidationError"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, or invalid Authorization bearer token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicApiAuthenticationError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "The API account is blocked by billing state or prepaid balance.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicApiBillingError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The API key is valid but does not include the required scope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicApiPermissionError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "The API account exceeded the public API rate limit. Retry-After is included when available.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error",
+                    "_tag"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "required": [
+                        "type",
+                        "code",
+                        "message"
+                      ],
+                      "properties": {
+                        "type": {
+                          "type": "string"
+                        },
+                        "code": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    "retryAfter": {
+                      "type": "number"
+                    },
+                    "_tag": {
+                      "type": "string",
+                      "enum": [
+                        "PublicApiRateLimitError"
+                      ]
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The platform could not price, meter, rate-limit, or fetch data for the request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicApiPlatformError"
+                }
+              }
+            }
+          }
+        },
+        "description": "Returns daily billable usage totals for the authenticated API account. Usage analytics are eventually consistent with the billing ledger and are intended for customer dashboards and reconciliation.",
+        "summary": "Summarize usage"
       }
     }
   },
@@ -6022,6 +6556,9 @@
     },
     {
       "name": "Dealers"
+    },
+    {
+      "name": "Usage"
     }
   ],
   "servers": [

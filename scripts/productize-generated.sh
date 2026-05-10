@@ -70,6 +70,48 @@ if [ -f .printing-press.json ] && command -v jq >/dev/null 2>&1; then
   mv "$tmp_meta" .printing-press.json
 fi
 
+# Keep product-specific root/client behavior that Printing Press regeneration
+# currently resets.
+if [ -f internal/cli/root.go ]; then
+  perl -0pi -e 's/var version = "1\.0\.0"/var version = "1.0.13"/' internal/cli/root.go
+  perl -0pi -e 's/(\tcsv\s+bool\n)(\tplain\s+bool)/$1\tmarkdown      bool\n$2/' internal/cli/root.go
+  perl -0pi -e 's/(\tc\.NoCache = f\.noCache\n)(\treturn c, nil)/$1\tc.UserAgent = "visor-cli\/" + version\n\tc.Telemetry = f.telemetryHeaders()\n$2/' internal/cli/root.go
+  if ! rg -q 'func \(f \*rootFlags\) telemetryHeaders' internal/cli/root.go; then
+    perl -0pi -e 's/(func \(f \*rootFlags\) printJSON)/func (f *rootFlags) telemetryHeaders() map[string]string {\n\tcontext := []string{}\n\tif f.agent {\n\t\tcontext = append(context, "agent")\n\t}\n\tif f.compact {\n\t\tcontext = append(context, "compact")\n\t}\n\tif f.asJSON {\n\t\tcontext = append(context, "json")\n\t}\n\tif f.markdown {\n\t\tcontext = append(context, "markdown")\n\t}\n\tif f.csv {\n\t\tcontext = append(context, "csv")\n\t}\n\tif f.plain {\n\t\tcontext = append(context, "plain")\n\t}\n\tif f.quiet {\n\t\tcontext = append(context, "quiet")\n\t}\n\tif f.noCache {\n\t\tcontext = append(context, "no-cache")\n\t}\n\n\theaders := map[string]string{\n\t\t"X-Visor-Client":      "cli",\n\t\t"X-Visor-CLI-Version": version,\n\t}\n\tif len(context) > 0 {\n\t\theaders["X-Visor-CLI-Context"] = strings.Join(context, ",")\n\t}\n\treturn headers\n}\n\n$1/' internal/cli/root.go
+  fi
+fi
+
+if [ -f internal/client/client.go ]; then
+  perl -0pi -e 's/(\tNoCache\s+bool\n)(\tcacheDir)/$1\tUserAgent  string\n\tTelemetry  map[string]string\n$2/' internal/client/client.go
+  perl -0pi -e 's/(\t\tHTTPClient: httpClient,\n)(\t\tcacheDir:)/$1\t\tUserAgent:  "visor-cli",\n$2/' internal/client/client.go
+  perl -0pi -e 's/\t\tif bodyBytes != nil \{\n\t\t\treq\.Header\.Set\("Content-Type", "application\/json"\)\n\t\t\}\n\n//g' internal/client/client.go
+  perl -0pi -e 's/\t\t\/\/ Per-endpoint header overrides \(e\.g\., different API version per resource\)\n\t\tfor k, v := range headerOverrides \{\n\t\t\treq\.Header\.Set\(k, v\)\n\t\t\}\n\t\treq\.Header\.Set\("User-Agent", "visor\/1\.0\.0-beta"\)/\t\tc.applyRequestHeaders(req.Header, bodyBytes != nil, headerOverrides)/' internal/client/client.go
+  if ! rg -q 'func \(c \*Client\) applyRequestHeaders' internal/client/client.go; then
+    perl -0pi -e 's/(func \(c \*Client\) ConfiguredTimeout)/func (c *Client) applyRequestHeaders(h http.Header, hasBody bool, headerOverrides map[string]string) {\n\tif hasBody {\n\t\th.Set("Content-Type", "application\/json")\n\t}\n\t\/\/ Per-endpoint header overrides (e.g., different API version per resource).\n\tfor k, v := range headerOverrides {\n\t\th.Set(k, v)\n\t}\n\tif c.UserAgent != "" {\n\t\th.Set("User-Agent", c.UserAgent)\n\t}\n\tkeys := make([]string, 0, len(c.Telemetry))\n\tfor k := range c.Telemetry {\n\t\tkeys = append(keys, k)\n\t}\n\tsort.Strings(keys)\n\tfor _, k := range keys {\n\t\tif c.Telemetry[k] != "" {\n\t\t\th.Set(k, c.Telemetry[k])\n\t\t}\n\t}\n}\n\n$1/' internal/client/client.go
+  fi
+  if ! rg -Fq 'headers := http.Header{}' internal/client/client.go; then
+    perl -0pi -e 's/(\tif authHeader != "" \{\n\t\tfmt\.Fprintf\(os\.Stderr, "  %s: %s\\n", "Authorization", maskToken\(authHeader\)\)\n\t\}\n)(\tfmt\.Fprintf\(os\.Stderr, "\\n\(dry run - no request sent\)\\n"\))/$1\theaders := http.Header{}\n\tc.applyRequestHeaders(headers, body != nil, headerOverrides)\n\theaderKeys := make([]string, 0, len(headers))\n\tfor k := range headers {\n\t\tif strings.EqualFold(k, "Authorization") {\n\t\t\tcontinue\n\t\t}\n\t\theaderKeys = append(headerKeys, k)\n\t}\n\tsort.Strings(headerKeys)\n\tfor _, k := range headerKeys {\n\t\tfmt.Fprintf(os.Stderr, "  %s: %s\\n", k, headers.Get(k))\n\t}\n$2/' internal/client/client.go
+  fi
+fi
+
+if [ -f cmd/visor-mcp/main.go ]; then
+  perl -0pi -e 's/"1\.0\.0"/"1.0.13"/' cmd/visor-mcp/main.go
+fi
+
+if [ -f internal/mcp/tools.go ]; then
+  if ! rg -q 'c.UserAgent = "visor-mcp"' internal/mcp/tools.go; then
+    perl -0pi -e 's/(\tc := client\.New\(cfg, 30\*time\.Second, 0\)\n)/$1\tc.UserAgent = "visor-mcp"\n\tc.Telemetry = map[string]string{\n\t\t"X-Visor-Client":      "mcp",\n\t\t"X-Visor-CLI-Context": "agent,mcp,json,compact",\n\t}\n/' internal/mcp/tools.go
+  fi
+  perl -0pi -e 's/"name":\s+"usage",\n\t\t\t\t"description": "Manage usage",\n\t\t\t\t"endpoints":\s+\[\]string\{"public"\},\n\t\t\t\t"syncable":\s+true,\n\t\t\t\t"searchable":\s+true,/"name":        "usage",\n\t\t\t\t"description": "Manage usage",\n\t\t\t\t"endpoints":   []string{"public"},\n\t\t\t\t"syncable":    false,\n\t\t\t\t"searchable":  false,/' internal/mcp/tools.go
+fi
+
+if [ -f internal/cli/which.go ]; then
+  perl -0pi -e 's/Command: "usage public"/Command: "usage"/' internal/cli/which.go
+fi
+if [ -f internal/cli/promoted_usage.go ]; then
+  perl -0pi -e 's/Shortcut for '\''usage public'\''. //' internal/cli/promoted_usage.go
+fi
+
 # Keep the dealer inventory endpoint at a direct endpoint-equivalent path:
 #   visor dealers listings list <dealer_id>
 if [ -f internal/cli/dealers_listings_dealers.go ]; then
@@ -81,6 +123,10 @@ fi
 # that the strict public API rejects, and dry-run tries to store placeholder output.
 if [ -f internal/cli/sync.go ]; then
   perl -0pi -e 's/\treturn \[\]string\{\n\t\t"dealers",\n\t\t"facets",\n\t\t"listings",\n\t\}/\treturn []string{\n\t\t"dealers",\n\t\t"listings",\n\t}/' internal/cli/sync.go
+  perl -0pi -e 's/\treturn \[\]string\{\n\t\t"dealers",\n\t\t"listings",\n\t\t"usage",\n\t\}/\treturn []string{\n\t\t"dealers",\n\t\t"listings",\n\t}/' internal/cli/sync.go
+  perl -0pi -e 's/\n\tcase "usage":\n\t\treturn db\.UpsertUsage\(data\)//' internal/cli/sync.go
+  perl -0pi -e 's/\n\t\t"usage":\s+"\/v1\/usage",//' internal/cli/sync.go
+  perl -0pi -e 's/\n\t"usage":\s+"date",//' internal/cli/sync.go
   perl -0pi -e 's/\t\tif effectiveSince != "" \{\n\t\t\tparams\[sinceParam\] = effectiveSince\n\t\t\}/\t\tif effectiveSince != "" \&\& sinceParam != "" {\n\t\t\tparams[sinceParam] = effectiveSince\n\t\t}/' internal/cli/sync.go
   perl -0pi -e 's/func determineSinceParam\(\) string \{\n\treturn "since"\n\}/func determineSinceParam() string {\n\treturn ""\n}/' internal/cli/sync.go
   perl -0pi -e 's/\treturn \[\]dependentResourceDef\{\n\t\t\{Name: "dealers_listings", ParentTable: "dealers", ParentIDParam: "dealer_id", PathTemplate: "\/v1\/dealers\/\{dealer_id\}\/listings"\},\n\t\}/\treturn nil/' internal/cli/sync.go
@@ -89,6 +135,10 @@ if [ -f internal/cli/sync.go ]; then
     perl -0pi -e 's/(\t\t\tif len\(resources\) == 0 \{\n\t\t\t\tresources = defaultSyncResources\(\)\n\t\t\t\}\n)/$1\n\t\t\tif flags.dryRun {\n\t\t\t\treturn syncDryRun(c, resources)\n\t\t\t}\n/' internal/cli/sync.go
     perl -0pi -e 's/(\/\/ syncResource handles the full paginated sync of a single resource\.)/func syncDryRun(c interface {\n\tGet(string, map[string]string) (json.RawMessage, error)\n}, resources []string) error {\n\tpageSize := determinePaginationDefaults()\n\tfor _, resource := range resources {\n\t\tpath, err := syncResourcePath(resource)\n\t\tif err != nil {\n\t\t\treturn err\n\t\t}\n\t\tparams := map[string]string{}\n\t\tif pageSize.limitParam != "" {\n\t\t\tparams[pageSize.limitParam] = strconv.Itoa(pageSize.limit)\n\t\t}\n\t\t_, _ = c.Get(path, params)\n\t}\n\treturn nil\n}\n\n$1/' internal/cli/sync.go
   fi
+fi
+
+if [ -f internal/cli/channel_workflow.go ]; then
+  perl -0pi -e 's/\[\]string\{"dealers", "listings", "usage"\}/[]string{"dealers", "listings"}/' internal/cli/channel_workflow.go
 fi
 
 gofmt -w $(find cmd internal -type f -name '*.go')

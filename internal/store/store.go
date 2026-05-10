@@ -247,6 +247,10 @@ func (s *Store) backfillColumns(ctx context.Context, conn *sql.Conn) error {
 		{table: "listings", column: "vdp_url", decl: "TEXT"},
 		{table: "listings", column: "vin", decl: "TEXT"},
 		{table: "listings", column: "year", decl: "TEXT"},
+		{table: "usage", column: "charged_micros", decl: "REAL"},
+		{table: "usage", column: "date", decl: "TEXT"},
+		{table: "usage", column: "metering_class", decl: "TEXT"},
+		{table: "usage", column: "requests", decl: "REAL"},
 		{table: "sync_state", column: "last_cursor", decl: "TEXT"},
 		{table: "sync_state", column: "last_synced_at", decl: "DATETIME"},
 		{table: "sync_state", column: "total_count", decl: "INTEGER DEFAULT 0"},
@@ -350,6 +354,15 @@ func (s *Store) migrate(ctx context.Context) error {
 			year TEXT
 		)`,
 		`CREATE INDEX IF NOT EXISTS idx_listings_dealer_id ON listings(dealer_id)`,
+		`CREATE TABLE IF NOT EXISTS usage (
+			id TEXT PRIMARY KEY,
+			data JSON NOT NULL,
+			synced_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			charged_micros REAL,
+			date TEXT,
+			metering_class TEXT,
+			requests REAL
+		)`,
 	}
 
 	// Run every migration — including the column backfill and the
@@ -860,6 +873,60 @@ func (s *Store) UpsertListings(data json.RawMessage) error {
 	return tx.Commit()
 }
 
+// upsertUsageTx writes the typed-table portion of a usage upsert
+// inside an existing transaction. The caller is responsible for the generic
+// resources insert (via upsertGenericResourceTx) and for committing the tx.
+// Splitting this out lets UpsertBatch dispatch typed inserts per item without
+// opening a per-item transaction.
+func (s *Store) upsertUsageTx(tx *sql.Tx, id string, obj map[string]any, data json.RawMessage) error {
+	if _, err := tx.Exec(
+		`INSERT INTO usage (id, data, synced_at, charged_micros, date, metering_class, requests)
+		 VALUES (?, ?, ?, ?, ?, ?, ?)
+		 ON CONFLICT(id) DO UPDATE SET data = excluded.data, synced_at = excluded.synced_at, charged_micros = excluded.charged_micros, date = excluded.date, metering_class = excluded.metering_class, requests = excluded.requests`,
+		id,
+		string(data),
+		time.Now(),
+		lookupFieldValue(obj, "charged_micros"),
+		lookupFieldValue(obj, "date"),
+		lookupFieldValue(obj, "metering_class"),
+		lookupFieldValue(obj, "requests"),
+	); err != nil {
+		return fmt.Errorf("insert into usage: %w", err)
+	}
+
+	return nil
+}
+
+// UpsertUsage inserts or updates a usage record with domain-specific columns.
+func (s *Store) UpsertUsage(data json.RawMessage) error {
+	var obj map[string]any
+	if err := json.Unmarshal(data, &obj); err != nil {
+		return fmt.Errorf("unmarshaling usage: %w", err)
+	}
+
+	id := extractObjectID(obj)
+	if id == "" {
+		return fmt.Errorf("missing id for usage")
+	}
+
+	s.writeMu.Lock()
+	defer s.writeMu.Unlock()
+	tx, err := s.db.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	if err := s.upsertGenericResourceTx(tx, "usage", id, data); err != nil {
+		return err
+	}
+	if err := s.upsertUsageTx(tx, id, obj, data); err != nil {
+		return err
+	}
+
+	return tx.Commit()
+}
+
 // resourceIDFieldOverrides projects per-resource IDField (set by the profiler
 // from x-resource-id or response-schema fallback) into a runtime lookup map.
 // UpsertBatch consults this first so the templated path wins over the
@@ -872,6 +939,7 @@ func (s *Store) UpsertListings(data json.RawMessage) error {
 var resourceIDFieldOverrides = map[string]string{
 	"dealers":          "name",
 	"listings":         "id",
+	"usage":            "date",
 	"dealers_listings": "id",
 }
 
@@ -954,6 +1022,10 @@ func (s *Store) UpsertBatch(resourceType string, items []json.RawMessage) (int, 
 			}
 		case "listings":
 			if err := s.upsertListingsTx(tx, id, obj, item); err != nil {
+				return 0, extractFailures, fmt.Errorf("typed upsert for %s/%s: %w", resourceType, id, err)
+			}
+		case "usage":
+			if err := s.upsertUsageTx(tx, id, obj, item); err != nil {
 				return 0, extractFailures, fmt.Errorf("typed upsert for %s/%s: %w", resourceType, id, err)
 			}
 		}

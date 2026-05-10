@@ -278,6 +278,18 @@ func RegisterTools(s *server.MCPServer) {
 		makeAPIHandler("GET", "/v1/listings", []mcpParamBinding{{PublicName: "limit", WireName: "limit", Location: "query"}, {PublicName: "offset", WireName: "offset", Location: "query"}, {PublicName: "sort", WireName: "sort", Location: "query"}, {PublicName: "make", WireName: "make", Location: "query"}, {PublicName: "model", WireName: "model", Location: "query"}, {PublicName: "trim", WireName: "trim", Location: "query"}, {PublicName: "year", WireName: "year", Location: "query"}, {PublicName: "state", WireName: "state", Location: "query"}, {PublicName: "dealer_type", WireName: "dealer_type", Location: "query"}, {PublicName: "in_transit", WireName: "in_transit", Location: "query"}, {PublicName: "inventory_type", WireName: "inventory_type", Location: "query"}, {PublicName: "body_type", WireName: "body_type", Location: "query"}, {PublicName: "transmission", WireName: "transmission", Location: "query"}, {PublicName: "drivetrain", WireName: "drivetrain", Location: "query"}, {PublicName: "assembly_location", WireName: "assembly_location", Location: "query"}, {PublicName: "assembly_country", WireName: "assembly_country", Location: "query"}, {PublicName: "fuel_type", WireName: "fuel_type", Location: "query"}, {PublicName: "engine", WireName: "engine", Location: "query"}, {PublicName: "version", WireName: "version", Location: "query"}, {PublicName: "exterior_color", WireName: "exterior_color", Location: "query"}, {PublicName: "interior_color", WireName: "interior_color", Location: "query"}, {PublicName: "base_exterior_color", WireName: "base_exterior_color", Location: "query"}, {PublicName: "base_interior_color", WireName: "base_interior_color", Location: "query"}, {PublicName: "seating_capacity", WireName: "seating_capacity", Location: "query"}, {PublicName: "cylinders", WireName: "cylinders", Location: "query"}, {PublicName: "doors", WireName: "doors", Location: "query"}, {PublicName: "options_packages", WireName: "options_packages", Location: "query"}, {PublicName: "features", WireName: "features", Location: "query"}, {PublicName: "keywords", WireName: "keywords", Location: "query"}, {PublicName: "exclude_make", WireName: "exclude_make", Location: "query"}, {PublicName: "exclude_model", WireName: "exclude_model", Location: "query"}, {PublicName: "exclude_trim", WireName: "exclude_trim", Location: "query"}, {PublicName: "exclude_year", WireName: "exclude_year", Location: "query"}, {PublicName: "exclude_state", WireName: "exclude_state", Location: "query"}, {PublicName: "exclude_version", WireName: "exclude_version", Location: "query"}, {PublicName: "exclude_engine", WireName: "exclude_engine", Location: "query"}, {PublicName: "exclude_assembly_location", WireName: "exclude_assembly_location", Location: "query"}, {PublicName: "exclude_assembly_country", WireName: "exclude_assembly_country", Location: "query"}, {PublicName: "exclude_exterior_color", WireName: "exclude_exterior_color", Location: "query"}, {PublicName: "exclude_interior_color", WireName: "exclude_interior_color", Location: "query"}, {PublicName: "exclude_base_exterior_color", WireName: "exclude_base_exterior_color", Location: "query"}, {PublicName: "exclude_base_interior_color", WireName: "exclude_base_interior_color", Location: "query"}, {PublicName: "exclude_options_packages", WireName: "exclude_options_packages", Location: "query"}, {PublicName: "exclude_features", WireName: "exclude_features", Location: "query"}, {PublicName: "exclude_fuel_type", WireName: "exclude_fuel_type", Location: "query"}, {PublicName: "exclude_powertrain_type", WireName: "exclude_powertrain_type", Location: "query"}, {PublicName: "exclude_keywords", WireName: "exclude_keywords", Location: "query"}, {PublicName: "inventory_status", WireName: "inventory_status", Location: "query"}, {PublicName: "sold_within_days", WireName: "sold_within_days", Location: "query"}, {PublicName: "snapshot_date", WireName: "snapshot_date", Location: "query"}, {PublicName: "min_price", WireName: "min_price", Location: "query"}, {PublicName: "max_price", WireName: "max_price", Location: "query"}, {PublicName: "min_mileage", WireName: "min_mileage", Location: "query"}, {PublicName: "max_mileage", WireName: "max_mileage", Location: "query"}, {PublicName: "min_msrp", WireName: "min_msrp", Location: "query"}, {PublicName: "max_msrp", WireName: "max_msrp", Location: "query"}, {PublicName: "min_days_on_market", WireName: "min_days_on_market", Location: "query"}, {PublicName: "max_days_on_market", WireName: "max_days_on_market", Location: "query"}, {PublicName: "latitude", WireName: "latitude", Location: "query"}, {PublicName: "longitude", WireName: "longitude", Location: "query"}, {PublicName: "postal_code", WireName: "postal_code", Location: "query"}, {PublicName: "radius", WireName: "radius", Location: "query"}, {PublicName: "bbox", WireName: "bbox", Location: "query"}}, []string{}),
 	)
 	s.AddTool(
+		mcplib.NewTool("usage_public",
+			mcplib.WithDescription("Returns daily billable usage totals for the authenticated API account. Usage analytics are eventually consistent with the billing ledger and are intended for customer dashboards and reconciliation. Optional: start_date, end_date, metering_class."),
+			mcplib.WithString("start_date", mcplib.Description("Inclusive UTC start date in YYYY-MM-DD format. Defaults to 29 days before end_date.")),
+			mcplib.WithString("end_date", mcplib.Description("Inclusive UTC end date in YYYY-MM-DD format. Defaults to today.")),
+			mcplib.WithString("metering_class", mcplib.Description("Optional comma-separated metering classes to include.")),
+			mcplib.WithReadOnlyHintAnnotation(true),
+			mcplib.WithDestructiveHintAnnotation(false),
+			mcplib.WithOpenWorldHintAnnotation(true),
+		),
+		makeAPIHandler("GET", "/v1/usage", []mcpParamBinding{{PublicName: "start_date", WireName: "start_date", Location: "query"}, {PublicName: "end_date", WireName: "end_date", Location: "query"}, {PublicName: "metering_class", WireName: "metering_class", Location: "query"}}, []string{}),
+	)
+	s.AddTool(
 		mcplib.NewTool("vins_get",
 			mcplib.WithDescription("Returns the current or latest known record for a VIN. Missing VINs return 404 not_found_error. Required: vin. Optional: include."),
 			mcplib.WithString("vin", mcplib.Required(), mcplib.Description("17-character VIN.")),
@@ -622,7 +634,7 @@ func handleContext(_ context.Context, _ mcplib.CallToolRequest) (*mcplib.CallToo
 		"api":         "visor",
 		"description": "Query Visor vehicle listings, facets, VIN detail, and dealer inventory from a scriptable CLI.",
 		"archetype":   "crm",
-		"tool_count":  7,
+		"tool_count":  8,
 		// tool_surface tells agents which surface a capability lives on.
 		"tool_surface": "MCP exposes typed endpoint tools plus a runtime mirror of user-facing CLI commands. Endpoint tools keep typed schemas; command-mirror tools shell out to the companion visor binary.",
 		"auth": map[string]any{
@@ -657,6 +669,13 @@ func handleContext(_ context.Context, _ mcplib.CallToolRequest) (*mcplib.CallToo
 				"endpoints":   []string{"get", "list"},
 				"syncable":    true,
 				"searchable":  true,
+			},
+			{
+				"name":        "usage",
+				"description": "Manage usage",
+				"endpoints":   []string{"public"},
+				"syncable":    false,
+				"searchable":  false,
 			},
 			{
 				"name":        "vins",

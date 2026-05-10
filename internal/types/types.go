@@ -118,6 +118,13 @@ type PublicApiValidationError struct {
 	Error json.RawMessage `json:"error"`
 }
 
+type UsagePublicItem struct {
+	ChargedMicros float64 `json:"charged_micros"`
+	Date          string  `json:"date"`
+	MeteringClass string  `json:"metering_class"`
+	Requests      float64 `json:"requests"`
+}
+
 type VinsGetResponse struct {
 	Data json.RawMessage `json:"data"`
 	Meta json.RawMessage `json:"meta"`

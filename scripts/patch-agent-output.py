@@ -202,6 +202,391 @@ def patch_helpers() -> None:
         "if flags.asJSON || flags.csv || flags.compact || flags.quiet || flags.plain {",
         "if flags.asJSON || flags.csv || flags.markdown || flags.compact || flags.quiet || flags.plain {",
     )
+    if '`json:"query,omitempty"`' not in text:
+        text = text.replace(
+            '\tFreshness    any        `json:"freshness,omitempty"`     // optional machine-owned freshness metadata for covered command paths\n',
+            '\tFreshness    any        `json:"freshness,omitempty"`     // optional machine-owned freshness metadata for covered command paths\n\tQuery        any        `json:"query,omitempty"`         // cleaned request query params for agent envelopes\n',
+        )
+    text = text.replace(
+        """	if prov.Freshness != nil {
+		meta["freshness"] = prov.Freshness
+	}
+	var results any = json.RawMessage(data)
+""",
+        """	if prov.Freshness != nil {
+		meta["freshness"] = prov.Freshness
+	}
+	if prov.Query != nil {
+		meta["query"] = prov.Query
+	}
+	var results any = json.RawMessage(data)
+""",
+    )
+    text = text.replace(
+        'if len(paths) == 0 || !selectPathExists(data, []string{"results", "data"}) {',
+        'if len(paths) == 0 || (!selectPathExists(data, []string{"results", "data"}) && !selectPathExists(data, []string{"data"})) {',
+    )
+    text = text.replace(
+        """		candidate := append([]string{"results", "data"}, p...)
+		if selectPathExists(data, candidate) {
+			expanded = append(expanded, candidate)
+			continue
+		}
+		expanded = append(expanded, p)
+""",
+        """		candidate := append([]string{"results", "data"}, p...)
+		if selectPathExists(data, candidate) {
+			expanded = append(expanded, candidate)
+			continue
+		}
+		candidate = append([]string{"data"}, p...)
+		if selectPathExists(data, candidate) {
+			expanded = append(expanded, candidate)
+			continue
+		}
+		expanded = append(expanded, p)
+""",
+    )
+    text = text.replace(
+        """// printOutputWithFlags routes output through the right format based on flags.
+func printOutputWithFlags(w io.Writer, data json.RawMessage, flags *rootFlags) error {
+	// --select wins over --compact when both are set: an explicit field list
+	// is the user's authoritative request, so compacting must not strip those
+	// fields before --select can pick them.
+	if flags.selectFields != "" {
+		filtered, err := filterFieldsValidated(data, flags.selectFields)
+		if err != nil {
+			return err
+		}
+		data = filtered
+	} else if flags.compact {
+		data = compactFields(data)
+	}
+	// --quiet: suppress all output, exit code communicates result
+	if flags.quiet {
+		return nil
+	}
+	// --csv: render as CSV
+	if flags.csv {
+		return printCSV(w, data)
+	}
+	// --markdown: render as Markdown for transcript-friendly output
+	if flags.markdown {
+		return printMarkdown(w, data)
+	}
+	return printOutput(w, data, flags.asJSON)
+}
+""",
+        """// printOutputWithFlags routes output through the right format based on flags.
+func printOutputWithFlags(w io.Writer, data json.RawMessage, flags *rootFlags) error {
+	if flags != nil && flags.agent {
+		data = agentEnvelope(data)
+	}
+	// --select wins over --compact when both are set: an explicit field list
+	// is the user's authoritative request, so compacting must not strip those
+	// fields before --select can pick them.
+	if flags != nil && flags.selectFields != "" {
+		filtered, err := filterFieldsForOutput(data, flags.selectFields, flags)
+		if err != nil {
+			return err
+		}
+		data = filtered
+	} else if flags != nil && flags.compact {
+		data = compactFields(data)
+	}
+	// --quiet: suppress all output, exit code communicates result
+	if flags != nil && flags.quiet {
+		return nil
+	}
+	// --csv: render as CSV
+	if flags != nil && flags.csv {
+		return printCSV(w, data)
+	}
+	// --markdown: render as Markdown for transcript-friendly output
+	if flags != nil && flags.markdown {
+		return printMarkdown(w, data)
+	}
+	return printOutput(w, data, flags != nil && flags.asJSON)
+}
+
+func filterFieldsForOutput(data json.RawMessage, fields string, flags *rootFlags) (json.RawMessage, error) {
+	if flags != nil && flags.agent {
+		return filterAgentDataFields(data, fields)
+	}
+	return filterFieldsValidated(data, fields)
+}
+
+func filterAgentDataFields(data json.RawMessage, fields string) (json.RawMessage, error) {
+	var obj map[string]json.RawMessage
+	if json.Unmarshal(data, &obj) != nil {
+		return filterFieldsValidated(data, fields)
+	}
+	dataRaw, ok := obj["data"]
+	if !ok {
+		return filterFieldsValidated(data, fields)
+	}
+	filtered, err := filterFieldsValidated(dataRaw, agentDataSelectFields(fields))
+	if err != nil {
+		return nil, err
+	}
+	obj["data"] = filtered
+	return json.Marshal(obj)
+}
+
+func agentDataSelectFields(fields string) string {
+	paths := parseSelectPaths(fields)
+	out := make([]string, 0, len(paths))
+	for _, p := range paths {
+		if len(p) >= 2 && p[0] == "data" {
+			p = p[1:]
+		}
+		if len(p) >= 3 && p[0] == "results" && p[1] == "data" {
+			p = p[2:]
+		}
+		if len(p) == 0 {
+			continue
+		}
+		out = append(out, strings.Join(p, "."))
+	}
+	return strings.Join(out, ",")
+}
+
+func agentEnvelope(data json.RawMessage) json.RawMessage {
+	var obj map[string]json.RawMessage
+	if json.Unmarshal(data, &obj) != nil {
+		out, _ := json.Marshal(map[string]any{
+			"data":            rawJSONToAny(data),
+			"pagination":      map[string]any{},
+			"query":           map[string]any{},
+			"warnings":        []any{},
+			"facets_used":     []any{},
+			"total_available": nil,
+		})
+		return out
+	}
+
+	payload := data
+	if results, ok := obj["results"]; ok {
+		payload = results
+	}
+	payloadObj := map[string]json.RawMessage{}
+	_ = json.Unmarshal(payload, &payloadObj)
+
+	rows := payload
+	if nestedData, ok := payloadObj["data"]; ok {
+		rows = nestedData
+	}
+	pagination := json.RawMessage(`{}`)
+	if raw, ok := payloadObj["pagination"]; ok {
+		pagination = raw
+	} else if raw, ok := payloadObj["meta"]; ok {
+		pagination = raw
+	}
+	totalAvailable := any(nil)
+	if pmap := map[string]json.RawMessage{}; json.Unmarshal(pagination, &pmap) == nil {
+		if n, ok := intFromJSONFields(pmap, "total_available", "total", "total_count", "count"); ok {
+			totalAvailable = n
+		}
+	}
+	if totalAvailable == nil {
+		var arr []json.RawMessage
+		if json.Unmarshal(rows, &arr) == nil {
+			totalAvailable = len(arr)
+		}
+	}
+
+	envelope := map[string]any{
+		"data":            rawJSONToAny(rows),
+		"pagination":      rawJSONToAny(pagination),
+		"query":           map[string]any{},
+		"warnings":        []any{},
+		"facets_used":     []any{},
+		"total_available": totalAvailable,
+	}
+	if meta, ok := obj["meta"]; ok {
+		metaAny := rawJSONToAny(meta)
+		envelope["meta"] = metaAny
+		if metaObj, ok := metaAny.(map[string]any); ok {
+			if query, ok := metaObj["query"]; ok {
+				envelope["query"] = query
+				envelope["facets_used"] = facetsUsedFromQuery(query)
+			}
+		}
+	}
+	result, _ := json.Marshal(envelope)
+	return result
+}
+
+func facetsUsedFromQuery(query any) []string {
+	queryObj, ok := query.(map[string]any)
+	if !ok {
+		return []string{}
+	}
+	raw, ok := queryObj["facets"]
+	if !ok {
+		return []string{}
+	}
+	facets, ok := raw.(string)
+	if !ok {
+		return []string{}
+	}
+	out := make([]string, 0)
+	for _, facet := range strings.Split(facets, ",") {
+		facet = strings.TrimSpace(facet)
+		if facet != "" {
+			out = append(out, facet)
+		}
+	}
+	return out
+}
+""",
+    )
+    path.write_text(text)
+
+
+def patch_offset_pagination() -> None:
+    path = ROOT / "internal/cli/helpers.go"
+    text = path.read_text()
+    if '"strconv"' not in text:
+        text = text.replace('\t"sort"\n', '\t"sort"\n\t"strconv"\n', 1)
+    if "itemsBefore := len(allItems)" not in text:
+        text = text.replace(
+            """				// Try common data fields
+				for _, field := range []string{"data", "items", "results", "messages", "members", "values"} {
+					if arr, ok := obj[field]; ok {
+						var nested []json.RawMessage
+						if json.Unmarshal(arr, &nested) == nil {
+							allItems = append(allItems, nested...)
+							break
+						}
+					}
+				}
+""",
+        """				itemsBefore := len(allItems)
+				// Try common data fields
+				for _, field := range []string{"data", "items", "results", "messages", "members", "values"} {
+					if arr, ok := obj[field]; ok {
+						var nested []json.RawMessage
+						if json.Unmarshal(arr, &nested) == nil {
+							allItems = append(allItems, nested...)
+							break
+						}
+					}
+				}
+				itemsAdded := len(allItems) - itemsBefore
+""",
+            1,
+        )
+    if "nextOffsetFromEnvelope(obj, clean, itemsAdded)" not in text:
+        text = text.replace(
+            """				// Check has_more
+				if hasMoreField != "" {
+					if moreRaw, ok := obj[hasMoreField]; ok {
+						var more bool
+						if json.Unmarshal(moreRaw, &more) == nil && more {
+							continue
+						}
+					}
+				}
+""",
+        """				// Check has_more
+				if hasMoreField != "" {
+					if moreRaw, ok := obj[hasMoreField]; ok {
+						var more bool
+						if json.Unmarshal(moreRaw, &more) == nil && more {
+							continue
+						}
+					}
+				}
+
+				if nextOffset, ok := nextOffsetFromEnvelope(obj, clean, itemsAdded); ok {
+					clean["offset"] = fmt.Sprintf("%d", nextOffset)
+					continue
+				}
+""",
+            1,
+        )
+    marker = "// printJSONFiltered marshals a Go-typed value through the same output\n"
+    if "func nextOffsetFromEnvelope" not in text:
+        text = text.replace(
+            marker,
+            """func nextOffsetFromEnvelope(obj map[string]json.RawMessage, params map[string]string, itemsAdded int) (int, bool) {
+	if itemsAdded <= 0 {
+		return 0, false
+	}
+	paginationRaw, ok := obj["pagination"]
+	if !ok {
+		if metaRaw, hasMeta := obj["meta"]; hasMeta {
+			paginationRaw = metaRaw
+		}
+	}
+	if len(paginationRaw) == 0 {
+		return 0, false
+	}
+	var pagination map[string]json.RawMessage
+	if json.Unmarshal(paginationRaw, &pagination) != nil {
+		return 0, false
+	}
+	total, hasTotal := intFromJSONFields(pagination, "total", "total_available", "total_count", "count")
+	limit, hasLimit := intFromJSONFields(pagination, "limit", "page_size", "per_page")
+	offset, hasOffset := intFromJSONFields(pagination, "offset", "skip")
+	if !hasOffset {
+		offset, _ = atoiDefault(params["offset"], 0)
+	}
+	if !hasLimit {
+		limit, _ = atoiDefault(params["limit"], itemsAdded)
+	}
+	if limit <= 0 {
+		limit = itemsAdded
+	}
+	next := offset + limit
+	if itemsAdded < limit {
+		return 0, false
+	}
+	if hasTotal && next >= total {
+		return 0, false
+	}
+	return next, true
+}
+
+func intFromJSONFields(obj map[string]json.RawMessage, names ...string) (int, bool) {
+	for _, name := range names {
+		raw, ok := obj[name]
+		if !ok {
+			continue
+		}
+		var n int
+		if json.Unmarshal(raw, &n) == nil {
+			return n, true
+		}
+		var f float64
+		if json.Unmarshal(raw, &f) == nil {
+			return int(f), true
+		}
+		var s string
+		if json.Unmarshal(raw, &s) == nil {
+			if parsed, err := atoiDefault(s, 0); err == nil {
+				return parsed, true
+			}
+		}
+	}
+	return 0, false
+}
+
+func atoiDefault(s string, fallback int) (int, error) {
+	if strings.TrimSpace(s) == "" {
+		return fallback, nil
+	}
+	n, err := strconv.Atoi(strings.TrimSpace(s))
+	if err != nil {
+		return fallback, err
+	}
+	return n, nil
+}
+
+""" + marker,
+            1,
+        )
     path.write_text(text)
 
 
@@ -233,10 +618,29 @@ def patch_endpoint_branches() -> None:
 				return printOutputWithFlags(cmd.OutOrStdout(), wrapped, flags)
 			}
 """
+    current_generated = """			// For JSON output, wrap with provenance envelope. --select wins over
+			// --compact when both are set; --compact only runs when no explicit
+			// fields were requested.
+			if flags.asJSON || flags.markdown || !isTerminal(cmd.OutOrStdout()) {
+				filtered := data
+				if flags.selectFields != "" {
+					filtered = filterFields(filtered, flags.selectFields)
+				} else if flags.compact {
+					filtered = compactFields(filtered)
+				}
+				wrapped, wrapErr := wrapWithProvenance(filtered, prov)
+				if wrapErr != nil {
+					return wrapErr
+				}
+				return printOutputWithFlags(cmd.OutOrStdout(), wrapped, flags)
+			}
+"""
     for path in (ROOT / "internal/cli").glob("*.go"):
         text = path.read_text()
         if old in text:
             text = text.replace(old, new)
+        if current_generated in text:
+            text = text.replace(current_generated, new)
         text = text.replace(
             "if flags.asJSON || !isTerminal(cmd.OutOrStdout()) {",
             "if flags.asJSON || flags.markdown || !isTerminal(cmd.OutOrStdout()) {",
@@ -315,11 +719,59 @@ def patch_doctor() -> None:
     path.write_text(text)
 
 
+def patch_data_source() -> None:
+    path = ROOT / "internal/cli/data_source.go"
+    text = path.read_text()
+    if "func attachQuery" not in text:
+        text = text.replace(
+            """func attachFreshness(prov DataProvenance, flags *rootFlags) DataProvenance {
+	if flags != nil {
+		prov.Freshness = flags.freshnessMeta
+	}
+	return prov
+}
+
+""",
+            """func attachFreshness(prov DataProvenance, flags *rootFlags) DataProvenance {
+	if flags != nil {
+		prov.Freshness = flags.freshnessMeta
+	}
+	return prov
+}
+
+func attachQuery(prov DataProvenance, params map[string]string) DataProvenance {
+	query := cleanQueryParams(params)
+	if len(query) > 0 {
+		prov.Query = query
+	}
+	return prov
+}
+
+func cleanQueryParams(params map[string]string) map[string]string {
+	query := map[string]string{}
+	for k, v := range params {
+		if v != "" && v != "0" && v != "false" {
+			query[k] = v
+		}
+	}
+	return query
+}
+
+""",
+        )
+    text = text.replace("attachFreshness(prov, flags)", "attachFreshness(attachQuery(prov, params), flags)")
+    text = text.replace('attachFreshness(DataProvenance{Source: "live"}, flags)', 'attachFreshness(attachQuery(DataProvenance{Source: "live"}, params), flags)')
+    text = text.replace("attachFreshness(fallbackProv, flags)", "attachFreshness(attachQuery(fallbackProv, params), flags)")
+    path.write_text(text)
+
+
 def main() -> None:
     patch_helpers()
+    patch_offset_pagination()
     patch_endpoint_branches()
     patch_root_help()
     patch_doctor()
+    patch_data_source()
 
 
 if __name__ == "__main__":

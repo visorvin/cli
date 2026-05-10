@@ -70,6 +70,7 @@ rsync -a --delete \
   --exclude='README.md' \
   --exclude='SKILL.md' \
   --exclude='install.sh' \
+  --exclude='internal/client/*_test.go' \
   --exclude='internal/cli/*_test.go' \
   "$TMP/visor-generated/" "$ROOT/"
 

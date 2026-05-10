@@ -18,7 +18,7 @@ import (
 	"github.com/visorvin/cli/internal/config"
 )
 
-var version = "1.0.12"
+var version = "1.0.13"
 
 type rootFlags struct {
 	asJSON        bool
@@ -190,6 +190,7 @@ Run 'visor doctor' to verify auth and connectivity.`,
 	rootCmd.AddCommand(newWorkflowCmd(flags))
 	rootCmd.AddCommand(newAPICmd(flags))
 	rootCmd.AddCommand(newFacetsPromotedCmd(flags))
+	rootCmd.AddCommand(newUsagePromotedCmd(flags))
 	rootCmd.AddCommand(newVinsPromotedCmd(flags))
 	rootCmd.AddCommand(newVersionCliCmd())
 	rootCmd.AddCommand(newAdvancedHelpCmd(rootCmd))
