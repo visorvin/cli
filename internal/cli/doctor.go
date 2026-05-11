@@ -174,6 +174,18 @@ func newDoctorCmd(flags *rootFlags) *cobra.Command {
 						report["api"] = fmt.Sprintf("unreachable: %s", reachErr)
 					}
 
+					compatibility, compatErr := checkCLICompatibility(cmd.Context(), c)
+					if compatErr != nil {
+						report["api_compatibility"] = "unknown: " + compatErr.Error()
+						report["api_compatibility_details"] = map[string]any{
+							"status": "unknown",
+							"error":  compatErr.Error(),
+						}
+					} else {
+						report["api_compatibility"] = compatibility.Status
+						report["api_compatibility_details"] = compatibilityDetailsMap(compatibility)
+					}
+
 					// Step 2: Validate credentials with an authenticated probe.
 					authHeader := cfg.AuthHeader()
 					if authHeader == "" {
@@ -221,6 +233,9 @@ func newDoctorCmd(flags *rootFlags) *cobra.Command {
 			report["cache"] = collectCacheReport(cmd.Context(), "")
 
 			report["version"] = version
+			freshness := checkReleaseFreshness(cmd.Context(), githubReleaseHTTPClient(), version)
+			report["release_freshness"] = freshness.Status
+			report["release_freshness_details"] = freshness
 
 			if flags.asJSON {
 				if err := printJSONFiltered(cmd.OutOrStdout(), report, flags); err != nil {
@@ -236,6 +251,8 @@ func newDoctorCmd(flags *rootFlags) *cobra.Command {
 				{"auth", "Auth"},
 				{"env_vars", "Env Vars"},
 				{"api", "API"},
+				{"api_compatibility", "API compatibility"},
+				{"release_freshness", "Release freshness"},
 				{"credentials", "Credentials"},
 			}
 			for _, ck := range checkKeys {
@@ -259,7 +276,9 @@ func newDoctorCmd(flags *rootFlags) *cobra.Command {
 					// valid tokens). Surface as WARN, not FAIL — the user's actual
 					// commands will reveal a real auth failure if one exists.
 					indicator = yellow("WARN")
-				case strings.Contains(s, "error") || strings.Contains(s, "not configured") || strings.Contains(s, "unreachable") || strings.Contains(s, "invalid") || strings.Contains(s, "missing"):
+				case strings.HasPrefix(s, "unknown") || s == "outdated":
+					indicator = yellow("WARN")
+				case strings.Contains(s, "error") || strings.Contains(s, "not configured") || strings.Contains(s, "unreachable") || strings.Contains(s, "invalid") || strings.Contains(s, "missing") || s == "unsupported":
 					indicator = red("FAIL")
 				case s == "not required":
 					// Public APIs: no auth needed is a healthy state, not a warning.
@@ -268,6 +287,16 @@ func newDoctorCmd(flags *rootFlags) *cobra.Command {
 					indicator = yellow("WARN")
 				}
 				fmt.Fprintf(w, "  %s %s: %s\n", indicator, ck.label, s)
+				if ck.key == "api_compatibility" && s == "unsupported" {
+					if details, ok := report["api_compatibility_details"].(map[string]any); ok {
+						renderUnsupportedCompatibility(w, details)
+					}
+				}
+				if ck.key == "release_freshness" && s == "outdated" {
+					if details, ok := report["release_freshness_details"].(releaseFreshnessReport); ok {
+						renderOutdatedFreshness(w, details)
+					}
+				}
 			}
 			// Print info keys without status indicator
 			for _, key := range []string{"config_path", "base_url", "auth_source", "version"} {
@@ -306,12 +335,12 @@ func doctorExitForFailOn(failOn string, report map[string]any) error {
 	for _, v := range report {
 		s, ok := v.(string)
 		if ok {
-			if strings.Contains(s, "error") || strings.Contains(s, "unreachable") || strings.Contains(s, "invalid") || strings.Contains(s, "missing") {
+			if strings.Contains(s, "error") || strings.Contains(s, "unreachable") || strings.Contains(s, "invalid") || strings.Contains(s, "missing") || s == "unsupported" {
 				worstError = true
 			}
 		}
 		if m, ok := v.(map[string]any); ok {
-			if st, _ := m["status"].(string); st == "error" {
+			if st, _ := m["status"].(string); st == "error" || st == "unsupported" {
 				worstError = true
 			} else if st == "stale" {
 				worstStale = true

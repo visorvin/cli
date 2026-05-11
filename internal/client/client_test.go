@@ -37,6 +37,7 @@ func TestClientSendsUserAgentAndTelemetryHeaders(t *testing.T) {
 		}, nil
 	})}
 	c.UserAgent = "visor-cli/1.2.3"
+	c.NoCache = true
 	c.Telemetry = map[string]string{
 		"X-Visor-Client":      "cli",
 		"X-Visor-CLI-Version": "1.2.3",

@@ -218,8 +218,41 @@ func writeAPIErrorEnvelope(flags *rootFlags, err error, code int) {
 	})
 }
 
+func writeUnsupportedCLIErrorEnvelope(flags *rootFlags, details cliCompatibilityResponse, code int) {
+	if flags == nil || !flags.asJSON {
+		return
+	}
+	_ = json.NewEncoder(os.Stdout).Encode(map[string]any{
+		"error": map[string]any{
+			"code":                      "unsupported_cli_version",
+			"message":                   stringValue(details.Message),
+			"installed_version":         details.InstalledVersion,
+			"minimum_supported_version": stringValue(details.MinimumSupportedVersion),
+			"reason_code":               stringValue(details.ReasonCode),
+			"update_url":                details.UpdateURL,
+			"update_command":            details.UpdateCommand,
+		},
+		"code": code,
+	})
+}
+
+func stringValue(s *string) string {
+	if s == nil {
+		return ""
+	}
+	return *s
+}
+
 // classifyAPIError maps API errors to structured exit codes with actionable hints.
 func classifyAPIError(err error, flags *rootFlags) error {
+	var apiError *client.APIError
+	if errors.As(err, &apiError) {
+		if details, ok := compatibilityFromAPIErrorBody(apiError.Body); ok {
+			classified := apiErr(errors.New(formatUnsupportedCLIError(details)))
+			writeUnsupportedCLIErrorEnvelope(flags, details, ExitCode(classified))
+			return classified
+		}
+	}
 	msg := err.Error()
 	switch {
 	case strings.Contains(msg, "HTTP 409"):

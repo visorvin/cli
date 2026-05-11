@@ -41,6 +41,7 @@ func newListingsListCmd(flags *rootFlags) *cobra.Command {
 	var flagOptionsPackages string
 	var flagFeatures string
 	var flagKeywords string
+	var flagVinPattern string
 	var flagExcludeMake string
 	var flagExcludeModel string
 	var flagExcludeTrim string
@@ -158,6 +159,7 @@ func newListingsListCmd(flags *rootFlags) *cobra.Command {
 				"options_packages":            fmt.Sprintf("%v", flagOptionsPackages),
 				"features":                    fmt.Sprintf("%v", flagFeatures),
 				"keywords":                    fmt.Sprintf("%v", flagKeywords),
+				"vin_pattern":                 fmt.Sprintf("%v", flagVinPattern),
 				"exclude_make":                fmt.Sprintf("%v", flagExcludeMake),
 				"exclude_model":               fmt.Sprintf("%v", flagExcludeModel),
 				"exclude_trim":                fmt.Sprintf("%v", flagExcludeTrim),
@@ -256,6 +258,7 @@ func newListingsListCmd(flags *rootFlags) *cobra.Command {
 	cmd.Flags().StringVar(&flagOptionsPackages, "options-packages", "", "Comma-separated manufacturer option/package codes.")
 	cmd.Flags().StringVar(&flagFeatures, "features", "", "Comma-separated feature tokens.")
 	cmd.Flags().StringVar(&flagKeywords, "keywords", "", "Comma-separated listing keyword tokens. Positive tokens must be present; negative history tokens are excluded.")
+	cmd.Flags().StringVar(&flagVinPattern, "vin-pattern", "", "Comma-separated VIN masks, up to 10 distinct patterns. VIN characters match themselves, ? matches one VIN position,...")
 	cmd.Flags().StringVar(&flagExcludeMake, "exclude-make", "", "Comma-separated makes to exclude.")
 	cmd.Flags().StringVar(&flagExcludeModel, "exclude-model", "", "Comma-separated models to exclude.")
 	cmd.Flags().StringVar(&flagExcludeTrim, "exclude-trim", "", "Comma-separated trims to exclude.")
