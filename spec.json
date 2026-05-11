@@ -1124,6 +1124,42 @@
                         },
                         "message": {
                           "type": "string"
+                        },
+                        "current_version": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "minimum_supported_version": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "reason_code": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "update_url": {
+                          "type": "string"
+                        },
+                        "update_command": {
+                          "type": "string"
                         }
                       },
                       "additionalProperties": false
@@ -1170,10 +1206,10 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "Required comma-separated facet names to return. Supported facets: make, model, inventory_type, year, trim, version, base_exterior_color, exterior_color, base_interior_color, interior_color, seating_capacity, doors, engine, state, drivetrain, assembly_location, assembly_country, transmission, fuel_type, body_type, cylinders, dealer_type, in_transit, options_packages, features, keywords, price, msrp, miles, dos_active."
+              "description": "Required comma-separated facet names to return. Supported facets: make, model, inventory_type, year, trim, version, base_exterior_color, exterior_color, base_interior_color, interior_color, seating_capacity, doors, engine, state, drivetrain, assembly_location, assembly_country, transmission, fuel_type, body_type, cylinders, dealer_type, in_transit, options_packages, features, keywords, price, msrp, miles, days_on_market."
             },
             "required": true,
-            "description": "Required comma-separated facet names to return. Supported facets: make, model, inventory_type, year, trim, version, base_exterior_color, exterior_color, base_interior_color, interior_color, seating_capacity, doors, engine, state, drivetrain, assembly_location, assembly_country, transmission, fuel_type, body_type, cylinders, dealer_type, in_transit, options_packages, features, keywords, price, msrp, miles, dos_active."
+            "description": "Required comma-separated facet names to return. Supported facets: make, model, inventory_type, year, trim, version, base_exterior_color, exterior_color, base_interior_color, interior_color, seating_capacity, doors, engine, state, drivetrain, assembly_location, assembly_country, transmission, fuel_type, body_type, cylinders, dealer_type, in_transit, options_packages, features, keywords, price, msrp, miles, days_on_market."
           },
           {
             "name": "facet_value_limit",
@@ -1184,6 +1220,32 @@
             },
             "required": false,
             "description": "Maximum number of values returned per categorical facet. Defaults to 20; maximum 100. Numeric range facets always return fixed buckets."
+          },
+          {
+            "name": "metric",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "Facet Metric used to compute an optional per-bucket aggregate. Defaults to count. Supported non-count metrics use <measure>.<aggregate>, for example price.p95 or days_on_market.median. Non-count metrics require exactly one categorical facet."
+            },
+            "required": false,
+            "description": "Facet Metric used to compute an optional per-bucket aggregate. Defaults to count. Supported non-count metrics use <measure>.<aggregate>, for example price.p95 or days_on_market.median. Non-count metrics require exactly one categorical facet."
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "count",
+                "-count",
+                "metric",
+                "-metric"
+              ],
+              "description": "Facet bucket ordering. Defaults to -count. Sorting by metric requires a non-count metric."
+            },
+            "required": false,
+            "description": "Facet bucket ordering. Defaults to -count. Sorting by metric requires a non-count metric."
           },
           {
             "name": "make",
@@ -1855,6 +1917,39 @@
                                   "type": "number",
                                   "description": "Number of matching records for the value."
                                 },
+                                "metric": {
+                                  "type": "object",
+                                  "required": [
+                                    "name",
+                                    "value"
+                                  ],
+                                  "properties": {
+                                    "name": {
+                                      "type": "string",
+                                      "description": "Selected Facet Metric name, for example price.p95."
+                                    },
+                                    "value": {
+                                      "anyOf": [
+                                        {
+                                          "type": "number"
+                                        },
+                                        {
+                                          "type": "null"
+                                        }
+                                      ],
+                                      "description": "Facet Metric value, or null when suppressed by the minimum sample-size rule."
+                                    },
+                                    "null_reason": {
+                                      "type": "string",
+                                      "enum": [
+                                        "insufficient_sample"
+                                      ],
+                                      "description": "Reason the Facet Metric value is null."
+                                    }
+                                  },
+                                  "additionalProperties": false,
+                                  "description": "Selected non-count Facet Metric for this bucket."
+                                },
                                 "name": {
                                   "type": "string",
                                   "description": "Display name for enriched option package buckets."
@@ -2012,7 +2107,10 @@
                     "meta": {
                       "type": "object",
                       "required": [
-                        "facets"
+                        "facets",
+                        "metric",
+                        "sort",
+                        "minimum_metric_count"
                       ],
                       "properties": {
                         "facets": {
@@ -2021,6 +2119,24 @@
                             "type": "string"
                           },
                           "description": "Facet names requested and returned, after default expansion."
+                        },
+                        "metric": {
+                          "type": "string",
+                          "description": "Facet Metric used for this response. Defaults to count."
+                        },
+                        "sort": {
+                          "type": "string",
+                          "enum": [
+                            "count",
+                            "-count",
+                            "metric",
+                            "-metric"
+                          ],
+                          "description": "Facet bucket ordering used for this response."
+                        },
+                        "minimum_metric_count": {
+                          "type": "number",
+                          "description": "Minimum bucket count required before non-count metric values are returned."
                         }
                       },
                       "additionalProperties": false,
@@ -2157,6 +2273,42 @@
                         },
                         "message": {
                           "type": "string"
+                        },
+                        "current_version": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "minimum_supported_version": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "reason_code": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "update_url": {
+                          "type": "string"
+                        },
+                        "update_command": {
+                          "type": "string"
                         }
                       },
                       "additionalProperties": false
@@ -2187,7 +2339,7 @@
             }
           }
         },
-        "description": "Returns categorical facets, numeric range facets, and stats for an explicit listing filter surface facet selection. Use facets=make,model,price. Supported facets: make, model, inventory_type, year, trim, version, base_exterior_color, exterior_color, base_interior_color, interior_color, seating_capacity, doors, engine, state, drivetrain, assembly_location, assembly_country, transmission, fuel_type, body_type, cylinders, dealer_type, in_transit, options_packages, features, keywords, price, msrp, miles, dos_active.",
+        "description": "Returns categorical facets, numeric range facets, and stats for an explicit listing filter surface facet selection. Use facets=make,model,price. Supported facets: make, model, inventory_type, year, trim, version, base_exterior_color, exterior_color, base_interior_color, interior_color, seating_capacity, doors, engine, state, drivetrain, assembly_location, assembly_country, transmission, fuel_type, body_type, cylinders, dealer_type, in_transit, options_packages, features, keywords, price, msrp, miles, days_on_market.",
         "summary": "Filter facets"
       }
     },
@@ -3017,6 +3169,42 @@
                           "type": "string"
                         },
                         "message": {
+                          "type": "string"
+                        },
+                        "current_version": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "minimum_supported_version": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "reason_code": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "update_url": {
+                          "type": "string"
+                        },
+                        "update_command": {
                           "type": "string"
                         }
                       },
@@ -3872,6 +4060,42 @@
                         },
                         "message": {
                           "type": "string"
+                        },
+                        "current_version": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "minimum_supported_version": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "reason_code": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "update_url": {
+                          "type": "string"
+                        },
+                        "update_command": {
+                          "type": "string"
                         }
                       },
                       "additionalProperties": false
@@ -4313,6 +4537,42 @@
                         },
                         "message": {
                           "type": "string"
+                        },
+                        "current_version": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "minimum_supported_version": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "reason_code": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "update_url": {
+                          "type": "string"
+                        },
+                        "update_command": {
+                          "type": "string"
                         }
                       },
                       "additionalProperties": false
@@ -4737,6 +4997,42 @@
                           "type": "string"
                         },
                         "message": {
+                          "type": "string"
+                        },
+                        "current_version": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "minimum_supported_version": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "reason_code": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "update_url": {
+                          "type": "string"
+                        },
+                        "update_command": {
                           "type": "string"
                         }
                       },
@@ -5898,6 +6194,42 @@
                         },
                         "message": {
                           "type": "string"
+                        },
+                        "current_version": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "minimum_supported_version": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "reason_code": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "update_url": {
+                          "type": "string"
+                        },
+                        "update_command": {
+                          "type": "string"
                         }
                       },
                       "additionalProperties": false
@@ -6207,6 +6539,42 @@
                         },
                         "message": {
                           "type": "string"
+                        },
+                        "current_version": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "minimum_supported_version": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "reason_code": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "update_url": {
+                          "type": "string"
+                        },
+                        "update_command": {
+                          "type": "string"
                         }
                       },
                       "additionalProperties": false
@@ -6361,6 +6729,42 @@
               },
               "message": {
                 "type": "string"
+              },
+              "current_version": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "minimum_supported_version": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "reason_code": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "update_url": {
+                "type": "string"
+              },
+              "update_command": {
+                "type": "string"
               }
             },
             "additionalProperties": false
@@ -6396,6 +6800,42 @@
                 "type": "string"
               },
               "message": {
+                "type": "string"
+              },
+              "current_version": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "minimum_supported_version": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "reason_code": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "update_url": {
+                "type": "string"
+              },
+              "update_command": {
                 "type": "string"
               }
             },
@@ -6433,6 +6873,42 @@
               },
               "message": {
                 "type": "string"
+              },
+              "current_version": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "minimum_supported_version": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "reason_code": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "update_url": {
+                "type": "string"
+              },
+              "update_command": {
+                "type": "string"
               }
             },
             "additionalProperties": false
@@ -6468,6 +6944,42 @@
                 "type": "string"
               },
               "message": {
+                "type": "string"
+              },
+              "current_version": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "minimum_supported_version": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "reason_code": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "update_url": {
+                "type": "string"
+              },
+              "update_command": {
                 "type": "string"
               }
             },
@@ -6505,6 +7017,42 @@
               },
               "message": {
                 "type": "string"
+              },
+              "current_version": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "minimum_supported_version": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "reason_code": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "update_url": {
+                "type": "string"
+              },
+              "update_command": {
+                "type": "string"
               }
             },
             "additionalProperties": false
@@ -6540,6 +7088,42 @@
                 "type": "string"
               },
               "message": {
+                "type": "string"
+              },
+              "current_version": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "minimum_supported_version": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "reason_code": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "update_url": {
+                "type": "string"
+              },
+              "update_command": {
                 "type": "string"
               }
             },

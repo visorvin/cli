@@ -14,6 +14,8 @@ import (
 func newFacetsPromotedCmd(flags *rootFlags) *cobra.Command {
 	var flagFacets string
 	var flagFacetValueLimit string
+	var flagMetric string
+	var flagSort string
 	var flagMake string
 	var flagModel string
 	var flagTrim string
@@ -86,6 +88,19 @@ func newFacetsPromotedCmd(flags *rootFlags) *cobra.Command {
 			if !cmd.Flags().Changed("facets") && !flags.dryRun {
 				return fmt.Errorf("required flag \"%s\" not set", "facets")
 			}
+			if cmd.Flags().Changed("sort") {
+				allowedSort := []string{"count", "-count", "metric", "-metric"}
+				validSort := false
+				for _, v := range allowedSort {
+					if flagSort == v {
+						validSort = true
+						break
+					}
+				}
+				if !validSort {
+					fmt.Fprintf(os.Stderr, "warning: --%s %q not in allowed set %v\n", "sort", flagSort, allowedSort)
+				}
+			}
 			if cmd.Flags().Changed("in-transit") {
 				allowedInTransit := []string{"true", "false"}
 				validInTransit := false
@@ -124,6 +139,12 @@ func newFacetsPromotedCmd(flags *rootFlags) *cobra.Command {
 			}
 			if flagFacetValueLimit != "" {
 				params["facet_value_limit"] = fmt.Sprintf("%v", flagFacetValueLimit)
+			}
+			if flagMetric != "" {
+				params["metric"] = fmt.Sprintf("%v", flagMetric)
+			}
+			if flagSort != "" {
+				params["sort"] = fmt.Sprintf("%v", flagSort)
 			}
 			if flagMake != "" {
 				params["make"] = fmt.Sprintf("%v", flagMake)
@@ -355,6 +376,8 @@ func newFacetsPromotedCmd(flags *rootFlags) *cobra.Command {
 	}
 	cmd.Flags().StringVar(&flagFacets, "facets", "", "Required comma-separated facet names to return. Supported facets: make, model, inventory_type, year, trim, version,...")
 	cmd.Flags().StringVar(&flagFacetValueLimit, "facet-value-limit", "", "Maximum number of values returned per categorical facet. Defaults to 20; maximum 100. Numeric range facets always...")
+	cmd.Flags().StringVar(&flagMetric, "metric", "", "Facet Metric used to compute an optional per-bucket aggregate. Defaults to count. Supported non-count metrics use...")
+	cmd.Flags().StringVar(&flagSort, "sort", "", "Facet bucket ordering. Defaults to -count. Sorting by metric requires a non-count metric. (one of: count, -count, metric, -metric)")
 	cmd.Flags().StringVar(&flagMake, "make", "", "Comma-separated make names or slugs to apply before counting facet buckets.")
 	cmd.Flags().StringVar(&flagModel, "model", "", "Comma-separated model names or slugs to apply before counting facet buckets.")
 	cmd.Flags().StringVar(&flagTrim, "trim", "", "Comma-separated trim names to apply before counting facet buckets.")

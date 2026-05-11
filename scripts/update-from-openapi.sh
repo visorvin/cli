@@ -70,6 +70,9 @@ rsync -a --delete \
   --exclude='README.md' \
   --exclude='SKILL.md' \
   --exclude='install.sh' \
+  --exclude='internal/cli/compatibility.go' \
+  --exclude='internal/cli/doctor.go' \
+  --exclude='internal/cli/helpers.go' \
   --exclude='internal/client/*_test.go' \
   --exclude='internal/cli/*_test.go' \
   "$TMP/visor-generated/" "$ROOT/"

@@ -73,7 +73,7 @@ fi
 # Keep product-specific root/client behavior that Printing Press regeneration
 # currently resets.
 if [ -f internal/cli/root.go ]; then
-  perl -0pi -e 's/var version = "1\.0\.0"/var version = "1.0.14"/' internal/cli/root.go
+  perl -0pi -e 's/var version = "1\.0\.0"/var version = "1.0.15"/' internal/cli/root.go
   perl -0pi -e 's/(\tcsv\s+bool\n)(\tplain\s+bool)/$1\tmarkdown      bool\n$2/' internal/cli/root.go
   perl -0pi -e 's/(\tc\.NoCache = f\.noCache\n)(\treturn c, nil)/$1\tc.UserAgent = "visor-cli\/" + version\n\tc.Telemetry = f.telemetryHeaders()\n$2/' internal/cli/root.go
   if ! rg -q 'func \(f \*rootFlags\) telemetryHeaders' internal/cli/root.go; then
@@ -95,7 +95,7 @@ if [ -f internal/client/client.go ]; then
 fi
 
 if [ -f cmd/visor-mcp/main.go ]; then
-  perl -0pi -e 's/"1\.0\.0"/"1.0.14"/' cmd/visor-mcp/main.go
+  perl -0pi -e 's/"1\.0\.0"/"1.0.15"/' cmd/visor-mcp/main.go
 fi
 
 if [ -f internal/mcp/tools.go ]; then
@@ -111,6 +111,12 @@ fi
 if [ -f internal/cli/promoted_usage.go ]; then
   perl -0pi -e 's/Shortcut for '\''usage public'\''. //' internal/cli/promoted_usage.go
 fi
+
+for promoted in internal/cli/promoted_facets.go internal/cli/promoted_usage.go internal/cli/promoted_vins.go; do
+  if [ -f "$promoted" ]; then
+    perl -0pi -e 's#\t\t\t// For JSON output, wrap with provenance envelope\. --select wins over\n\t\t\t// --compact when both are set; --compact only runs when no explicit\n\t\t\t// fields were requested\.\n\t\t\tif flags\.asJSON \|\| flags\.markdown \|\| !isTerminal\(cmd\.OutOrStdout\(\)\) \{\n\t\t\t\tfiltered := data\n\t\t\t\tif flags\.selectFields != "" \{\n\t\t\t\t\tfiltered = filterFields\(filtered, flags\.selectFields\)\n\t\t\t\t\} else if flags\.compact \{\n\t\t\t\t\tfiltered = compactFields\(filtered\)\n\t\t\t\t\}\n\t\t\t\twrapped, wrapErr := wrapWithProvenance\(filtered, prov\)#\t\t\t// For structured output, wrap with provenance first so --select paths\n\t\t\t// match the documented envelope shape, e.g. results.data.vin.\n\t\t\tif flags.asJSON || flags.markdown || !isTerminal(cmd.OutOrStdout()) {\n\t\t\t\twrapped, wrapErr := wrapWithProvenance(data, prov)#g' "$promoted"
+  fi
+done
 
 # Keep the dealer inventory endpoint at a direct endpoint-equivalent path:
 #   visor dealers listings list <dealer_id>
