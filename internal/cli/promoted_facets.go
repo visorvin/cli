@@ -21,6 +21,7 @@ func newFacetsPromotedCmd(flags *rootFlags) *cobra.Command {
 	var flagTrim string
 	var flagYear string
 	var flagState string
+	var flagDealerId string
 	var flagDealerType string
 	var flagInTransit string
 	var flagInventoryType string
@@ -160,6 +161,9 @@ func newFacetsPromotedCmd(flags *rootFlags) *cobra.Command {
 			}
 			if flagState != "" {
 				params["state"] = fmt.Sprintf("%v", flagState)
+			}
+			if flagDealerId != "" {
+				params["dealer_id"] = fmt.Sprintf("%v", flagDealerId)
 			}
 			if flagDealerType != "" {
 				params["dealer_type"] = fmt.Sprintf("%v", flagDealerType)
@@ -383,6 +387,7 @@ func newFacetsPromotedCmd(flags *rootFlags) *cobra.Command {
 	cmd.Flags().StringVar(&flagTrim, "trim", "", "Comma-separated trim names to apply before counting facet buckets.")
 	cmd.Flags().StringVar(&flagYear, "year", "", "Comma-separated model years to apply before counting facet buckets.")
 	cmd.Flags().StringVar(&flagState, "state", "", "Comma-separated two-letter dealer states to apply before counting facet buckets.")
+	cmd.Flags().StringVar(&flagDealerId, "dealer-id", "", "Comma-separated dealer UUIDs to apply before counting facet buckets. Accepts up to 50 dealer IDs.")
 	cmd.Flags().StringVar(&flagDealerType, "dealer-type", "", "Comma-separated dealer types to apply before counting facet buckets.")
 	cmd.Flags().StringVar(&flagInTransit, "in-transit", "", "Whether to count facets for in-transit/build inventory or stock inventory. (one of: true, false)")
 	cmd.Flags().StringVar(&flagInventoryType, "inventory-type", "", "Comma-separated inventory classes such as new,used,certified.")

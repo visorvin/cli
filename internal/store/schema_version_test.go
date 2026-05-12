@@ -497,11 +497,15 @@ func TestMigrate_AddsColumnsOnUpgrade_Listings(t *testing.T) {
 	}
 
 	for _, want := range []string{
+		"base_exterior_color",
+		"base_interior_color",
 		"city",
 		"days_on_market",
 		"dealer_id",
 		"dealer_name",
 		"distance_miles",
+		"exterior_color",
+		"interior_color",
 		"inventory_status",
 		"inventory_type",
 		"latitude",
@@ -509,6 +513,7 @@ func TestMigrate_AddsColumnsOnUpgrade_Listings(t *testing.T) {
 		"make",
 		"miles",
 		"model",
+		"msrp",
 		"price",
 		"state",
 		"status",

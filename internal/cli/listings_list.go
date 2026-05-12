@@ -15,11 +15,13 @@ func newListingsListCmd(flags *rootFlags) *cobra.Command {
 	var flagLimit string
 	var flagOffset string
 	var flagSort string
+	var flagFields string
 	var flagMake string
 	var flagModel string
 	var flagTrim string
 	var flagYear string
 	var flagState string
+	var flagDealerId string
 	var flagDealerType string
 	var flagInTransit string
 	var flagInventoryType string
@@ -133,11 +135,13 @@ func newListingsListCmd(flags *rootFlags) *cobra.Command {
 				"limit":                       fmt.Sprintf("%v", flagLimit),
 				"offset":                      fmt.Sprintf("%v", flagOffset),
 				"sort":                        fmt.Sprintf("%v", flagSort),
+				"fields":                      fmt.Sprintf("%v", flagFields),
 				"make":                        fmt.Sprintf("%v", flagMake),
 				"model":                       fmt.Sprintf("%v", flagModel),
 				"trim":                        fmt.Sprintf("%v", flagTrim),
 				"year":                        fmt.Sprintf("%v", flagYear),
 				"state":                       fmt.Sprintf("%v", flagState),
+				"dealer_id":                   fmt.Sprintf("%v", flagDealerId),
 				"dealer_type":                 fmt.Sprintf("%v", flagDealerType),
 				"in_transit":                  fmt.Sprintf("%v", flagInTransit),
 				"inventory_type":              fmt.Sprintf("%v", flagInventoryType),
@@ -232,11 +236,13 @@ func newListingsListCmd(flags *rootFlags) *cobra.Command {
 	cmd.Flags().StringVar(&flagLimit, "limit", "", "Page size as an integer string. Defaults to 50; maximum 100.")
 	cmd.Flags().StringVar(&flagOffset, "offset", "", "Zero-based page offset as an integer string. Defaults to 0.")
 	cmd.Flags().StringVar(&flagSort, "sort", "", "Sort order. Use field names with optional - for descending, for example price or -price. Defaults to days_on_market,... (one of: days_on_market, -days_on_market, price, -price, miles, -miles, msrp, -msrp, discount, -discount, distance)")
+	cmd.Flags().StringVar(&flagFields, "fields", "", "Comma-separated public listing summary fields to return. id and vin are always returned. Use default to include the...")
 	cmd.Flags().StringVar(&flagMake, "make", "", "Comma-separated make names or slugs, for example toyota,honda.")
 	cmd.Flags().StringVar(&flagModel, "model", "", "Comma-separated model names or slugs. Combine with make when possible for narrower results.")
 	cmd.Flags().StringVar(&flagTrim, "trim", "", "Comma-separated trim names.")
 	cmd.Flags().StringVar(&flagYear, "year", "", "Comma-separated model years, for example 2023,2024.")
 	cmd.Flags().StringVar(&flagState, "state", "", "Comma-separated two-letter dealer states, for example CA,TX.")
+	cmd.Flags().StringVar(&flagDealerId, "dealer-id", "", "Comma-separated dealer UUIDs. Accepts up to 50 dealer IDs and uses dealer-filtered listing metering.")
 	cmd.Flags().StringVar(&flagDealerType, "dealer-type", "", "Comma-separated dealer types, for example franchise,independent.")
 	cmd.Flags().StringVar(&flagInTransit, "in-transit", "", "Whether to return in-transit/build inventory or only stock inventory. (one of: true, false)")
 	cmd.Flags().StringVar(&flagInventoryType, "inventory-type", "", "Comma-separated inventory classes such as new,used,certified.")

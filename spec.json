@@ -59,6 +59,16 @@
             "description": "Sort order. Use field names with optional - for descending, for example price or -price. Defaults to days_on_market, which returns newest listings first. discount returns best discount from MSRP first. distance requires postal_code or latitude and longitude."
           },
           {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "Comma-separated public listing summary fields to return. id and vin are always returned. Use default to include the default listing summary fieldset plus selected extras. Unknown fields are rejected. Supported fields: default, id, vin, year, make, model, trim, exterior_color, interior_color, base_exterior_color, base_interior_color, msrp, price, miles, days_on_market, status, inventory_status, inventory_type, stock_number, vdp_url, dealer_id, dealer_name, city, state, latitude, longitude, distance_miles, photo_urls."
+            },
+            "required": false,
+            "description": "Comma-separated public listing summary fields to return. id and vin are always returned. Use default to include the default listing summary fieldset plus selected extras. Unknown fields are rejected. Supported fields: default, id, vin, year, make, model, trim, exterior_color, interior_color, base_exterior_color, base_interior_color, msrp, price, miles, days_on_market, status, inventory_status, inventory_type, stock_number, vdp_url, dealer_id, dealer_name, city, state, latitude, longitude, distance_miles, photo_urls."
+          },
+          {
             "name": "make",
             "in": "query",
             "schema": {
@@ -107,6 +117,16 @@
             },
             "required": false,
             "description": "Comma-separated two-letter dealer states, for example CA,TX."
+          },
+          {
+            "name": "dealer_id",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "Comma-separated dealer UUIDs. Accepts up to 50 dealer IDs and uses dealer-filtered listing metering."
+            },
+            "required": false,
+            "description": "Comma-separated dealer UUIDs. Accepts up to 50 dealer IDs and uses dealer-filtered listing metering."
           },
           {
             "name": "dealer_type",
@@ -701,27 +721,7 @@
                         "type": "object",
                         "required": [
                           "id",
-                          "vin",
-                          "year",
-                          "make",
-                          "model",
-                          "trim",
-                          "price",
-                          "miles",
-                          "days_on_market",
-                          "status",
-                          "inventory_status",
-                          "inventory_type",
-                          "stock_number",
-                          "vdp_url",
-                          "dealer_id",
-                          "dealer_name",
-                          "city",
-                          "state",
-                          "latitude",
-                          "longitude",
-                          "distance_miles",
-                          "photo_urls"
+                          "vin"
                         ],
                         "properties": {
                           "id": {
@@ -775,6 +775,61 @@
                               }
                             ],
                             "description": "Trim or package label when available."
+                          },
+                          "exterior_color": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "Exterior color."
+                          },
+                          "interior_color": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "Interior color."
+                          },
+                          "base_exterior_color": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "Normalized exterior color."
+                          },
+                          "base_interior_color": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "Normalized interior color."
+                          },
+                          "msrp": {
+                            "anyOf": [
+                              {
+                                "type": "number"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "Combined MSRP in whole dollars when available."
                           },
                           "price": {
                             "anyOf": [
@@ -1296,6 +1351,16 @@
             },
             "required": false,
             "description": "Comma-separated two-letter dealer states to apply before counting facet buckets."
+          },
+          {
+            "name": "dealer_id",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "Comma-separated dealer UUIDs to apply before counting facet buckets. Accepts up to 50 dealer IDs."
+            },
+            "required": false,
+            "description": "Comma-separated dealer UUIDs to apply before counting facet buckets. Accepts up to 50 dealer IDs."
           },
           {
             "name": "dealer_type",
@@ -5129,6 +5194,16 @@
             "description": "Sort order. Use field names with optional - for descending, for example price or -price. Defaults to days_on_market, which returns newest listings first. discount returns best discount from MSRP first. distance requires postal_code or latitude and longitude."
           },
           {
+            "name": "fields",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "Comma-separated public listing summary fields to return. id and vin are always returned. Use default to include the default listing summary fieldset plus selected extras. Unknown fields are rejected. Supported fields: default, id, vin, year, make, model, trim, exterior_color, interior_color, base_exterior_color, base_interior_color, msrp, price, miles, days_on_market, status, inventory_status, inventory_type, stock_number, vdp_url, dealer_id, dealer_name, city, state, latitude, longitude, distance_miles, photo_urls."
+            },
+            "required": false,
+            "description": "Comma-separated public listing summary fields to return. id and vin are always returned. Use default to include the default listing summary fieldset plus selected extras. Unknown fields are rejected. Supported fields: default, id, vin, year, make, model, trim, exterior_color, interior_color, base_exterior_color, base_interior_color, msrp, price, miles, days_on_market, status, inventory_status, inventory_type, stock_number, vdp_url, dealer_id, dealer_name, city, state, latitude, longitude, distance_miles, photo_urls."
+          },
+          {
             "name": "make",
             "in": "query",
             "schema": {
@@ -5177,6 +5252,16 @@
             },
             "required": false,
             "description": "Comma-separated two-letter dealer states, for example CA,TX."
+          },
+          {
+            "name": "dealer_id",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "Comma-separated dealer UUIDs. Accepts up to 50 dealer IDs and uses dealer-filtered listing metering."
+            },
+            "required": false,
+            "description": "Comma-separated dealer UUIDs. Accepts up to 50 dealer IDs and uses dealer-filtered listing metering."
           },
           {
             "name": "dealer_type",
@@ -5771,27 +5856,7 @@
                         "type": "object",
                         "required": [
                           "id",
-                          "vin",
-                          "year",
-                          "make",
-                          "model",
-                          "trim",
-                          "price",
-                          "miles",
-                          "days_on_market",
-                          "status",
-                          "inventory_status",
-                          "inventory_type",
-                          "stock_number",
-                          "vdp_url",
-                          "dealer_id",
-                          "dealer_name",
-                          "city",
-                          "state",
-                          "latitude",
-                          "longitude",
-                          "distance_miles",
-                          "photo_urls"
+                          "vin"
                         ],
                         "properties": {
                           "id": {
@@ -5845,6 +5910,61 @@
                               }
                             ],
                             "description": "Trim or package label when available."
+                          },
+                          "exterior_color": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "Exterior color."
+                          },
+                          "interior_color": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "Interior color."
+                          },
+                          "base_exterior_color": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "Normalized exterior color."
+                          },
+                          "base_interior_color": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "Normalized interior color."
+                          },
+                          "msrp": {
+                            "anyOf": [
+                              {
+                                "type": "number"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "Combined MSRP in whole dollars when available."
                           },
                           "price": {
                             "anyOf": [
@@ -6340,6 +6460,8 @@
                             "enum": [
                               "listing_search",
                               "listing_search_historical",
+                              "listing_search_dealer_filtered",
+                              "listing_search_dealer_filtered_historical",
                               "dealer_inventory_search",
                               "dealer_inventory_search_historical",
                               "facet_counts",

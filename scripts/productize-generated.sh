@@ -73,7 +73,7 @@ fi
 # Keep product-specific root/client behavior that Printing Press regeneration
 # currently resets.
 if [ -f internal/cli/root.go ]; then
-  perl -0pi -e 's/var version = "1\.0\.0"/var version = "1.0.15"/' internal/cli/root.go
+  perl -0pi -e 's/var version = "1\.0\.0"/var version = "1.0.16"/' internal/cli/root.go
   perl -0pi -e 's/(\tcsv\s+bool\n)(\tplain\s+bool)/$1\tmarkdown      bool\n$2/' internal/cli/root.go
   perl -0pi -e 's/(\tc\.NoCache = f\.noCache\n)(\treturn c, nil)/$1\tc.UserAgent = "visor-cli\/" + version\n\tc.Telemetry = f.telemetryHeaders()\n$2/' internal/cli/root.go
   if ! rg -q 'func \(f \*rootFlags\) telemetryHeaders' internal/cli/root.go; then
@@ -95,7 +95,7 @@ if [ -f internal/client/client.go ]; then
 fi
 
 if [ -f cmd/visor-mcp/main.go ]; then
-  perl -0pi -e 's/"1\.0\.0"/"1.0.15"/' cmd/visor-mcp/main.go
+  perl -0pi -e 's/"1\.0\.0"/"1.0.16"/' cmd/visor-mcp/main.go
 fi
 
 if [ -f internal/mcp/tools.go ]; then
@@ -123,6 +123,19 @@ done
 if [ -f internal/cli/dealers_listings_dealers.go ]; then
   perl -0pi -e 's/Use:\s+"dealers <dealer_id>",\n\s+Aliases: \[\]string\{"get"\},/Use:   "list <dealer_id>",\n\t\tAliases: []string{"dealers", "get"},/' internal/cli/dealers_listings_dealers.go
   perl -0pi -e 's/visor dealers listings dealers 550e8400-e29b-41d4-a716-446655440000/visor dealers listings list 550e8400-e29b-41d4-a716-446655440000/' internal/cli/dealers_listings_dealers.go
+  perl -0pi -e 's/\n\tvar flagDealerId string//' internal/cli/dealers_listings_dealers.go
+  perl -0pi -e 's/\n\t\t\t\t"dealer_id":\s+fmt\.Sprintf\("%v", flagDealerId\),//' internal/cli/dealers_listings_dealers.go
+  perl -0pi -e 's/\n\tcmd\.Flags\(\)\.StringVar\(&flagDealerId, "dealer-id", "", "Comma-separated dealer UUIDs\. Accepts up to 50 dealer IDs and uses dealer-filtered listing metering\."\)//' internal/cli/dealers_listings_dealers.go
+fi
+
+# The dealer inventory endpoint has a path dealer_id. The upstream shared
+# listing filter also includes query dealer_id, which collides in generated
+# MCP tool names. Keep the path argument for this endpoint and leave query
+# dealer_id available on the top-level listings/facets commands.
+if [ -f internal/mcp/tools.go ]; then
+  perl -0pi -e 's/Required: dealer_id\. Optional: limit, offset, sort \(plus 63 more\)\./Required: dealer_id. Optional: limit, offset, sort (plus 62 more)./' internal/mcp/tools.go
+  perl -0pi -e 's/\n\t\t\tmcplib\.WithString\("dealer_id", mcplib\.Description\("Comma-separated dealer UUIDs\. Accepts up to 50 dealer IDs and uses dealer-filtered listing metering\."\)\),//' internal/mcp/tools.go
+  perl -0pi -e 's/, \{PublicName: "dealer_id", WireName: "dealer_id", Location: "path"\}, \{PublicName: "dealer_type"/, {PublicName: "dealer_type"/' internal/mcp/tools.go
 fi
 
 # Current Visor compatibility patch: generated sync otherwise sends generic params
