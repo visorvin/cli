@@ -56,7 +56,7 @@ func TestCheckCLICompatibilityParsesResponseWithoutAuth(t *testing.T) {
 func TestDoctorJSONIncludesCompatibilityAndFreshness(t *testing.T) {
 	origFetch := fetchLatestCLIRelease
 	fetchLatestCLIRelease = func(context.Context, *http.Client) (string, string, error) {
-		return "1.0.17", "https://github.com/visorvin/cli/releases/tag/v1.0.17", nil
+		return "1.0.18", "https://github.com/visorvin/cli/releases/tag/v1.0.18", nil
 	}
 	defer func() { fetchLatestCLIRelease = origFetch }()
 
@@ -94,7 +94,7 @@ func TestDoctorJSONIncludesCompatibilityAndFreshness(t *testing.T) {
 		t.Fatalf("release_freshness = %v", report["release_freshness"])
 	}
 	details, ok := report["release_freshness_details"].(map[string]any)
-	if !ok || details["latest_version"] != "1.0.17" {
+	if !ok || details["latest_version"] != "1.0.18" {
 		t.Fatalf("release_freshness_details = %#v", report["release_freshness_details"])
 	}
 }

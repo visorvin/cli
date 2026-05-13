@@ -73,7 +73,7 @@ fi
 # Keep product-specific root/client behavior that Printing Press regeneration
 # currently resets.
 if [ -f internal/cli/root.go ]; then
-  perl -0pi -e 's/var version = "1\.0\.0"/var version = "1.0.16"/' internal/cli/root.go
+  perl -0pi -e 's/var version = "1\.0\.0"/var version = "1.0.17"/' internal/cli/root.go
   perl -0pi -e 's/(\tcsv\s+bool\n)(\tplain\s+bool)/$1\tmarkdown      bool\n$2/' internal/cli/root.go
   perl -0pi -e 's/(\tc\.NoCache = f\.noCache\n)(\treturn c, nil)/$1\tc.UserAgent = "visor-cli\/" + version\n\tc.Telemetry = f.telemetryHeaders()\n$2/' internal/cli/root.go
   if ! rg -q 'func \(f \*rootFlags\) telemetryHeaders' internal/cli/root.go; then
@@ -95,14 +95,14 @@ if [ -f internal/client/client.go ]; then
 fi
 
 if [ -f cmd/visor-mcp/main.go ]; then
-  perl -0pi -e 's/"1\.0\.0"/"1.0.16"/' cmd/visor-mcp/main.go
+  perl -0pi -e 's/"1\.0\.0"/"1.0.17"/' cmd/visor-mcp/main.go
 fi
 
 if [ -f internal/mcp/tools.go ]; then
   if ! rg -q 'c.UserAgent = "visor-mcp"' internal/mcp/tools.go; then
     perl -0pi -e 's/(\tc := client\.New\(cfg, 30\*time\.Second, 0\)\n)/$1\tc.UserAgent = "visor-mcp"\n\tc.Telemetry = map[string]string{\n\t\t"X-Visor-Client":      "mcp",\n\t\t"X-Visor-CLI-Context": "agent,mcp,json,compact",\n\t}\n/' internal/mcp/tools.go
   fi
-  perl -0pi -e 's/"name":\s+"usage",\n\t\t\t\t"description": "Manage usage",\n\t\t\t\t"endpoints":\s+\[\]string\{"public"\},\n\t\t\t\t"syncable":\s+true,\n\t\t\t\t"searchable":\s+true,/"name":        "usage",\n\t\t\t\t"description": "Manage usage",\n\t\t\t\t"endpoints":   []string{"public"},\n\t\t\t\t"syncable":    false,\n\t\t\t\t"searchable":  false,/' internal/mcp/tools.go
+  perl -0pi -e 's/"name":\s+"usage",\s+"description":\s+"Manage usage",\s+"endpoints":\s+\[\]string\{"public"\},\s+"syncable":\s+true,\s+"searchable":\s+true,/"name":        "usage",\n\t\t\t\t"description": "Manage usage",\n\t\t\t\t"endpoints":   []string{"public"},\n\t\t\t\t"syncable":    false,\n\t\t\t\t"searchable":  false,/s' internal/mcp/tools.go
 fi
 
 if [ -f internal/cli/which.go ]; then
@@ -133,7 +133,7 @@ fi
 # MCP tool names. Keep the path argument for this endpoint and leave query
 # dealer_id available on the top-level listings/facets commands.
 if [ -f internal/mcp/tools.go ]; then
-  perl -0pi -e 's/Required: dealer_id\. Optional: limit, offset, sort \(plus 63 more\)\./Required: dealer_id. Optional: limit, offset, sort (plus 62 more)./' internal/mcp/tools.go
+  perl -0pi -e 's/Required: dealer_id\. Optional: limit, offset, sort \(plus 64 more\)\./Required: dealer_id. Optional: limit, offset, sort (plus 63 more)./' internal/mcp/tools.go
   perl -0pi -e 's/\n\t\t\tmcplib\.WithString\("dealer_id", mcplib\.Description\("Comma-separated dealer UUIDs\. Accepts up to 50 dealer IDs and uses dealer-filtered listing metering\."\)\),//' internal/mcp/tools.go
   perl -0pi -e 's/, \{PublicName: "dealer_id", WireName: "dealer_id", Location: "path"\}, \{PublicName: "dealer_type"/, {PublicName: "dealer_type"/' internal/mcp/tools.go
 fi
@@ -157,7 +157,7 @@ if [ -f internal/cli/sync.go ]; then
 fi
 
 if [ -f internal/cli/channel_workflow.go ]; then
-  perl -0pi -e 's/\[\]string\{"dealers", "listings", "usage"\}/[]string{"dealers", "listings"}/' internal/cli/channel_workflow.go
+  perl -0pi -e 's/\[\]string\{\s*"dealers",\s*"listings",\s*"usage"\s*\}/[]string{"dealers", "listings"}/s' internal/cli/channel_workflow.go
 fi
 
 gofmt -w $(find cmd internal -type f -name '*.go')

@@ -63,10 +63,20 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "Comma-separated public listing summary fields to return. id and vin are always returned. Use default to include the default listing summary fieldset plus selected extras. Unknown fields are rejected. Supported fields: default, id, vin, year, make, model, trim, exterior_color, interior_color, base_exterior_color, base_interior_color, msrp, price, miles, days_on_market, status, inventory_status, inventory_type, stock_number, vdp_url, dealer_id, dealer_name, city, state, latitude, longitude, distance_miles, photo_urls."
+              "description": "Comma-separated public listing summary fields to return. id and vin are always returned. Use default to include the default listing summary fieldset plus selected extras. Unknown fields are rejected. Supported fields: default, id, vin, year, make, model, trim, version, body_type, drivetrain, fuel_type, powertrain_type, transmission, engine, cylinders, doors, seating_capacity, exterior_color, interior_color, base_exterior_color, base_interior_color, msrp, price, miles, days_on_market, status, inventory_status, inventory_type, stock_number, vdp_url, sold_date, dealer_id, dealer_name, city, state, latitude, longitude, distance_miles, photo_urls."
             },
             "required": false,
-            "description": "Comma-separated public listing summary fields to return. id and vin are always returned. Use default to include the default listing summary fieldset plus selected extras. Unknown fields are rejected. Supported fields: default, id, vin, year, make, model, trim, exterior_color, interior_color, base_exterior_color, base_interior_color, msrp, price, miles, days_on_market, status, inventory_status, inventory_type, stock_number, vdp_url, dealer_id, dealer_name, city, state, latitude, longitude, distance_miles, photo_urls."
+            "description": "Comma-separated public listing summary fields to return. id and vin are always returned. Use default to include the default listing summary fieldset plus selected extras. Unknown fields are rejected. Supported fields: default, id, vin, year, make, model, trim, version, body_type, drivetrain, fuel_type, powertrain_type, transmission, engine, cylinders, doors, seating_capacity, exterior_color, interior_color, base_exterior_color, base_interior_color, msrp, price, miles, days_on_market, status, inventory_status, inventory_type, stock_number, vdp_url, sold_date, dealer_id, dealer_name, city, state, latitude, longitude, distance_miles, photo_urls."
+          },
+          {
+            "name": "include",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "Comma-separated optional expansions. Supported value: price_history."
+            },
+            "required": false,
+            "description": "Comma-separated optional expansions. Supported value: price_history."
           },
           {
             "name": "make",
@@ -776,6 +786,116 @@
                             ],
                             "description": "Trim or package label when available."
                           },
+                          "version": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "Vehicle version label."
+                          },
+                          "body_type": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "Body type."
+                          },
+                          "drivetrain": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "Drivetrain."
+                          },
+                          "fuel_type": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "Fuel type."
+                          },
+                          "powertrain_type": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "Powertrain type."
+                          },
+                          "transmission": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "Transmission."
+                          },
+                          "engine": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "Engine description."
+                          },
+                          "cylinders": {
+                            "anyOf": [
+                              {
+                                "type": "number"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "Cylinder count."
+                          },
+                          "doors": {
+                            "anyOf": [
+                              {
+                                "type": "number"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "Door count."
+                          },
+                          "seating_capacity": {
+                            "anyOf": [
+                              {
+                                "type": "number"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "Seating capacity."
+                          },
                           "exterior_color": {
                             "anyOf": [
                               {
@@ -913,6 +1033,17 @@
                             ],
                             "description": "Vehicle detail page URL when available."
                           },
+                          "sold_date": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "Best observed date the listing exited active inventory as sold. Null for active inventory and when unavailable."
+                          },
                           "dealer_id": {
                             "anyOf": [
                               {
@@ -996,6 +1127,47 @@
                               "type": "string"
                             },
                             "description": "Listing photo URLs, ordered with the primary image first when available."
+                          },
+                          "price_history": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "required": [
+                                "changed_at",
+                                "price_before",
+                                "price_after"
+                              ],
+                              "properties": {
+                                "changed_at": {
+                                  "type": "string",
+                                  "description": "Timestamp of the price change."
+                                },
+                                "price_before": {
+                                  "anyOf": [
+                                    {
+                                      "type": "number"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ],
+                                  "description": "Previous listed price in whole dollars."
+                                },
+                                "price_after": {
+                                  "anyOf": [
+                                    {
+                                      "type": "number"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ],
+                                  "description": "New listed price in whole dollars."
+                                }
+                              },
+                              "additionalProperties": false
+                            },
+                            "description": "Observed price changes when include=price_history is requested."
                           }
                         },
                         "additionalProperties": false,
@@ -1056,7 +1228,7 @@
             },
             "headers": {
               "X-Usage-Class": {
-                "description": "Metering class used for the request, for example listing_search, facet_counts_historical, vehicle_detail_enriched, or dealer_lookup.",
+                "description": "Metering class used for the request, for example listing_search, listing_search_enriched, facet_counts_historical, vehicle_detail_enriched, or dealer_lookup.",
                 "schema": {
                   "type": "string"
                 }
@@ -2215,7 +2387,7 @@
             },
             "headers": {
               "X-Usage-Class": {
-                "description": "Metering class used for the request, for example listing_search, facet_counts_historical, vehicle_detail_enriched, or dealer_lookup.",
+                "description": "Metering class used for the request, for example listing_search, listing_search_enriched, facet_counts_historical, vehicle_detail_enriched, or dealer_lookup.",
                 "schema": {
                   "type": "string"
                 }
@@ -2468,6 +2640,7 @@
                         "photo_urls",
                         "photo_url_primary",
                         "inventory_date",
+                        "sold_date",
                         "last_checked_at",
                         "dealer",
                         "vehicle",
@@ -2592,6 +2765,17 @@
                             }
                           ],
                           "description": "Date the listing entered inventory when available."
+                        },
+                        "sold_date": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "description": "Best observed date the listing exited active inventory as sold. Null for active or missing inventory and when unavailable."
                         },
                         "last_checked_at": {
                           "anyOf": [
@@ -3102,7 +3286,7 @@
             },
             "headers": {
               "X-Usage-Class": {
-                "description": "Metering class used for the request, for example listing_search, facet_counts_historical, vehicle_detail_enriched, or dealer_lookup.",
+                "description": "Metering class used for the request, for example listing_search, listing_search_enriched, facet_counts_historical, vehicle_detail_enriched, or dealer_lookup.",
                 "schema": {
                   "type": "string"
                 }
@@ -3387,6 +3571,7 @@
                                 "photo_urls",
                                 "photo_url_primary",
                                 "inventory_date",
+                                "sold_date",
                                 "last_checked_at",
                                 "dealer",
                                 "price_history"
@@ -3497,6 +3682,17 @@
                                     }
                                   ],
                                   "description": "Date the latest listing entered inventory when available."
+                                },
+                                "sold_date": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ],
+                                  "description": "Best observed date the listing exited active inventory as sold. Null for active or missing inventory and when unavailable."
                                 },
                                 "last_checked_at": {
                                   "anyOf": [
@@ -3992,7 +4188,7 @@
             },
             "headers": {
               "X-Usage-Class": {
-                "description": "Metering class used for the request, for example listing_search, facet_counts_historical, vehicle_detail_enriched, or dealer_lookup.",
+                "description": "Metering class used for the request, for example listing_search, listing_search_enriched, facet_counts_historical, vehicle_detail_enriched, or dealer_lookup.",
                 "schema": {
                   "type": "string"
                 }
@@ -4479,7 +4675,7 @@
             },
             "headers": {
               "X-Usage-Class": {
-                "description": "Metering class used for the request, for example listing_search, facet_counts_historical, vehicle_detail_enriched, or dealer_lookup.",
+                "description": "Metering class used for the request, for example listing_search, listing_search_enriched, facet_counts_historical, vehicle_detail_enriched, or dealer_lookup.",
                 "schema": {
                   "type": "string"
                 }
@@ -4930,7 +5126,7 @@
             },
             "headers": {
               "X-Usage-Class": {
-                "description": "Metering class used for the request, for example listing_search, facet_counts_historical, vehicle_detail_enriched, or dealer_lookup.",
+                "description": "Metering class used for the request, for example listing_search, listing_search_enriched, facet_counts_historical, vehicle_detail_enriched, or dealer_lookup.",
                 "schema": {
                   "type": "string"
                 }
@@ -5198,10 +5394,20 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "Comma-separated public listing summary fields to return. id and vin are always returned. Use default to include the default listing summary fieldset plus selected extras. Unknown fields are rejected. Supported fields: default, id, vin, year, make, model, trim, exterior_color, interior_color, base_exterior_color, base_interior_color, msrp, price, miles, days_on_market, status, inventory_status, inventory_type, stock_number, vdp_url, dealer_id, dealer_name, city, state, latitude, longitude, distance_miles, photo_urls."
+              "description": "Comma-separated public listing summary fields to return. id and vin are always returned. Use default to include the default listing summary fieldset plus selected extras. Unknown fields are rejected. Supported fields: default, id, vin, year, make, model, trim, version, body_type, drivetrain, fuel_type, powertrain_type, transmission, engine, cylinders, doors, seating_capacity, exterior_color, interior_color, base_exterior_color, base_interior_color, msrp, price, miles, days_on_market, status, inventory_status, inventory_type, stock_number, vdp_url, sold_date, dealer_id, dealer_name, city, state, latitude, longitude, distance_miles, photo_urls."
             },
             "required": false,
-            "description": "Comma-separated public listing summary fields to return. id and vin are always returned. Use default to include the default listing summary fieldset plus selected extras. Unknown fields are rejected. Supported fields: default, id, vin, year, make, model, trim, exterior_color, interior_color, base_exterior_color, base_interior_color, msrp, price, miles, days_on_market, status, inventory_status, inventory_type, stock_number, vdp_url, dealer_id, dealer_name, city, state, latitude, longitude, distance_miles, photo_urls."
+            "description": "Comma-separated public listing summary fields to return. id and vin are always returned. Use default to include the default listing summary fieldset plus selected extras. Unknown fields are rejected. Supported fields: default, id, vin, year, make, model, trim, version, body_type, drivetrain, fuel_type, powertrain_type, transmission, engine, cylinders, doors, seating_capacity, exterior_color, interior_color, base_exterior_color, base_interior_color, msrp, price, miles, days_on_market, status, inventory_status, inventory_type, stock_number, vdp_url, sold_date, dealer_id, dealer_name, city, state, latitude, longitude, distance_miles, photo_urls."
+          },
+          {
+            "name": "include",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "Comma-separated optional expansions. Supported value: price_history."
+            },
+            "required": false,
+            "description": "Comma-separated optional expansions. Supported value: price_history."
           },
           {
             "name": "make",
@@ -5911,6 +6117,116 @@
                             ],
                             "description": "Trim or package label when available."
                           },
+                          "version": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "Vehicle version label."
+                          },
+                          "body_type": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "Body type."
+                          },
+                          "drivetrain": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "Drivetrain."
+                          },
+                          "fuel_type": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "Fuel type."
+                          },
+                          "powertrain_type": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "Powertrain type."
+                          },
+                          "transmission": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "Transmission."
+                          },
+                          "engine": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "Engine description."
+                          },
+                          "cylinders": {
+                            "anyOf": [
+                              {
+                                "type": "number"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "Cylinder count."
+                          },
+                          "doors": {
+                            "anyOf": [
+                              {
+                                "type": "number"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "Door count."
+                          },
+                          "seating_capacity": {
+                            "anyOf": [
+                              {
+                                "type": "number"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "Seating capacity."
+                          },
                           "exterior_color": {
                             "anyOf": [
                               {
@@ -6048,6 +6364,17 @@
                             ],
                             "description": "Vehicle detail page URL when available."
                           },
+                          "sold_date": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "Best observed date the listing exited active inventory as sold. Null for active inventory and when unavailable."
+                          },
                           "dealer_id": {
                             "anyOf": [
                               {
@@ -6131,6 +6458,47 @@
                               "type": "string"
                             },
                             "description": "Listing photo URLs, ordered with the primary image first when available."
+                          },
+                          "price_history": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "required": [
+                                "changed_at",
+                                "price_before",
+                                "price_after"
+                              ],
+                              "properties": {
+                                "changed_at": {
+                                  "type": "string",
+                                  "description": "Timestamp of the price change."
+                                },
+                                "price_before": {
+                                  "anyOf": [
+                                    {
+                                      "type": "number"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ],
+                                  "description": "Previous listed price in whole dollars."
+                                },
+                                "price_after": {
+                                  "anyOf": [
+                                    {
+                                      "type": "number"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ],
+                                  "description": "New listed price in whole dollars."
+                                }
+                              },
+                              "additionalProperties": false
+                            },
+                            "description": "Observed price changes when include=price_history is requested."
                           }
                         },
                         "additionalProperties": false,
@@ -6191,7 +6559,7 @@
             },
             "headers": {
               "X-Usage-Class": {
-                "description": "Metering class used for the request, for example listing_search, facet_counts_historical, vehicle_detail_enriched, or dealer_lookup.",
+                "description": "Metering class used for the request, for example listing_search, listing_search_enriched, facet_counts_historical, vehicle_detail_enriched, or dealer_lookup.",
                 "schema": {
                   "type": "string"
                 }
@@ -6462,6 +6830,7 @@
                               "listing_search_historical",
                               "listing_search_dealer_filtered",
                               "listing_search_dealer_filtered_historical",
+                              "listing_search_enriched",
                               "dealer_inventory_search",
                               "dealer_inventory_search_historical",
                               "facet_counts",
