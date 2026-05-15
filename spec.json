@@ -63,20 +63,20 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "Comma-separated public listing summary fields to return. id and vin are always returned. Use default to include the default listing summary fieldset plus selected extras. Unknown fields are rejected. Supported fields: default, id, vin, year, make, model, trim, version, body_type, drivetrain, fuel_type, powertrain_type, transmission, engine, cylinders, doors, seating_capacity, exterior_color, interior_color, base_exterior_color, base_interior_color, msrp, price, miles, days_on_market, status, inventory_status, inventory_type, stock_number, vdp_url, sold_date, dealer_id, dealer_name, city, state, latitude, longitude, distance_miles, photo_urls."
+              "description": "Comma-separated public listing summary fields to return. id and vin are always returned. Use default to include the default listing summary fieldset plus selected extras. Unknown fields are rejected. Supported fields: default, id, vin, year, make, model, trim, version, body_type, drivetrain, fuel_type, powertrain_type, transmission, engine, cylinders, doors, seating_capacity, exterior_color, interior_color, base_exterior_color, base_interior_color, msrp, discount_from_msrp, price, miles, days_on_market, status, inventory_status, inventory_type, stock_number, vdp_url, sold_date, dealer_id, dealer_name, city, state, latitude, longitude, distance_miles, photo_urls, features, options_packages."
             },
             "required": false,
-            "description": "Comma-separated public listing summary fields to return. id and vin are always returned. Use default to include the default listing summary fieldset plus selected extras. Unknown fields are rejected. Supported fields: default, id, vin, year, make, model, trim, version, body_type, drivetrain, fuel_type, powertrain_type, transmission, engine, cylinders, doors, seating_capacity, exterior_color, interior_color, base_exterior_color, base_interior_color, msrp, price, miles, days_on_market, status, inventory_status, inventory_type, stock_number, vdp_url, sold_date, dealer_id, dealer_name, city, state, latitude, longitude, distance_miles, photo_urls."
+            "description": "Comma-separated public listing summary fields to return. id and vin are always returned. Use default to include the default listing summary fieldset plus selected extras. Unknown fields are rejected. Supported fields: default, id, vin, year, make, model, trim, version, body_type, drivetrain, fuel_type, powertrain_type, transmission, engine, cylinders, doors, seating_capacity, exterior_color, interior_color, base_exterior_color, base_interior_color, msrp, discount_from_msrp, price, miles, days_on_market, status, inventory_status, inventory_type, stock_number, vdp_url, sold_date, dealer_id, dealer_name, city, state, latitude, longitude, distance_miles, photo_urls, features, options_packages."
           },
           {
             "name": "include",
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "Comma-separated optional expansions. Supported value: price_history."
+              "description": "Comma-separated optional expansions. Supported values are price_history and options."
             },
             "required": false,
-            "description": "Comma-separated optional expansions. Supported value: price_history."
+            "description": "Comma-separated optional expansions. Supported values are price_history and options."
           },
           {
             "name": "make",
@@ -951,6 +951,17 @@
                             ],
                             "description": "Combined MSRP in whole dollars when available."
                           },
+                          "discount_from_msrp": {
+                            "anyOf": [
+                              {
+                                "type": "number"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "Fractional delta from MSRP when available. Negative values are below MSRP, for example -0.12 means 12% below MSRP."
+                          },
                           "price": {
                             "anyOf": [
                               {
@@ -1128,6 +1139,20 @@
                             },
                             "description": "Listing photo URLs, ordered with the primary image first when available."
                           },
+                          "features": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            },
+                            "description": "Feature values for this listing when requested through fields."
+                          },
+                          "options_packages": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            },
+                            "description": "Manufacturer option/package codes for this listing when requested through fields."
+                          },
                           "price_history": {
                             "type": "array",
                             "items": {
@@ -1168,6 +1193,41 @@
                               "additionalProperties": false
                             },
                             "description": "Observed price changes when include=price_history is requested."
+                          },
+                          "options": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "required": [
+                                "code",
+                                "name",
+                                "msrp"
+                              ],
+                              "properties": {
+                                "code": {
+                                  "type": "string",
+                                  "description": "Manufacturer option code."
+                                },
+                                "name": {
+                                  "type": "string",
+                                  "description": "Option name."
+                                },
+                                "msrp": {
+                                  "anyOf": [
+                                    {
+                                      "type": "number"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ],
+                                  "description": "Option MSRP in whole dollars when available."
+                                }
+                              },
+                              "additionalProperties": false,
+                              "description": "Listing option decoded from option/package codes."
+                            },
+                            "description": "Installed options decoded from option/package codes when include=options is requested."
                           }
                         },
                         "additionalProperties": false,
@@ -5394,20 +5454,20 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "Comma-separated public listing summary fields to return. id and vin are always returned. Use default to include the default listing summary fieldset plus selected extras. Unknown fields are rejected. Supported fields: default, id, vin, year, make, model, trim, version, body_type, drivetrain, fuel_type, powertrain_type, transmission, engine, cylinders, doors, seating_capacity, exterior_color, interior_color, base_exterior_color, base_interior_color, msrp, price, miles, days_on_market, status, inventory_status, inventory_type, stock_number, vdp_url, sold_date, dealer_id, dealer_name, city, state, latitude, longitude, distance_miles, photo_urls."
+              "description": "Comma-separated public listing summary fields to return. id and vin are always returned. Use default to include the default listing summary fieldset plus selected extras. Unknown fields are rejected. Supported fields: default, id, vin, year, make, model, trim, version, body_type, drivetrain, fuel_type, powertrain_type, transmission, engine, cylinders, doors, seating_capacity, exterior_color, interior_color, base_exterior_color, base_interior_color, msrp, discount_from_msrp, price, miles, days_on_market, status, inventory_status, inventory_type, stock_number, vdp_url, sold_date, dealer_id, dealer_name, city, state, latitude, longitude, distance_miles, photo_urls, features, options_packages."
             },
             "required": false,
-            "description": "Comma-separated public listing summary fields to return. id and vin are always returned. Use default to include the default listing summary fieldset plus selected extras. Unknown fields are rejected. Supported fields: default, id, vin, year, make, model, trim, version, body_type, drivetrain, fuel_type, powertrain_type, transmission, engine, cylinders, doors, seating_capacity, exterior_color, interior_color, base_exterior_color, base_interior_color, msrp, price, miles, days_on_market, status, inventory_status, inventory_type, stock_number, vdp_url, sold_date, dealer_id, dealer_name, city, state, latitude, longitude, distance_miles, photo_urls."
+            "description": "Comma-separated public listing summary fields to return. id and vin are always returned. Use default to include the default listing summary fieldset plus selected extras. Unknown fields are rejected. Supported fields: default, id, vin, year, make, model, trim, version, body_type, drivetrain, fuel_type, powertrain_type, transmission, engine, cylinders, doors, seating_capacity, exterior_color, interior_color, base_exterior_color, base_interior_color, msrp, discount_from_msrp, price, miles, days_on_market, status, inventory_status, inventory_type, stock_number, vdp_url, sold_date, dealer_id, dealer_name, city, state, latitude, longitude, distance_miles, photo_urls, features, options_packages."
           },
           {
             "name": "include",
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "Comma-separated optional expansions. Supported value: price_history."
+              "description": "Comma-separated optional expansions. Supported values are price_history and options."
             },
             "required": false,
-            "description": "Comma-separated optional expansions. Supported value: price_history."
+            "description": "Comma-separated optional expansions. Supported values are price_history and options."
           },
           {
             "name": "make",
@@ -6282,6 +6342,17 @@
                             ],
                             "description": "Combined MSRP in whole dollars when available."
                           },
+                          "discount_from_msrp": {
+                            "anyOf": [
+                              {
+                                "type": "number"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "Fractional delta from MSRP when available. Negative values are below MSRP, for example -0.12 means 12% below MSRP."
+                          },
                           "price": {
                             "anyOf": [
                               {
@@ -6459,6 +6530,20 @@
                             },
                             "description": "Listing photo URLs, ordered with the primary image first when available."
                           },
+                          "features": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            },
+                            "description": "Feature values for this listing when requested through fields."
+                          },
+                          "options_packages": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            },
+                            "description": "Manufacturer option/package codes for this listing when requested through fields."
+                          },
                           "price_history": {
                             "type": "array",
                             "items": {
@@ -6499,6 +6584,41 @@
                               "additionalProperties": false
                             },
                             "description": "Observed price changes when include=price_history is requested."
+                          },
+                          "options": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "required": [
+                                "code",
+                                "name",
+                                "msrp"
+                              ],
+                              "properties": {
+                                "code": {
+                                  "type": "string",
+                                  "description": "Manufacturer option code."
+                                },
+                                "name": {
+                                  "type": "string",
+                                  "description": "Option name."
+                                },
+                                "msrp": {
+                                  "anyOf": [
+                                    {
+                                      "type": "number"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ],
+                                  "description": "Option MSRP in whole dollars when available."
+                                }
+                              },
+                              "additionalProperties": false,
+                              "description": "Listing option decoded from option/package codes."
+                            },
+                            "description": "Installed options decoded from option/package codes when include=options is requested."
                           }
                         },
                         "additionalProperties": false,

@@ -239,7 +239,7 @@ func newListingsListCmd(flags *rootFlags) *cobra.Command {
 	cmd.Flags().StringVar(&flagOffset, "offset", "", "Zero-based page offset as an integer string. Defaults to 0.")
 	cmd.Flags().StringVar(&flagSort, "sort", "", "Sort order. Use field names with optional - for descending, for example price or -price. Defaults to days_on_market,... (one of: days_on_market, -days_on_market, price, -price, miles, -miles, msrp, -msrp, discount, -discount, distance)")
 	cmd.Flags().StringVar(&flagFields, "fields", "", "Comma-separated public listing summary fields to return. id and vin are always returned. Use default to include the...")
-	cmd.Flags().StringVar(&flagInclude, "include", "", "Comma-separated optional expansions. Supported value: price_history.")
+	cmd.Flags().StringVar(&flagInclude, "include", "", "Comma-separated optional expansions. Supported values are price_history and options.")
 	cmd.Flags().StringVar(&flagMake, "make", "", "Comma-separated make names or slugs, for example toyota,honda.")
 	cmd.Flags().StringVar(&flagModel, "model", "", "Comma-separated model names or slugs. Combine with make when possible for narrower results.")
 	cmd.Flags().StringVar(&flagTrim, "trim", "", "Comma-separated trim names.")

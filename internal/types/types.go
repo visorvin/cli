@@ -48,11 +48,13 @@ type ListingsDealersItem struct {
 	DaysOnMarket      string          `json:"days_on_market"`
 	DealerId          string          `json:"dealer_id"`
 	DealerName        string          `json:"dealer_name"`
+	DiscountFromMsrp  string          `json:"discount_from_msrp"`
 	DistanceMiles     string          `json:"distance_miles"`
 	Doors             string          `json:"doors"`
 	Drivetrain        string          `json:"drivetrain"`
 	Engine            string          `json:"engine"`
 	ExteriorColor     string          `json:"exterior_color"`
+	Features          json.RawMessage `json:"features"`
 	FuelType          string          `json:"fuel_type"`
 	Id                string          `json:"id"`
 	InteriorColor     string          `json:"interior_color"`
@@ -64,6 +66,8 @@ type ListingsDealersItem struct {
 	Miles             string          `json:"miles"`
 	Model             string          `json:"model"`
 	Msrp              string          `json:"msrp"`
+	Options           json.RawMessage `json:"options"`
+	OptionsPackages   json.RawMessage `json:"options_packages"`
 	PhotoUrls         json.RawMessage `json:"photo_urls"`
 	PowertrainType    string          `json:"powertrain_type"`
 	Price             string          `json:"price"`
@@ -95,11 +99,13 @@ type ListingsListItem struct {
 	DaysOnMarket      string          `json:"days_on_market"`
 	DealerId          string          `json:"dealer_id"`
 	DealerName        string          `json:"dealer_name"`
+	DiscountFromMsrp  string          `json:"discount_from_msrp"`
 	DistanceMiles     string          `json:"distance_miles"`
 	Doors             string          `json:"doors"`
 	Drivetrain        string          `json:"drivetrain"`
 	Engine            string          `json:"engine"`
 	ExteriorColor     string          `json:"exterior_color"`
+	Features          json.RawMessage `json:"features"`
 	FuelType          string          `json:"fuel_type"`
 	Id                string          `json:"id"`
 	InteriorColor     string          `json:"interior_color"`
@@ -111,6 +117,8 @@ type ListingsListItem struct {
 	Miles             string          `json:"miles"`
 	Model             string          `json:"model"`
 	Msrp              string          `json:"msrp"`
+	Options           json.RawMessage `json:"options"`
+	OptionsPackages   json.RawMessage `json:"options_packages"`
 	PhotoUrls         json.RawMessage `json:"photo_urls"`
 	PowertrainType    string          `json:"powertrain_type"`
 	Price             string          `json:"price"`
