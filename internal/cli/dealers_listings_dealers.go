@@ -23,7 +23,7 @@ func newDealersListingsDealersCmd(flags *rootFlags) *cobra.Command {
 	var flagYear string
 	var flagState string
 	var flagDealerType string
-	var flagInTransit string
+	var flagAvailabilityStatus string
 	var flagInventoryType string
 	var flagBodyType string
 	var flagTransmission string
@@ -103,19 +103,6 @@ func newDealersListingsDealersCmd(flags *rootFlags) *cobra.Command {
 					fmt.Fprintf(os.Stderr, "warning: --%s %q not in allowed set %v\n", "sort", flagSort, allowedSort)
 				}
 			}
-			if cmd.Flags().Changed("in-transit") {
-				allowedInTransit := []string{"true", "false"}
-				validInTransit := false
-				for _, v := range allowedInTransit {
-					if flagInTransit == v {
-						validInTransit = true
-						break
-					}
-				}
-				if !validInTransit {
-					fmt.Fprintf(os.Stderr, "warning: --%s %q not in allowed set %v\n", "in-transit", flagInTransit, allowedInTransit)
-				}
-			}
 			if cmd.Flags().Changed("inventory-status") {
 				allowedInventoryStatus := []string{"active", "sold"}
 				validInventoryStatus := false
@@ -148,7 +135,7 @@ func newDealersListingsDealersCmd(flags *rootFlags) *cobra.Command {
 				"year":                        fmt.Sprintf("%v", flagYear),
 				"state":                       fmt.Sprintf("%v", flagState),
 				"dealer_type":                 fmt.Sprintf("%v", flagDealerType),
-				"in_transit":                  fmt.Sprintf("%v", flagInTransit),
+				"availability_status":         fmt.Sprintf("%v", flagAvailabilityStatus),
 				"inventory_type":              fmt.Sprintf("%v", flagInventoryType),
 				"body_type":                   fmt.Sprintf("%v", flagBodyType),
 				"transmission":                fmt.Sprintf("%v", flagTransmission),
@@ -249,7 +236,7 @@ func newDealersListingsDealersCmd(flags *rootFlags) *cobra.Command {
 	cmd.Flags().StringVar(&flagYear, "year", "", "Comma-separated model years, for example 2023,2024.")
 	cmd.Flags().StringVar(&flagState, "state", "", "Comma-separated two-letter dealer states, for example CA,TX.")
 	cmd.Flags().StringVar(&flagDealerType, "dealer-type", "", "Comma-separated dealer types, for example franchise,independent.")
-	cmd.Flags().StringVar(&flagInTransit, "in-transit", "", "Whether to return in-transit/build inventory or only stock inventory. (one of: true, false)")
+	cmd.Flags().StringVar(&flagAvailabilityStatus, "availability-status", "", "Comma-separated availability statuses: stock, transit, build.")
 	cmd.Flags().StringVar(&flagInventoryType, "inventory-type", "", "Comma-separated inventory classes such as new,used,certified.")
 	cmd.Flags().StringVar(&flagBodyType, "body-type", "", "Comma-separated body types.")
 	cmd.Flags().StringVar(&flagTransmission, "transmission", "", "Comma-separated transmission values.")

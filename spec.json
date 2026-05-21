@@ -149,18 +149,14 @@
             "description": "Comma-separated dealer types, for example franchise,independent."
           },
           {
-            "name": "in_transit",
+            "name": "availability_status",
             "in": "query",
             "schema": {
               "type": "string",
-              "enum": [
-                "true",
-                "false"
-              ],
-              "description": "Whether to return in-transit/build inventory or only stock inventory."
+              "description": "Comma-separated availability statuses: stock, transit, build."
             },
             "required": false,
-            "description": "Whether to return in-transit/build inventory or only stock inventory."
+            "description": "Comma-separated availability statuses: stock, transit, build."
           },
           {
             "name": "inventory_type",
@@ -1493,10 +1489,10 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "Required comma-separated facet names to return. Supported facets: make, model, inventory_type, year, trim, version, base_exterior_color, exterior_color, base_interior_color, interior_color, seating_capacity, doors, engine, state, drivetrain, assembly_location, assembly_country, transmission, fuel_type, body_type, cylinders, dealer_type, in_transit, options_packages, features, keywords, price, msrp, miles, days_on_market."
+              "description": "Required comma-separated facet names to return. Supported facets: make, model, inventory_type, year, trim, version, base_exterior_color, exterior_color, base_interior_color, interior_color, seating_capacity, doors, engine, state, drivetrain, assembly_location, assembly_country, transmission, fuel_type, body_type, cylinders, dealer_type, availability_status, options_packages, features, keywords, price, msrp, miles, days_on_market."
             },
             "required": true,
-            "description": "Required comma-separated facet names to return. Supported facets: make, model, inventory_type, year, trim, version, base_exterior_color, exterior_color, base_interior_color, interior_color, seating_capacity, doors, engine, state, drivetrain, assembly_location, assembly_country, transmission, fuel_type, body_type, cylinders, dealer_type, in_transit, options_packages, features, keywords, price, msrp, miles, days_on_market."
+            "description": "Required comma-separated facet names to return. Supported facets: make, model, inventory_type, year, trim, version, base_exterior_color, exterior_color, base_interior_color, interior_color, seating_capacity, doors, engine, state, drivetrain, assembly_location, assembly_country, transmission, fuel_type, body_type, cylinders, dealer_type, availability_status, options_packages, features, keywords, price, msrp, miles, days_on_market."
           },
           {
             "name": "facet_value_limit",
@@ -1605,18 +1601,14 @@
             "description": "Comma-separated dealer types to apply before counting facet buckets."
           },
           {
-            "name": "in_transit",
+            "name": "availability_status",
             "in": "query",
             "schema": {
               "type": "string",
-              "enum": [
-                "true",
-                "false"
-              ],
-              "description": "Whether to count facets for in-transit/build inventory or stock inventory."
+              "description": "Comma-separated availability statuses to apply before counting facet buckets: stock, transit, build."
             },
             "required": false,
-            "description": "Whether to count facets for in-transit/build inventory or stock inventory."
+            "description": "Comma-separated availability statuses to apply before counting facet buckets: stock, transit, build."
           },
           {
             "name": "inventory_type",
@@ -2636,7 +2628,7 @@
             }
           }
         },
-        "description": "Returns categorical facets, numeric range facets, and stats for an explicit listing filter surface facet selection. Use facets=make,model,price. Supported facets: make, model, inventory_type, year, trim, version, base_exterior_color, exterior_color, base_interior_color, interior_color, seating_capacity, doors, engine, state, drivetrain, assembly_location, assembly_country, transmission, fuel_type, body_type, cylinders, dealer_type, in_transit, options_packages, features, keywords, price, msrp, miles, days_on_market.",
+        "description": "Returns categorical facets, numeric range facets, and stats for an explicit listing filter surface facet selection. Use facets=make,model,price. Supported facets: make, model, inventory_type, year, trim, version, base_exterior_color, exterior_color, base_interior_color, interior_color, seating_capacity, doors, engine, state, drivetrain, assembly_location, assembly_country, transmission, fuel_type, body_type, cylinders, dealer_type, availability_status, options_packages, features, keywords, price, msrp, miles, days_on_market.",
         "summary": "Filter facets"
       }
     },
@@ -5540,18 +5532,14 @@
             "description": "Comma-separated dealer types, for example franchise,independent."
           },
           {
-            "name": "in_transit",
+            "name": "availability_status",
             "in": "query",
             "schema": {
               "type": "string",
-              "enum": [
-                "true",
-                "false"
-              ],
-              "description": "Whether to return in-transit/build inventory or only stock inventory."
+              "description": "Comma-separated availability statuses: stock, transit, build."
             },
             "required": false,
-            "description": "Whether to return in-transit/build inventory or only stock inventory."
+            "description": "Comma-separated availability statuses: stock, transit, build."
           },
           {
             "name": "inventory_type",

@@ -23,7 +23,7 @@ func newFacetsPromotedCmd(flags *rootFlags) *cobra.Command {
 	var flagState string
 	var flagDealerId string
 	var flagDealerType string
-	var flagInTransit string
+	var flagAvailabilityStatus string
 	var flagInventoryType string
 	var flagBodyType string
 	var flagTransmission string
@@ -102,19 +102,6 @@ func newFacetsPromotedCmd(flags *rootFlags) *cobra.Command {
 					fmt.Fprintf(os.Stderr, "warning: --%s %q not in allowed set %v\n", "sort", flagSort, allowedSort)
 				}
 			}
-			if cmd.Flags().Changed("in-transit") {
-				allowedInTransit := []string{"true", "false"}
-				validInTransit := false
-				for _, v := range allowedInTransit {
-					if flagInTransit == v {
-						validInTransit = true
-						break
-					}
-				}
-				if !validInTransit {
-					fmt.Fprintf(os.Stderr, "warning: --%s %q not in allowed set %v\n", "in-transit", flagInTransit, allowedInTransit)
-				}
-			}
 			if cmd.Flags().Changed("inventory-status") {
 				allowedInventoryStatus := []string{"active", "sold"}
 				validInventoryStatus := false
@@ -168,8 +155,8 @@ func newFacetsPromotedCmd(flags *rootFlags) *cobra.Command {
 			if flagDealerType != "" {
 				params["dealer_type"] = fmt.Sprintf("%v", flagDealerType)
 			}
-			if flagInTransit != "" {
-				params["in_transit"] = fmt.Sprintf("%v", flagInTransit)
+			if flagAvailabilityStatus != "" {
+				params["availability_status"] = fmt.Sprintf("%v", flagAvailabilityStatus)
 			}
 			if flagInventoryType != "" {
 				params["inventory_type"] = fmt.Sprintf("%v", flagInventoryType)
@@ -389,7 +376,7 @@ func newFacetsPromotedCmd(flags *rootFlags) *cobra.Command {
 	cmd.Flags().StringVar(&flagState, "state", "", "Comma-separated two-letter dealer states to apply before counting facet buckets.")
 	cmd.Flags().StringVar(&flagDealerId, "dealer-id", "", "Comma-separated dealer UUIDs to apply before counting facet buckets. Accepts up to 50 dealer IDs.")
 	cmd.Flags().StringVar(&flagDealerType, "dealer-type", "", "Comma-separated dealer types to apply before counting facet buckets.")
-	cmd.Flags().StringVar(&flagInTransit, "in-transit", "", "Whether to count facets for in-transit/build inventory or stock inventory. (one of: true, false)")
+	cmd.Flags().StringVar(&flagAvailabilityStatus, "availability-status", "", "Comma-separated availability statuses to apply before counting facet buckets: stock, transit, build.")
 	cmd.Flags().StringVar(&flagInventoryType, "inventory-type", "", "Comma-separated inventory classes such as new,used,certified.")
 	cmd.Flags().StringVar(&flagBodyType, "body-type", "", "Comma-separated body types.")
 	cmd.Flags().StringVar(&flagTransmission, "transmission", "", "Comma-separated transmission values.")
