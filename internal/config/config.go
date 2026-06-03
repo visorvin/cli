@@ -80,18 +80,36 @@ func Load(configPath string) (*Config, error) {
 
 func (c *Config) AuthHeader() string {
 	if c.AuthHeaderVal != "" {
-		return c.AuthHeaderVal
+		return strings.TrimSpace(c.AuthHeaderVal)
 	}
 	// Env-var token wins over file-stored AccessToken (env > config convention).
 	if c.VisorApiKey != "" {
-		c.AuthSource = "env:VISOR_API_KEY"
-		return "Bearer " + c.VisorApiKey
+		if c.AuthSource == "" {
+			c.AuthSource = "config"
+		}
+		return bearerAuthHeader(c.VisorApiKey)
 	}
 	if c.AccessToken != "" {
 		c.AuthSource = "oauth2"
-		return "Bearer " + c.AccessToken
+		return bearerAuthHeader(c.AccessToken)
 	}
 	return ""
+}
+
+func NormalizeAPIToken(token string) string {
+	token = strings.TrimSpace(token)
+	if strings.HasPrefix(strings.ToLower(token), "bearer ") {
+		token = strings.TrimSpace(token[len("bearer "):])
+	}
+	return token
+}
+
+func bearerAuthHeader(token string) string {
+	token = NormalizeAPIToken(token)
+	if token == "" {
+		return ""
+	}
+	return "Bearer " + token
 }
 
 func applyAuthFormat(format string, replacements map[string]string) string {
@@ -117,6 +135,8 @@ func (c *Config) SaveTokens(clientID, clientSecret, accessToken, refreshToken st
 }
 
 func (c *Config) ClearTokens() error {
+	c.AuthHeaderVal = ""
+	c.VisorApiKey = ""
 	c.AccessToken = ""
 	c.RefreshToken = ""
 	c.TokenExpiry = time.Time{}

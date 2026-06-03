@@ -65,3 +65,56 @@ func TestAuthSetTokenStdinSavesConfig(t *testing.T) {
 		t.Fatalf("saved access token = %q, want test-token", cfg.AccessToken)
 	}
 }
+
+func TestAuthSetTokenStdinNormalizesBearerPrefix(t *testing.T) {
+	configPath := t.TempDir() + "/config.toml"
+	cmd := newAuthSetTokenCmd(&rootFlags{configPath: configPath})
+	cmd.SetIn(strings.NewReader("Bearer test-token\n"))
+	cmd.SetArgs([]string{"--stdin"})
+
+	if err := cmd.Execute(); err != nil {
+		t.Fatalf("auth set-token --stdin failed: %v", err)
+	}
+
+	cfg, err := config.Load(configPath)
+	if err != nil {
+		t.Fatalf("loading config: %v", err)
+	}
+	if cfg.AccessToken != "test-token" {
+		t.Fatalf("saved access token = %q, want test-token", cfg.AccessToken)
+	}
+	if got := cfg.AuthHeader(); got != "Bearer test-token" {
+		t.Fatalf("AuthHeader() = %q, want %q", got, "Bearer test-token")
+	}
+}
+
+func TestAuthSetTokenClearsLegacyAPIKey(t *testing.T) {
+	configPath := t.TempDir() + "/config.toml"
+	cfg := &config.Config{
+		Path:        configPath,
+		BaseURL:     "https://api.visor.vin",
+		VisorApiKey: "old-token",
+	}
+	if err := cfg.SaveTokens("", "", "", "", cfg.TokenExpiry); err != nil {
+		t.Fatalf("saving initial config: %v", err)
+	}
+
+	cmd := newAuthSetTokenCmd(&rootFlags{configPath: configPath})
+	cmd.SetIn(strings.NewReader("new-token\n"))
+	cmd.SetArgs([]string{"--stdin"})
+
+	if err := cmd.Execute(); err != nil {
+		t.Fatalf("auth set-token --stdin failed: %v", err)
+	}
+
+	loaded, err := config.Load(configPath)
+	if err != nil {
+		t.Fatalf("loading config: %v", err)
+	}
+	if loaded.VisorApiKey != "" {
+		t.Fatalf("legacy api key = %q, want empty", loaded.VisorApiKey)
+	}
+	if got := loaded.AuthHeader(); got != "Bearer new-token" {
+		t.Fatalf("AuthHeader() = %q, want %q", got, "Bearer new-token")
+	}
+}
