@@ -31,6 +31,7 @@ func newDealersListingsDealersCmd(flags *rootFlags) *cobra.Command {
 	var flagAssemblyLocation string
 	var flagAssemblyCountry string
 	var flagFuelType string
+	var flagPowertrainType string
 	var flagEngine string
 	var flagVersion string
 	var flagExteriorColor string
@@ -49,6 +50,10 @@ func newDealersListingsDealersCmd(flags *rootFlags) *cobra.Command {
 	var flagExcludeTrim string
 	var flagExcludeYear string
 	var flagExcludeState string
+	var flagExcludeInventoryType string
+	var flagExcludeBodyType string
+	var flagExcludeTransmission string
+	var flagExcludeDrivetrain string
 	var flagExcludeVersion string
 	var flagExcludeEngine string
 	var flagExcludeAssemblyLocation string
@@ -143,6 +148,7 @@ func newDealersListingsDealersCmd(flags *rootFlags) *cobra.Command {
 				"assembly_location":           fmt.Sprintf("%v", flagAssemblyLocation),
 				"assembly_country":            fmt.Sprintf("%v", flagAssemblyCountry),
 				"fuel_type":                   fmt.Sprintf("%v", flagFuelType),
+				"powertrain_type":             fmt.Sprintf("%v", flagPowertrainType),
 				"engine":                      fmt.Sprintf("%v", flagEngine),
 				"version":                     fmt.Sprintf("%v", flagVersion),
 				"exterior_color":              fmt.Sprintf("%v", flagExteriorColor),
@@ -161,6 +167,10 @@ func newDealersListingsDealersCmd(flags *rootFlags) *cobra.Command {
 				"exclude_trim":                fmt.Sprintf("%v", flagExcludeTrim),
 				"exclude_year":                fmt.Sprintf("%v", flagExcludeYear),
 				"exclude_state":               fmt.Sprintf("%v", flagExcludeState),
+				"exclude_inventory_type":      fmt.Sprintf("%v", flagExcludeInventoryType),
+				"exclude_body_type":           fmt.Sprintf("%v", flagExcludeBodyType),
+				"exclude_transmission":        fmt.Sprintf("%v", flagExcludeTransmission),
+				"exclude_drivetrain":          fmt.Sprintf("%v", flagExcludeDrivetrain),
 				"exclude_version":             fmt.Sprintf("%v", flagExcludeVersion),
 				"exclude_engine":              fmt.Sprintf("%v", flagExcludeEngine),
 				"exclude_assembly_location":   fmt.Sprintf("%v", flagExcludeAssemblyLocation),
@@ -228,7 +238,7 @@ func newDealersListingsDealersCmd(flags *rootFlags) *cobra.Command {
 	cmd.Flags().StringVar(&flagLimit, "limit", "", "Page size as an integer string. Defaults to 50; maximum 100.")
 	cmd.Flags().StringVar(&flagOffset, "offset", "", "Zero-based page offset as an integer string. Defaults to 0.")
 	cmd.Flags().StringVar(&flagSort, "sort", "", "Sort order. Use field names with optional - for descending, for example price or -price. Defaults to days_on_market,... (one of: days_on_market, -days_on_market, price, -price, miles, -miles, msrp, -msrp, discount, -discount, distance)")
-	cmd.Flags().StringVar(&flagFields, "fields", "", "Comma-separated public listing summary fields to return. id and vin are always returned. Use default to include the...")
+	cmd.Flags().StringVar(&flagFields, "fields", "", "Comma-separated public listing summary fields to return. This controls response projection only; filters such as...")
 	cmd.Flags().StringVar(&flagInclude, "include", "", "Comma-separated optional expansions. Supported values are price_history and options.")
 	cmd.Flags().StringVar(&flagMake, "make", "", "Comma-separated make names or slugs, for example toyota,honda.")
 	cmd.Flags().StringVar(&flagModel, "model", "", "Comma-separated model names or slugs. Combine with make when possible for narrower results.")
@@ -237,13 +247,14 @@ func newDealersListingsDealersCmd(flags *rootFlags) *cobra.Command {
 	cmd.Flags().StringVar(&flagState, "state", "", "Comma-separated two-letter dealer states, for example CA,TX.")
 	cmd.Flags().StringVar(&flagDealerType, "dealer-type", "", "Comma-separated dealer types, for example franchise,independent.")
 	cmd.Flags().StringVar(&flagAvailabilityStatus, "availability-status", "", "Comma-separated availability statuses: stock, transit, build.")
-	cmd.Flags().StringVar(&flagInventoryType, "inventory-type", "", "Comma-separated inventory classes such as new,used,certified.")
+	cmd.Flags().StringVar(&flagInventoryType, "inventory-type", "", "Comma-separated inventory classes: new, used, certified. cpo is accepted as an alias for certified.")
 	cmd.Flags().StringVar(&flagBodyType, "body-type", "", "Comma-separated body types.")
 	cmd.Flags().StringVar(&flagTransmission, "transmission", "", "Comma-separated transmission values.")
 	cmd.Flags().StringVar(&flagDrivetrain, "drivetrain", "", "Comma-separated drivetrain values.")
 	cmd.Flags().StringVar(&flagAssemblyLocation, "assembly-location", "", "Pipe-separated assembly locations. Uses | because locations often contain commas.")
 	cmd.Flags().StringVar(&flagAssemblyCountry, "assembly-country", "", "Comma-separated assembly country values.")
 	cmd.Flags().StringVar(&flagFuelType, "fuel-type", "", "Comma-separated fuel type values.")
+	cmd.Flags().StringVar(&flagPowertrainType, "powertrain-type", "", "Comma-separated powertrain type values.")
 	cmd.Flags().StringVar(&flagEngine, "engine", "", "Comma-separated engine descriptions.")
 	cmd.Flags().StringVar(&flagVersion, "version", "", "Comma-separated vehicle version values.")
 	cmd.Flags().StringVar(&flagExteriorColor, "exterior-color", "", "Comma-separated exterior color values.")
@@ -255,13 +266,17 @@ func newDealersListingsDealersCmd(flags *rootFlags) *cobra.Command {
 	cmd.Flags().StringVar(&flagDoors, "doors", "", "Comma-separated door count integers.")
 	cmd.Flags().StringVar(&flagOptionsPackages, "options-packages", "", "Comma-separated manufacturer option/package codes.")
 	cmd.Flags().StringVar(&flagFeatures, "features", "", "Comma-separated feature tokens.")
-	cmd.Flags().StringVar(&flagKeywords, "keywords", "", "Comma-separated listing keyword tokens. Positive tokens must be present; negative history tokens are excluded.")
+	cmd.Flags().StringVar(&flagKeywords, "keywords", "", "Comma-separated provenance/history keyword tokens. Supported values: one_owner, clean_title, branded, fleet....")
 	cmd.Flags().StringVar(&flagVinPattern, "vin-pattern", "", "Comma-separated VIN masks, up to 10 distinct patterns. VIN characters match themselves, ? matches one VIN position,...")
 	cmd.Flags().StringVar(&flagExcludeMake, "exclude-make", "", "Comma-separated makes to exclude.")
 	cmd.Flags().StringVar(&flagExcludeModel, "exclude-model", "", "Comma-separated models to exclude.")
 	cmd.Flags().StringVar(&flagExcludeTrim, "exclude-trim", "", "Comma-separated trims to exclude.")
 	cmd.Flags().StringVar(&flagExcludeYear, "exclude-year", "", "Comma-separated model years to exclude.")
 	cmd.Flags().StringVar(&flagExcludeState, "exclude-state", "", "Comma-separated dealer states to exclude.")
+	cmd.Flags().StringVar(&flagExcludeInventoryType, "exclude-inventory-type", "", "Comma-separated inventory classes to exclude: new, used, certified. cpo is accepted as an alias for certified.")
+	cmd.Flags().StringVar(&flagExcludeBodyType, "exclude-body-type", "", "Comma-separated body types to exclude.")
+	cmd.Flags().StringVar(&flagExcludeTransmission, "exclude-transmission", "", "Comma-separated transmission values to exclude.")
+	cmd.Flags().StringVar(&flagExcludeDrivetrain, "exclude-drivetrain", "", "Comma-separated drivetrain values to exclude.")
 	cmd.Flags().StringVar(&flagExcludeVersion, "exclude-version", "", "Comma-separated vehicle versions to exclude.")
 	cmd.Flags().StringVar(&flagExcludeEngine, "exclude-engine", "", "Comma-separated engine descriptions to exclude.")
 	cmd.Flags().StringVar(&flagExcludeAssemblyLocation, "exclude-assembly-location", "", "Plus-separated assembly locations to exclude. Uses + to match the private API separator.")

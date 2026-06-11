@@ -505,6 +505,7 @@ func TestMigrate_AddsColumnsOnUpgrade_Listings(t *testing.T) {
 		"days_on_market",
 		"dealer_id",
 		"dealer_name",
+		"dealer_type",
 		"discount_from_msrp",
 		"distance_miles",
 		"doors",

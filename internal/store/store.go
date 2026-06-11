@@ -235,6 +235,7 @@ func (s *Store) backfillColumns(ctx context.Context, conn *sql.Conn) error {
 		{table: "listings", column: "days_on_market", decl: "TEXT"},
 		{table: "listings", column: "dealer_id", decl: "TEXT"},
 		{table: "listings", column: "dealer_name", decl: "TEXT"},
+		{table: "listings", column: "dealer_type", decl: "TEXT"},
 		{table: "listings", column: "discount_from_msrp", decl: "TEXT"},
 		{table: "listings", column: "distance_miles", decl: "TEXT"},
 		{table: "listings", column: "doors", decl: "TEXT"},
@@ -357,6 +358,7 @@ func (s *Store) migrate(ctx context.Context) error {
 			days_on_market TEXT,
 			dealer_id TEXT,
 			dealer_name TEXT,
+			dealer_type TEXT,
 			discount_from_msrp TEXT,
 			distance_miles TEXT,
 			doors TEXT,
@@ -844,9 +846,9 @@ func (s *Store) UpsertDealersListings(data json.RawMessage) error {
 // opening a per-item transaction.
 func (s *Store) upsertListingsTx(tx *sql.Tx, id string, obj map[string]any, data json.RawMessage) error {
 	if _, err := tx.Exec(
-		`INSERT INTO listings (id, data, synced_at, base_exterior_color, base_interior_color, body_type, city, cylinders, days_on_market, dealer_id, dealer_name, discount_from_msrp, distance_miles, doors, drivetrain, engine, exterior_color, fuel_type, interior_color, inventory_status, inventory_type, latitude, longitude, make, miles, model, msrp, powertrain_type, price, seating_capacity, sold_date, state, status, stock_number, transmission, trim, vdp_url, version, vin, year)
-		 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-		 ON CONFLICT(id) DO UPDATE SET data = excluded.data, synced_at = excluded.synced_at, base_exterior_color = excluded.base_exterior_color, base_interior_color = excluded.base_interior_color, body_type = excluded.body_type, city = excluded.city, cylinders = excluded.cylinders, days_on_market = excluded.days_on_market, dealer_id = excluded.dealer_id, dealer_name = excluded.dealer_name, discount_from_msrp = excluded.discount_from_msrp, distance_miles = excluded.distance_miles, doors = excluded.doors, drivetrain = excluded.drivetrain, engine = excluded.engine, exterior_color = excluded.exterior_color, fuel_type = excluded.fuel_type, interior_color = excluded.interior_color, inventory_status = excluded.inventory_status, inventory_type = excluded.inventory_type, latitude = excluded.latitude, longitude = excluded.longitude, make = excluded.make, miles = excluded.miles, model = excluded.model, msrp = excluded.msrp, powertrain_type = excluded.powertrain_type, price = excluded.price, seating_capacity = excluded.seating_capacity, sold_date = excluded.sold_date, state = excluded.state, status = excluded.status, stock_number = excluded.stock_number, transmission = excluded.transmission, trim = excluded.trim, vdp_url = excluded.vdp_url, version = excluded.version, vin = excluded.vin, year = excluded.year`,
+		`INSERT INTO listings (id, data, synced_at, base_exterior_color, base_interior_color, body_type, city, cylinders, days_on_market, dealer_id, dealer_name, dealer_type, discount_from_msrp, distance_miles, doors, drivetrain, engine, exterior_color, fuel_type, interior_color, inventory_status, inventory_type, latitude, longitude, make, miles, model, msrp, powertrain_type, price, seating_capacity, sold_date, state, status, stock_number, transmission, trim, vdp_url, version, vin, year)
+		 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		 ON CONFLICT(id) DO UPDATE SET data = excluded.data, synced_at = excluded.synced_at, base_exterior_color = excluded.base_exterior_color, base_interior_color = excluded.base_interior_color, body_type = excluded.body_type, city = excluded.city, cylinders = excluded.cylinders, days_on_market = excluded.days_on_market, dealer_id = excluded.dealer_id, dealer_name = excluded.dealer_name, dealer_type = excluded.dealer_type, discount_from_msrp = excluded.discount_from_msrp, distance_miles = excluded.distance_miles, doors = excluded.doors, drivetrain = excluded.drivetrain, engine = excluded.engine, exterior_color = excluded.exterior_color, fuel_type = excluded.fuel_type, interior_color = excluded.interior_color, inventory_status = excluded.inventory_status, inventory_type = excluded.inventory_type, latitude = excluded.latitude, longitude = excluded.longitude, make = excluded.make, miles = excluded.miles, model = excluded.model, msrp = excluded.msrp, powertrain_type = excluded.powertrain_type, price = excluded.price, seating_capacity = excluded.seating_capacity, sold_date = excluded.sold_date, state = excluded.state, status = excluded.status, stock_number = excluded.stock_number, transmission = excluded.transmission, trim = excluded.trim, vdp_url = excluded.vdp_url, version = excluded.version, vin = excluded.vin, year = excluded.year`,
 		id,
 		string(data),
 		time.Now(),
@@ -858,6 +860,7 @@ func (s *Store) upsertListingsTx(tx *sql.Tx, id string, obj map[string]any, data
 		lookupFieldValue(obj, "days_on_market"),
 		lookupFieldValue(obj, "dealer_id"),
 		lookupFieldValue(obj, "dealer_name"),
+		lookupFieldValue(obj, "dealer_type"),
 		lookupFieldValue(obj, "discount_from_msrp"),
 		lookupFieldValue(obj, "distance_miles"),
 		lookupFieldValue(obj, "doors"),

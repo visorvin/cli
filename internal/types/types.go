@@ -48,6 +48,7 @@ type ListingsDealersItem struct {
 	DaysOnMarket      string          `json:"days_on_market"`
 	DealerId          string          `json:"dealer_id"`
 	DealerName        string          `json:"dealer_name"`
+	DealerType        string          `json:"dealer_type"`
 	DiscountFromMsrp  string          `json:"discount_from_msrp"`
 	DistanceMiles     string          `json:"distance_miles"`
 	Doors             string          `json:"doors"`
@@ -99,6 +100,7 @@ type ListingsListItem struct {
 	DaysOnMarket      string          `json:"days_on_market"`
 	DealerId          string          `json:"dealer_id"`
 	DealerName        string          `json:"dealer_name"`
+	DealerType        string          `json:"dealer_type"`
 	DiscountFromMsrp  string          `json:"discount_from_msrp"`
 	DistanceMiles     string          `json:"distance_miles"`
 	Doors             string          `json:"doors"`

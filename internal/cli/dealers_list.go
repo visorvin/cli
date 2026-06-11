@@ -14,6 +14,7 @@ import (
 func newDealersListCmd(flags *rootFlags) *cobra.Command {
 	var flagLimit string
 	var flagOffset string
+	var flagDealerId string
 	var flagState string
 	var flagCountry string
 	var flagType string
@@ -23,7 +24,7 @@ func newDealersListCmd(flags *rootFlags) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:         "list",
-		Short:       "Returns dealer summaries ordered by active listing count. Listing counts use VIN-level listing deduplication and...",
+		Short:       "Returns public dealer summaries ordered by active listing count. Listing counts use VIN-level listing deduplication...",
 		Example:     "  visor dealers list",
 		Annotations: map[string]string{"pp:endpoint": "dealers.list", "pp:method": "GET", "pp:path": "/v1/dealers", "mcp:read-only": "true"},
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -47,13 +48,14 @@ func newDealersListCmd(flags *rootFlags) *cobra.Command {
 
 			path := "/v1/dealers"
 			data, prov, err := resolvePaginatedRead(cmd.Context(), c, flags, "dealers", path, map[string]string{
-				"limit":   fmt.Sprintf("%v", flagLimit),
-				"offset":  fmt.Sprintf("%v", flagOffset),
-				"state":   fmt.Sprintf("%v", flagState),
-				"country": fmt.Sprintf("%v", flagCountry),
-				"type":    fmt.Sprintf("%v", flagType),
-				"make":    fmt.Sprintf("%v", flagMake),
-				"q":       fmt.Sprintf("%v", flagQ),
+				"limit":     fmt.Sprintf("%v", flagLimit),
+				"offset":    fmt.Sprintf("%v", flagOffset),
+				"dealer_id": fmt.Sprintf("%v", flagDealerId),
+				"state":     fmt.Sprintf("%v", flagState),
+				"country":   fmt.Sprintf("%v", flagCountry),
+				"type":      fmt.Sprintf("%v", flagType),
+				"make":      fmt.Sprintf("%v", flagMake),
+				"q":         fmt.Sprintf("%v", flagQ),
 			}, nil, flagAll, "offset", "", "")
 			if err != nil {
 				return classifyAPIError(err, flags)
@@ -91,6 +93,7 @@ func newDealersListCmd(flags *rootFlags) *cobra.Command {
 	}
 	cmd.Flags().StringVar(&flagLimit, "limit", "", "Page size as an integer string. Defaults to 50; maximum 100.")
 	cmd.Flags().StringVar(&flagOffset, "offset", "", "Zero-based page offset as an integer string. Defaults to 0.")
+	cmd.Flags().StringVar(&flagDealerId, "dealer-id", "", "Comma-separated dealer UUIDs to fetch directly. Accepts up to 100 dealer IDs.")
 	cmd.Flags().StringVar(&flagState, "state", "", "Comma-separated two-letter dealer states, for example CA,TX.")
 	cmd.Flags().StringVar(&flagCountry, "country", "", "Dealer country code, for example US.")
 	cmd.Flags().StringVar(&flagType, "type", "", "Dealer type. (one of: franchise, independent)")

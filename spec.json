@@ -23,7 +23,8 @@
               "description": "Page size as an integer string. Defaults to 50; maximum 100."
             },
             "required": false,
-            "description": "Page size as an integer string. Defaults to 50; maximum 100."
+            "description": "Page size as an integer string. Defaults to 50; maximum 100.",
+            "example": "2"
           },
           {
             "name": "offset",
@@ -63,10 +64,11 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "Comma-separated public listing summary fields to return. id and vin are always returned. Use default to include the default listing summary fieldset plus selected extras. Unknown fields are rejected. Supported fields: default, id, vin, year, make, model, trim, version, body_type, drivetrain, fuel_type, powertrain_type, transmission, engine, cylinders, doors, seating_capacity, exterior_color, interior_color, base_exterior_color, base_interior_color, msrp, discount_from_msrp, price, miles, days_on_market, status, inventory_status, inventory_type, stock_number, vdp_url, sold_date, dealer_id, dealer_name, city, state, latitude, longitude, distance_miles, photo_urls, features, options_packages."
+              "description": "Comma-separated public listing summary fields to return. This controls response projection only; filters such as availability_status, options_packages, and features do not belong in fields. id and vin are always returned. Use default to include the default listing summary fieldset plus selected extras. Unknown fields are rejected. Supported fields: default, id, vin, year, make, model, trim, version, body_type, drivetrain, fuel_type, powertrain_type, transmission, engine, cylinders, doors, seating_capacity, exterior_color, interior_color, base_exterior_color, base_interior_color, msrp, discount_from_msrp, price, miles, days_on_market, status, inventory_status, inventory_type, stock_number, vdp_url, sold_date, dealer_id, dealer_name, dealer_type, city, state, latitude, longitude, distance_miles, photo_urls, features, options_packages."
             },
             "required": false,
-            "description": "Comma-separated public listing summary fields to return. id and vin are always returned. Use default to include the default listing summary fieldset plus selected extras. Unknown fields are rejected. Supported fields: default, id, vin, year, make, model, trim, version, body_type, drivetrain, fuel_type, powertrain_type, transmission, engine, cylinders, doors, seating_capacity, exterior_color, interior_color, base_exterior_color, base_interior_color, msrp, discount_from_msrp, price, miles, days_on_market, status, inventory_status, inventory_type, stock_number, vdp_url, sold_date, dealer_id, dealer_name, city, state, latitude, longitude, distance_miles, photo_urls, features, options_packages."
+            "description": "Comma-separated public listing summary fields to return. This controls response projection only; filters such as availability_status, options_packages, and features do not belong in fields. id and vin are always returned. Use default to include the default listing summary fieldset plus selected extras. Unknown fields are rejected. Supported fields: default, id, vin, year, make, model, trim, version, body_type, drivetrain, fuel_type, powertrain_type, transmission, engine, cylinders, doors, seating_capacity, exterior_color, interior_color, base_exterior_color, base_interior_color, msrp, discount_from_msrp, price, miles, days_on_market, status, inventory_status, inventory_type, stock_number, vdp_url, sold_date, dealer_id, dealer_name, dealer_type, city, state, latitude, longitude, distance_miles, photo_urls, features, options_packages.",
+            "example": "default,price,miles,dealer_id,dealer_name,vdp_url"
           },
           {
             "name": "include",
@@ -86,7 +88,8 @@
               "description": "Comma-separated make names or slugs, for example toyota,honda."
             },
             "required": false,
-            "description": "Comma-separated make names or slugs, for example toyota,honda."
+            "description": "Comma-separated make names or slugs, for example toyota,honda.",
+            "example": "Toyota"
           },
           {
             "name": "model",
@@ -96,7 +99,8 @@
               "description": "Comma-separated model names or slugs. Combine with make when possible for narrower results."
             },
             "required": false,
-            "description": "Comma-separated model names or slugs. Combine with make when possible for narrower results."
+            "description": "Comma-separated model names or slugs. Combine with make when possible for narrower results.",
+            "example": "Camry"
           },
           {
             "name": "trim",
@@ -126,7 +130,8 @@
               "description": "Comma-separated two-letter dealer states, for example CA,TX."
             },
             "required": false,
-            "description": "Comma-separated two-letter dealer states, for example CA,TX."
+            "description": "Comma-separated two-letter dealer states, for example CA,TX.",
+            "example": "CA"
           },
           {
             "name": "dealer_id",
@@ -163,10 +168,10 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "Comma-separated inventory classes such as new,used,certified."
+              "description": "Comma-separated inventory classes: new, used, certified. cpo is accepted as an alias for certified."
             },
             "required": false,
-            "description": "Comma-separated inventory classes such as new,used,certified."
+            "description": "Comma-separated inventory classes: new, used, certified. cpo is accepted as an alias for certified."
           },
           {
             "name": "body_type",
@@ -227,6 +232,16 @@
             },
             "required": false,
             "description": "Comma-separated fuel type values."
+          },
+          {
+            "name": "powertrain_type",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "Comma-separated powertrain type values."
+            },
+            "required": false,
+            "description": "Comma-separated powertrain type values."
           },
           {
             "name": "engine",
@@ -343,10 +358,10 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "Comma-separated listing keyword tokens. Positive tokens must be present; negative history tokens are excluded."
+              "description": "Comma-separated provenance/history keyword tokens. Supported values: one_owner, clean_title, branded, fleet. Positive tokens must be present; negative history tokens are excluded."
             },
             "required": false,
-            "description": "Comma-separated listing keyword tokens. Positive tokens must be present; negative history tokens are excluded."
+            "description": "Comma-separated provenance/history keyword tokens. Supported values: one_owner, clean_title, branded, fleet. Positive tokens must be present; negative history tokens are excluded."
           },
           {
             "name": "vin_pattern",
@@ -407,6 +422,46 @@
             },
             "required": false,
             "description": "Comma-separated dealer states to exclude."
+          },
+          {
+            "name": "exclude_inventory_type",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "Comma-separated inventory classes to exclude: new, used, certified. cpo is accepted as an alias for certified."
+            },
+            "required": false,
+            "description": "Comma-separated inventory classes to exclude: new, used, certified. cpo is accepted as an alias for certified."
+          },
+          {
+            "name": "exclude_body_type",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "Comma-separated body types to exclude."
+            },
+            "required": false,
+            "description": "Comma-separated body types to exclude."
+          },
+          {
+            "name": "exclude_transmission",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "Comma-separated transmission values to exclude."
+            },
+            "required": false,
+            "description": "Comma-separated transmission values to exclude."
+          },
+          {
+            "name": "exclude_drivetrain",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "Comma-separated drivetrain values to exclude."
+            },
+            "required": false,
+            "description": "Comma-separated drivetrain values to exclude."
           },
           {
             "name": "exclude_version",
@@ -1016,7 +1071,7 @@
                                 "type": "null"
                               }
                             ],
-                            "description": "Vehicle inventory class such as new, used, or certified."
+                            "description": "Vehicle inventory class: new, used, or certified."
                           },
                           "stock_number": {
                             "anyOf": [
@@ -1072,6 +1127,21 @@
                               }
                             ],
                             "description": "Dealer display name."
+                          },
+                          "dealer_type": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "enum": [
+                                  "franchise",
+                                  "independent"
+                                ]
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "Dealer type associated with the listing when available."
                           },
                           "city": {
                             "anyOf": [
@@ -1155,6 +1225,7 @@
                               "type": "object",
                               "required": [
                                 "changed_at",
+                                "miles",
                                 "price_before",
                                 "price_after"
                               ],
@@ -1162,6 +1233,17 @@
                                 "changed_at": {
                                   "type": "string",
                                   "description": "Timestamp of the price change."
+                                },
+                                "miles": {
+                                  "anyOf": [
+                                    {
+                                      "type": "number"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ],
+                                  "description": "Observed odometer mileage at the price change when available."
                                 },
                                 "price_before": {
                                   "anyOf": [
@@ -1242,7 +1324,7 @@
                       "properties": {
                         "limit": {
                           "type": "number",
-                          "description": "Maximum number of records requested for this page. Collection endpoints default to 50 and cap at 100."
+                          "description": "Maximum number of records requested for this page. Collection endpoints default to 50; values above 100 are rejected."
                         },
                         "offset": {
                           "type": "number",
@@ -1279,6 +1361,40 @@
                     }
                   },
                   "additionalProperties": false
+                },
+                "examples": {
+                  "success": {
+                    "summary": "Filtered Toyota Camry listings in California",
+                    "value": {
+                      "data": [
+                        {
+                          "id": "0043554b54709f18a7bcf42f23e5e6ef",
+                          "vin": "4T1DAACKXTU765422",
+                          "year": 2026,
+                          "make": "Toyota",
+                          "model": "Camry",
+                          "trim": "SE",
+                          "price": 35236,
+                          "miles": 0,
+                          "status": "active",
+                          "inventory_status": "active",
+                          "inventory_type": "new",
+                          "dealer_id": "16ed7612-0ffd-4e1e-88db-174f8dd57c54",
+                          "dealer_name": "North Hollywood Toyota",
+                          "city": "North Hollywood",
+                          "state": "CA",
+                          "vdp_url": "https://www.northhollywoodtoyota.com/viewdetails/new/4t1daackxtu765422"
+                        }
+                      ],
+                      "pagination": {
+                        "limit": 2,
+                        "offset": 0,
+                        "total": 13730,
+                        "next_offset": 2
+                      },
+                      "meta": {}
+                    }
+                  }
                 }
               }
             },
@@ -1473,8 +1589,19 @@
             }
           }
         },
-        "description": "Returns active, sold, or historical snapshot listing summaries using stable snake_case fields. Public inventory is deduplicated by VIN and assigned to the dealer Freeway believes owns the listing, so dealer-scoped counts can differ from raw dealer feed counts. Unknown filters fail closed with a validation_error.",
-        "summary": "Filter listings"
+        "description": "Returns active, sold, or historical snapshot listing summaries using stable snake_case fields. Public inventory is deduplicated by VIN and assigned to the dealer Freeway believes owns the listing, so dealer-scoped counts can differ from raw dealer feed counts. Unknown query parameters fail closed with validation_error / unknown_query_parameter; unsupported closed-vocabulary values fail with validation_error.",
+        "summary": "Filter listings",
+        "x-visor-example-request": {
+          "method": "GET",
+          "path": "/v1/listings",
+          "query": {
+            "limit": "2",
+            "make": "Toyota",
+            "model": "Camry",
+            "state": "CA",
+            "fields": "default,price,miles,dealer_id,dealer_name,vdp_url"
+          }
+        }
       }
     },
     "/v1/facets": {
@@ -1492,7 +1619,8 @@
               "description": "Required comma-separated facet names to return. Supported facets: make, model, inventory_type, year, trim, version, base_exterior_color, exterior_color, base_interior_color, interior_color, seating_capacity, doors, engine, state, drivetrain, assembly_location, assembly_country, transmission, fuel_type, body_type, cylinders, dealer_type, availability_status, options_packages, features, keywords, price, msrp, miles, days_on_market."
             },
             "required": true,
-            "description": "Required comma-separated facet names to return. Supported facets: make, model, inventory_type, year, trim, version, base_exterior_color, exterior_color, base_interior_color, interior_color, seating_capacity, doors, engine, state, drivetrain, assembly_location, assembly_country, transmission, fuel_type, body_type, cylinders, dealer_type, availability_status, options_packages, features, keywords, price, msrp, miles, days_on_market."
+            "description": "Required comma-separated facet names to return. Supported facets: make, model, inventory_type, year, trim, version, base_exterior_color, exterior_color, base_interior_color, interior_color, seating_capacity, doors, engine, state, drivetrain, assembly_location, assembly_country, transmission, fuel_type, body_type, cylinders, dealer_type, availability_status, options_packages, features, keywords, price, msrp, miles, days_on_market.",
+            "example": "make,model,price"
           },
           {
             "name": "facet_value_limit",
@@ -1502,17 +1630,18 @@
               "description": "Maximum number of values returned per categorical facet. Defaults to 20; maximum 100. Numeric range facets always return fixed buckets."
             },
             "required": false,
-            "description": "Maximum number of values returned per categorical facet. Defaults to 20; maximum 100. Numeric range facets always return fixed buckets."
+            "description": "Maximum number of values returned per categorical facet. Defaults to 20; maximum 100. Numeric range facets always return fixed buckets.",
+            "example": "5"
           },
           {
             "name": "metric",
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "Facet Metric used to compute an optional per-bucket aggregate. Defaults to count. Supported non-count metrics use <measure>.<aggregate>, for example price.p95 or days_on_market.median. Non-count metrics require exactly one categorical facet."
+              "description": "Facet Metric used to compute an optional per-bucket aggregate. Defaults to count. Supported measures: price, miles, msrp, days_on_market, discount_from_msrp. Supported aggregates: mean, p5, p25, median, p75, p95. Use <measure>.<aggregate>, for example price.p95 or days_on_market.median. Non-count metrics require exactly one categorical facet."
             },
             "required": false,
-            "description": "Facet Metric used to compute an optional per-bucket aggregate. Defaults to count. Supported non-count metrics use <measure>.<aggregate>, for example price.p95 or days_on_market.median. Non-count metrics require exactly one categorical facet."
+            "description": "Facet Metric used to compute an optional per-bucket aggregate. Defaults to count. Supported measures: price, miles, msrp, days_on_market, discount_from_msrp. Supported aggregates: mean, p5, p25, median, p75, p95. Use <measure>.<aggregate>, for example price.p95 or days_on_market.median. Non-count metrics require exactly one categorical facet."
           },
           {
             "name": "sort",
@@ -1538,7 +1667,8 @@
               "description": "Comma-separated make names or slugs to apply before counting facet buckets."
             },
             "required": false,
-            "description": "Comma-separated make names or slugs to apply before counting facet buckets."
+            "description": "Comma-separated make names or slugs to apply before counting facet buckets.",
+            "example": "Toyota"
           },
           {
             "name": "model",
@@ -1578,7 +1708,8 @@
               "description": "Comma-separated two-letter dealer states to apply before counting facet buckets."
             },
             "required": false,
-            "description": "Comma-separated two-letter dealer states to apply before counting facet buckets."
+            "description": "Comma-separated two-letter dealer states to apply before counting facet buckets.",
+            "example": "CA"
           },
           {
             "name": "dealer_id",
@@ -1615,10 +1746,10 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "Comma-separated inventory classes such as new,used,certified."
+              "description": "Comma-separated inventory classes to apply before counting facet buckets: new, used, certified. cpo is accepted as an alias for certified."
             },
             "required": false,
-            "description": "Comma-separated inventory classes such as new,used,certified."
+            "description": "Comma-separated inventory classes to apply before counting facet buckets: new, used, certified. cpo is accepted as an alias for certified."
           },
           {
             "name": "body_type",
@@ -1679,6 +1810,16 @@
             },
             "required": false,
             "description": "Comma-separated fuel type values."
+          },
+          {
+            "name": "powertrain_type",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "Comma-separated powertrain type values."
+            },
+            "required": false,
+            "description": "Comma-separated powertrain type values."
           },
           {
             "name": "engine",
@@ -1795,10 +1936,10 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "Comma-separated listing keyword tokens. Positive tokens must be present; negative history tokens are excluded."
+              "description": "Comma-separated provenance/history keyword tokens to apply before counting facet buckets. Supported values: one_owner, clean_title, branded, fleet."
             },
             "required": false,
-            "description": "Comma-separated listing keyword tokens. Positive tokens must be present; negative history tokens are excluded."
+            "description": "Comma-separated provenance/history keyword tokens to apply before counting facet buckets. Supported values: one_owner, clean_title, branded, fleet."
           },
           {
             "name": "vin_pattern",
@@ -1859,6 +2000,46 @@
             },
             "required": false,
             "description": "Comma-separated dealer states to exclude."
+          },
+          {
+            "name": "exclude_inventory_type",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "Comma-separated inventory classes to exclude: new, used, certified. cpo is accepted as an alias for certified."
+            },
+            "required": false,
+            "description": "Comma-separated inventory classes to exclude: new, used, certified. cpo is accepted as an alias for certified."
+          },
+          {
+            "name": "exclude_body_type",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "Comma-separated body types to exclude."
+            },
+            "required": false,
+            "description": "Comma-separated body types to exclude."
+          },
+          {
+            "name": "exclude_transmission",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "Comma-separated transmission values to exclude."
+            },
+            "required": false,
+            "description": "Comma-separated transmission values to exclude."
+          },
+          {
+            "name": "exclude_drivetrain",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "Comma-separated drivetrain values to exclude."
+            },
+            "required": false,
+            "description": "Comma-separated drivetrain values to exclude."
           },
           {
             "name": "exclude_version",
@@ -2425,7 +2606,7 @@
                         },
                         "minimum_metric_count": {
                           "type": "number",
-                          "description": "Minimum bucket count required before non-count metric values are returned."
+                          "description": "Minimum bucket count required before non-count metric values are returned. Currently 10."
                         }
                       },
                       "additionalProperties": false,
@@ -2434,6 +2615,83 @@
                   },
                   "additionalProperties": false,
                   "description": "Facet response envelope."
+                },
+                "examples": {
+                  "success": {
+                    "summary": "Make, model, and price facets for Toyota inventory in California",
+                    "value": {
+                      "data": {
+                        "total": 62152,
+                        "facets": {
+                          "make": [
+                            {
+                              "value": "Toyota",
+                              "count": 62152
+                            }
+                          ],
+                          "model": [
+                            {
+                              "value": "Camry",
+                              "count": 13730
+                            },
+                            {
+                              "value": "Tacoma",
+                              "count": 10682
+                            },
+                            {
+                              "value": "RAV4",
+                              "count": 7499
+                            }
+                          ]
+                        },
+                        "range_facets": {
+                          "price": {
+                            "buckets": [
+                              {
+                                "min": 24608,
+                                "max": 28732,
+                                "count": 5270
+                              },
+                              {
+                                "min": 28732,
+                                "max": 32856,
+                                "count": 5528
+                              },
+                              {
+                                "min": 32856,
+                                "max": 36980,
+                                "count": 8392
+                              }
+                            ],
+                            "interval": 4124,
+                            "min": 3988,
+                            "max": 86468
+                          }
+                        },
+                        "stats": {
+                          "price": {
+                            "min": 0,
+                            "max": 148085,
+                            "count": 60556,
+                            "missing": 1596,
+                            "mean": 38889.62,
+                            "median": 38300,
+                            "stddev": 15641.34
+                          }
+                        }
+                      },
+                      "meta": {
+                        "facets": [
+                          "make",
+                          "model",
+                          "price"
+                        ],
+                        "metric": "count",
+                        "sort": "-count",
+                        "minimum_metric_count": 10
+                      }
+                    }
+                  }
                 }
               }
             },
@@ -2629,7 +2887,17 @@
           }
         },
         "description": "Returns categorical facets, numeric range facets, and stats for an explicit listing filter surface facet selection. Use facets=make,model,price. Supported facets: make, model, inventory_type, year, trim, version, base_exterior_color, exterior_color, base_interior_color, interior_color, seating_capacity, doors, engine, state, drivetrain, assembly_location, assembly_country, transmission, fuel_type, body_type, cylinders, dealer_type, availability_status, options_packages, features, keywords, price, msrp, miles, days_on_market.",
-        "summary": "Filter facets"
+        "summary": "Filter facets",
+        "x-visor-example-request": {
+          "method": "GET",
+          "path": "/v1/facets",
+          "query": {
+            "facets": "make,model,price",
+            "make": "Toyota",
+            "state": "CA",
+            "facet_value_limit": "5"
+          }
+        }
       }
     },
     "/v1/listings/{listing_id}": {
@@ -2647,7 +2915,8 @@
               "description": "Stable listing identifier."
             },
             "required": true,
-            "description": "Stable listing identifier."
+            "description": "Stable listing identifier.",
+            "example": "0043554b54709f18a7bcf42f23e5e6ef"
           },
           {
             "name": "include",
@@ -2657,7 +2926,8 @@
               "description": "Comma-separated optional expansions. Supported values are price_history and options."
             },
             "required": false,
-            "description": "Comma-separated optional expansions. Supported values are price_history and options."
+            "description": "Comma-separated optional expansions. Supported values are price_history and options.",
+            "example": "price_history,options"
           }
         ],
         "security": [
@@ -2754,7 +3024,7 @@
                               "type": "null"
                             }
                           ],
-                          "description": "Inventory classification such as new or used."
+                          "description": "Inventory classification: new, used, or certified."
                         },
                         "stock_number": {
                           "anyOf": [
@@ -3275,6 +3545,7 @@
                                 "type": "object",
                                 "required": [
                                   "changed_at",
+                                  "miles",
                                   "price_before",
                                   "price_after"
                                 ],
@@ -3282,6 +3553,17 @@
                                   "changed_at": {
                                     "type": "string",
                                     "description": "Timestamp of the price change."
+                                  },
+                                  "miles": {
+                                    "anyOf": [
+                                      {
+                                        "type": "number"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ],
+                                    "description": "Observed odometer mileage at the price change when available."
                                   },
                                   "price_before": {
                                     "anyOf": [
@@ -3333,6 +3615,82 @@
                   },
                   "additionalProperties": false,
                   "description": "Listing detail response envelope."
+                },
+                "examples": {
+                  "success": {
+                    "summary": "Listing detail with vehicle build data",
+                    "value": {
+                      "data": {
+                        "id": "0043554b54709f18a7bcf42f23e5e6ef",
+                        "vin": "4T1DAACKXTU765422",
+                        "status": "active",
+                        "price": 35236,
+                        "miles": 0,
+                        "inventory_type": "new",
+                        "stock_number": "263929",
+                        "vdp_url": "https://www.northhollywoodtoyota.com/viewdetails/new/4t1daackxtu765422",
+                        "vhr_url": null,
+                        "photo_urls": [
+                          "https://delivery.via.assetscs.toyota.com/adobe/assets/urn:aaid:aem:260ec892-e9be-4815-9148-8c139edd5b95/as/image.png?fmt=png-alpha%2Crgb%2Cnone"
+                        ],
+                        "photo_url_primary": "https://delivery.via.assetscs.toyota.com/adobe/assets/urn:aaid:aem:260ec892-e9be-4815-9148-8c139edd5b95/as/image.png?fmt=png-alpha%2Crgb%2Cnone",
+                        "inventory_date": "2026-06-09",
+                        "sold_date": null,
+                        "last_checked_at": "2026-06-09 11:40:57.534384",
+                        "dealer": {
+                          "dealer_id": "16ed7612-0ffd-4e1e-88db-174f8dd57c54",
+                          "name": "North Hollywood Toyota",
+                          "city": "North Hollywood",
+                          "state": "CA",
+                          "latitude": 34.154,
+                          "longitude": -118.3678,
+                          "phone": "(818) 369-3922"
+                        },
+                        "vehicle": {
+                          "vin": "4T1DAACKXTU765422",
+                          "status": "active",
+                          "build": {
+                            "year": 2026,
+                            "make": "Toyota",
+                            "model": "Camry",
+                            "trim": "SE",
+                            "version": "SE Hybrid",
+                            "body_type": "Sedan",
+                            "drivetrain": "FWD",
+                            "fuel_type": "Hybrid",
+                            "powertrain_type": "HEV",
+                            "transmission": "CVT",
+                            "engine": "2.5L I4",
+                            "cylinders": 4,
+                            "doors": 4,
+                            "seating_capacity": 5,
+                            "exterior_color": "Dark Cosmos",
+                            "interior_color": "Black SofTex",
+                            "base_exterior_color": "Blue",
+                            "base_interior_color": "Black",
+                            "assembly_location": null,
+                            "window_sticker_verified": false,
+                            "base_msrp": 31800,
+                            "combined_msrp": 35711,
+                            "options": [
+                              {
+                                "code": "3J",
+                                "name": "Blackout Emblem Overlays",
+                                "msrp": 89
+                              },
+                              {
+                                "code": "2T",
+                                "name": "All-Weather Floor Liner Package",
+                                "msrp": 319
+                              }
+                            ]
+                          }
+                        },
+                        "price_history": []
+                      },
+                      "meta": {}
+                    }
+                  }
                 }
               }
             },
@@ -3538,7 +3896,14 @@
           }
         },
         "description": "Returns listing-centered detail by listing_id. Missing listings return 404 not_found_error.",
-        "summary": "Get a listing"
+        "summary": "Get a listing",
+        "x-visor-example-request": {
+          "method": "GET",
+          "path": "/v1/listings/0043554b54709f18a7bcf42f23e5e6ef",
+          "query": {
+            "include": "price_history,options"
+          }
+        }
       }
     },
     "/v1/vins/{vin}": {
@@ -3553,10 +3918,11 @@
             "in": "path",
             "schema": {
               "type": "string",
-              "description": "17-character VIN."
+              "description": "17-character VIN. I, O, and Q are not valid VIN characters."
             },
             "required": true,
-            "description": "17-character VIN."
+            "description": "17-character VIN. I, O, and Q are not valid VIN characters.",
+            "example": "4T1DAACKXTU765422"
           },
           {
             "name": "include",
@@ -3566,7 +3932,8 @@
               "description": "Comma-separated optional expansions. Supported values are price_history and options."
             },
             "required": false,
-            "description": "Comma-separated optional expansions. Supported values are price_history and options."
+            "description": "Comma-separated optional expansions. Supported values are price_history and options.",
+            "example": "price_history,options"
           }
         ],
         "security": [
@@ -3671,7 +4038,7 @@
                                       "type": "null"
                                     }
                                   ],
-                                  "description": "Latest inventory classification such as new or used."
+                                  "description": "Latest inventory classification: new, used, or certified."
                                 },
                                 "stock_number": {
                                   "anyOf": [
@@ -3858,6 +4225,7 @@
                                         "type": "object",
                                         "required": [
                                           "changed_at",
+                                          "miles",
                                           "price_before",
                                           "price_after"
                                         ],
@@ -3865,6 +4233,17 @@
                                           "changed_at": {
                                             "type": "string",
                                             "description": "Timestamp of the price change."
+                                          },
+                                          "miles": {
+                                            "anyOf": [
+                                              {
+                                                "type": "number"
+                                              },
+                                              {
+                                                "type": "null"
+                                              }
+                                            ],
+                                            "description": "Observed odometer mileage at the price change when available."
                                           },
                                           "price_before": {
                                             "anyOf": [
@@ -4235,6 +4614,80 @@
                   },
                   "additionalProperties": false,
                   "description": "VIN detail response envelope."
+                },
+                "examples": {
+                  "success": {
+                    "summary": "VIN lookup with latest listing",
+                    "value": {
+                      "data": {
+                        "vin": "4T1DAACKXTU765422",
+                        "status": "active",
+                        "build": {
+                          "year": 2026,
+                          "make": "Toyota",
+                          "model": "Camry",
+                          "trim": "SE",
+                          "version": "SE Hybrid",
+                          "body_type": "Sedan",
+                          "drivetrain": "FWD",
+                          "fuel_type": "Hybrid",
+                          "powertrain_type": "HEV",
+                          "transmission": "CVT",
+                          "engine": "2.5L I4",
+                          "cylinders": 4,
+                          "doors": 4,
+                          "seating_capacity": 5,
+                          "exterior_color": "Dark Cosmos",
+                          "interior_color": "Black SofTex",
+                          "base_exterior_color": "Blue",
+                          "base_interior_color": "Black",
+                          "assembly_location": null,
+                          "window_sticker_verified": false,
+                          "base_msrp": 31800,
+                          "combined_msrp": 35711,
+                          "options": [
+                            {
+                              "code": "3J",
+                              "name": "Blackout Emblem Overlays",
+                              "msrp": 89
+                            },
+                            {
+                              "code": "2T",
+                              "name": "All-Weather Floor Liner Package",
+                              "msrp": 319
+                            }
+                          ]
+                        },
+                        "latest_listing": {
+                          "id": "0043554b54709f18a7bcf42f23e5e6ef",
+                          "price": 35236,
+                          "miles": 0,
+                          "inventory_type": "new",
+                          "stock_number": "263929",
+                          "vdp_url": "https://www.northhollywoodtoyota.com/viewdetails/new/4t1daackxtu765422",
+                          "vhr_url": null,
+                          "photo_urls": [
+                            "https://delivery.via.assetscs.toyota.com/adobe/assets/urn:aaid:aem:260ec892-e9be-4815-9148-8c139edd5b95/as/image.png?fmt=png-alpha%2Crgb%2Cnone"
+                          ],
+                          "photo_url_primary": "https://delivery.via.assetscs.toyota.com/adobe/assets/urn:aaid:aem:260ec892-e9be-4815-9148-8c139edd5b95/as/image.png?fmt=png-alpha%2Crgb%2Cnone",
+                          "inventory_date": "2026-06-09",
+                          "sold_date": null,
+                          "last_checked_at": "2026-06-09 11:40:57.534384",
+                          "dealer": {
+                            "dealer_id": "16ed7612-0ffd-4e1e-88db-174f8dd57c54",
+                            "name": "North Hollywood Toyota",
+                            "city": "North Hollywood",
+                            "state": "CA",
+                            "latitude": 34.154,
+                            "longitude": -118.3678,
+                            "phone": "(818) 369-3922"
+                          },
+                          "price_history": []
+                        }
+                      },
+                      "meta": {}
+                    }
+                  }
                 }
               }
             },
@@ -4439,8 +4892,15 @@
             }
           }
         },
-        "description": "Returns the current or latest known record for a VIN. Missing VINs return 404 not_found_error.",
-        "summary": "Look up a VIN"
+        "description": "Returns the current or latest known record for a VIN. Unknown VINs return 404 not_found_error; known VINs can return status: missing.",
+        "summary": "Look up a VIN",
+        "x-visor-example-request": {
+          "method": "GET",
+          "path": "/v1/vins/4T1DAACKXTU765422",
+          "query": {
+            "include": "price_history,options"
+          }
+        }
       }
     },
     "/v1/dealers": {
@@ -4458,7 +4918,8 @@
               "description": "Page size as an integer string. Defaults to 50; maximum 100."
             },
             "required": false,
-            "description": "Page size as an integer string. Defaults to 50; maximum 100."
+            "description": "Page size as an integer string. Defaults to 50; maximum 100.",
+            "example": "2"
           },
           {
             "name": "offset",
@@ -4471,6 +4932,16 @@
             "description": "Zero-based page offset as an integer string. Defaults to 0."
           },
           {
+            "name": "dealer_id",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "Comma-separated dealer UUIDs to fetch directly. Accepts up to 100 dealer IDs."
+            },
+            "required": false,
+            "description": "Comma-separated dealer UUIDs to fetch directly. Accepts up to 100 dealer IDs."
+          },
+          {
             "name": "state",
             "in": "query",
             "schema": {
@@ -4478,7 +4949,8 @@
               "description": "Comma-separated two-letter dealer states, for example CA,TX."
             },
             "required": false,
-            "description": "Comma-separated two-letter dealer states, for example CA,TX."
+            "description": "Comma-separated two-letter dealer states, for example CA,TX.",
+            "example": "CA"
           },
           {
             "name": "country",
@@ -4502,7 +4974,8 @@
               "description": "Dealer type."
             },
             "required": false,
-            "description": "Dealer type."
+            "description": "Dealer type.",
+            "example": "franchise"
           },
           {
             "name": "make",
@@ -4512,7 +4985,8 @@
               "description": "Comma-separated represented franchise makes or slugs, for example toyota,honda."
             },
             "required": false,
-            "description": "Comma-separated represented franchise makes or slugs, for example toyota,honda."
+            "description": "Comma-separated represented franchise makes or slugs, for example toyota,honda.",
+            "example": "Toyota"
           },
           {
             "name": "q",
@@ -4685,7 +5159,7 @@
                       "properties": {
                         "limit": {
                           "type": "number",
-                          "description": "Maximum number of records requested for this page. Collection endpoints default to 50 and cap at 100."
+                          "description": "Maximum number of records requested for this page. Collection endpoints default to 50; values above 100 are rejected."
                         },
                         "offset": {
                           "type": "number",
@@ -4722,6 +5196,37 @@
                     }
                   },
                   "additionalProperties": false
+                },
+                "examples": {
+                  "success": {
+                    "summary": "Toyota franchise dealers in California",
+                    "value": {
+                      "data": [
+                        {
+                          "dealer_id": "b62c6042-b3a0-4a58-bc5b-55966bd1c68c",
+                          "name": "Claremont Toyota",
+                          "city": "Claremont",
+                          "state": "CA",
+                          "country": "US",
+                          "latitude": 34.080929,
+                          "longitude": -117.72527,
+                          "type": "franchise",
+                          "website": "https://claremonttoyota.com",
+                          "makes": [
+                            "Toyota"
+                          ],
+                          "listing_count": 1656
+                        }
+                      ],
+                      "pagination": {
+                        "limit": 2,
+                        "offset": 0,
+                        "total": 130,
+                        "next_offset": 2
+                      },
+                      "meta": {}
+                    }
+                  }
                 }
               }
             },
@@ -4916,8 +5421,18 @@
             }
           }
         },
-        "description": "Returns dealer summaries ordered by active listing count. Listing counts use VIN-level listing deduplication and ownership assignment, so they can differ from raw dealer feed counts. Use state and q to narrow results.",
-        "summary": "Search dealers"
+        "description": "Returns public dealer summaries ordered by active listing count. Listing counts use VIN-level listing deduplication and ownership assignment, so they can differ from raw dealer feed counts. Use dealer_id, state, country, type, make, and q to narrow results.",
+        "summary": "Search dealers",
+        "x-visor-example-request": {
+          "method": "GET",
+          "path": "/v1/dealers",
+          "query": {
+            "state": "CA",
+            "type": "franchise",
+            "make": "Toyota",
+            "limit": "2"
+          }
+        }
       }
     },
     "/v1/dealers/{dealer_id}": {
@@ -4935,7 +5450,8 @@
               "description": "Dealer UUID."
             },
             "required": true,
-            "description": "Dealer UUID."
+            "description": "Dealer UUID.",
+            "example": "b62c6042-b3a0-4a58-bc5b-55966bd1c68c"
           }
         ],
         "security": [
@@ -5173,6 +5689,36 @@
                   },
                   "additionalProperties": false,
                   "description": "Dealer detail response envelope."
+                },
+                "examples": {
+                  "success": {
+                    "summary": "Dealer profile with address",
+                    "value": {
+                      "data": {
+                        "dealer_id": "b62c6042-b3a0-4a58-bc5b-55966bd1c68c",
+                        "name": "Claremont Toyota",
+                        "city": "Claremont",
+                        "state": "CA",
+                        "country": "US",
+                        "latitude": 34.080929,
+                        "longitude": -117.72527,
+                        "type": "franchise",
+                        "website": "https://claremonttoyota.com",
+                        "makes": [
+                          "Toyota"
+                        ],
+                        "listing_count": 1656,
+                        "phone": "(909) 455-9142",
+                        "address": {
+                          "line1": "601 Auto Center Dr",
+                          "city": "Claremont",
+                          "state": "CA",
+                          "country": "US"
+                        }
+                      },
+                      "meta": {}
+                    }
+                  }
                 }
               }
             },
@@ -5378,7 +5924,11 @@
           }
         },
         "description": "Returns one dealer summary by dealer_id. Missing dealers return 404 not_found_error.",
-        "summary": "Get a dealer"
+        "summary": "Get a dealer",
+        "x-visor-example-request": {
+          "method": "GET",
+          "path": "/v1/dealers/b62c6042-b3a0-4a58-bc5b-55966bd1c68c"
+        }
       }
     },
     "/v1/dealers/{dealer_id}/listings": {
@@ -5396,7 +5946,8 @@
               "description": "Dealer UUID."
             },
             "required": true,
-            "description": "Dealer UUID."
+            "description": "Dealer UUID.",
+            "example": "b62c6042-b3a0-4a58-bc5b-55966bd1c68c"
           },
           {
             "name": "limit",
@@ -5406,7 +5957,8 @@
               "description": "Page size as an integer string. Defaults to 50; maximum 100."
             },
             "required": false,
-            "description": "Page size as an integer string. Defaults to 50; maximum 100."
+            "description": "Page size as an integer string. Defaults to 50; maximum 100.",
+            "example": "2"
           },
           {
             "name": "offset",
@@ -5446,10 +5998,11 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "Comma-separated public listing summary fields to return. id and vin are always returned. Use default to include the default listing summary fieldset plus selected extras. Unknown fields are rejected. Supported fields: default, id, vin, year, make, model, trim, version, body_type, drivetrain, fuel_type, powertrain_type, transmission, engine, cylinders, doors, seating_capacity, exterior_color, interior_color, base_exterior_color, base_interior_color, msrp, discount_from_msrp, price, miles, days_on_market, status, inventory_status, inventory_type, stock_number, vdp_url, sold_date, dealer_id, dealer_name, city, state, latitude, longitude, distance_miles, photo_urls, features, options_packages."
+              "description": "Comma-separated public listing summary fields to return. This controls response projection only; filters such as availability_status, options_packages, and features do not belong in fields. id and vin are always returned. Use default to include the default listing summary fieldset plus selected extras. Unknown fields are rejected. Supported fields: default, id, vin, year, make, model, trim, version, body_type, drivetrain, fuel_type, powertrain_type, transmission, engine, cylinders, doors, seating_capacity, exterior_color, interior_color, base_exterior_color, base_interior_color, msrp, discount_from_msrp, price, miles, days_on_market, status, inventory_status, inventory_type, stock_number, vdp_url, sold_date, dealer_id, dealer_name, dealer_type, city, state, latitude, longitude, distance_miles, photo_urls, features, options_packages."
             },
             "required": false,
-            "description": "Comma-separated public listing summary fields to return. id and vin are always returned. Use default to include the default listing summary fieldset plus selected extras. Unknown fields are rejected. Supported fields: default, id, vin, year, make, model, trim, version, body_type, drivetrain, fuel_type, powertrain_type, transmission, engine, cylinders, doors, seating_capacity, exterior_color, interior_color, base_exterior_color, base_interior_color, msrp, discount_from_msrp, price, miles, days_on_market, status, inventory_status, inventory_type, stock_number, vdp_url, sold_date, dealer_id, dealer_name, city, state, latitude, longitude, distance_miles, photo_urls, features, options_packages."
+            "description": "Comma-separated public listing summary fields to return. This controls response projection only; filters such as availability_status, options_packages, and features do not belong in fields. id and vin are always returned. Use default to include the default listing summary fieldset plus selected extras. Unknown fields are rejected. Supported fields: default, id, vin, year, make, model, trim, version, body_type, drivetrain, fuel_type, powertrain_type, transmission, engine, cylinders, doors, seating_capacity, exterior_color, interior_color, base_exterior_color, base_interior_color, msrp, discount_from_msrp, price, miles, days_on_market, status, inventory_status, inventory_type, stock_number, vdp_url, sold_date, dealer_id, dealer_name, dealer_type, city, state, latitude, longitude, distance_miles, photo_urls, features, options_packages.",
+            "example": "default,price,miles,vdp_url"
           },
           {
             "name": "include",
@@ -5519,7 +6072,8 @@
               "description": "Comma-separated dealer UUIDs. Accepts up to 50 dealer IDs and uses dealer-filtered listing metering."
             },
             "required": false,
-            "description": "Comma-separated dealer UUIDs. Accepts up to 50 dealer IDs and uses dealer-filtered listing metering."
+            "description": "Comma-separated dealer UUIDs. Accepts up to 50 dealer IDs and uses dealer-filtered listing metering.",
+            "example": "b62c6042-b3a0-4a58-bc5b-55966bd1c68c"
           },
           {
             "name": "dealer_type",
@@ -5546,10 +6100,10 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "Comma-separated inventory classes such as new,used,certified."
+              "description": "Comma-separated inventory classes: new, used, certified. cpo is accepted as an alias for certified."
             },
             "required": false,
-            "description": "Comma-separated inventory classes such as new,used,certified."
+            "description": "Comma-separated inventory classes: new, used, certified. cpo is accepted as an alias for certified."
           },
           {
             "name": "body_type",
@@ -5610,6 +6164,16 @@
             },
             "required": false,
             "description": "Comma-separated fuel type values."
+          },
+          {
+            "name": "powertrain_type",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "Comma-separated powertrain type values."
+            },
+            "required": false,
+            "description": "Comma-separated powertrain type values."
           },
           {
             "name": "engine",
@@ -5726,10 +6290,10 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "Comma-separated listing keyword tokens. Positive tokens must be present; negative history tokens are excluded."
+              "description": "Comma-separated provenance/history keyword tokens. Supported values: one_owner, clean_title, branded, fleet. Positive tokens must be present; negative history tokens are excluded."
             },
             "required": false,
-            "description": "Comma-separated listing keyword tokens. Positive tokens must be present; negative history tokens are excluded."
+            "description": "Comma-separated provenance/history keyword tokens. Supported values: one_owner, clean_title, branded, fleet. Positive tokens must be present; negative history tokens are excluded."
           },
           {
             "name": "vin_pattern",
@@ -5790,6 +6354,46 @@
             },
             "required": false,
             "description": "Comma-separated dealer states to exclude."
+          },
+          {
+            "name": "exclude_inventory_type",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "Comma-separated inventory classes to exclude: new, used, certified. cpo is accepted as an alias for certified."
+            },
+            "required": false,
+            "description": "Comma-separated inventory classes to exclude: new, used, certified. cpo is accepted as an alias for certified."
+          },
+          {
+            "name": "exclude_body_type",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "Comma-separated body types to exclude."
+            },
+            "required": false,
+            "description": "Comma-separated body types to exclude."
+          },
+          {
+            "name": "exclude_transmission",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "Comma-separated transmission values to exclude."
+            },
+            "required": false,
+            "description": "Comma-separated transmission values to exclude."
+          },
+          {
+            "name": "exclude_drivetrain",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "Comma-separated drivetrain values to exclude."
+            },
+            "required": false,
+            "description": "Comma-separated drivetrain values to exclude."
           },
           {
             "name": "exclude_version",
@@ -6399,7 +7003,7 @@
                                 "type": "null"
                               }
                             ],
-                            "description": "Vehicle inventory class such as new, used, or certified."
+                            "description": "Vehicle inventory class: new, used, or certified."
                           },
                           "stock_number": {
                             "anyOf": [
@@ -6455,6 +7059,21 @@
                               }
                             ],
                             "description": "Dealer display name."
+                          },
+                          "dealer_type": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "enum": [
+                                  "franchise",
+                                  "independent"
+                                ]
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "Dealer type associated with the listing when available."
                           },
                           "city": {
                             "anyOf": [
@@ -6538,6 +7157,7 @@
                               "type": "object",
                               "required": [
                                 "changed_at",
+                                "miles",
                                 "price_before",
                                 "price_after"
                               ],
@@ -6545,6 +7165,17 @@
                                 "changed_at": {
                                   "type": "string",
                                   "description": "Timestamp of the price change."
+                                },
+                                "miles": {
+                                  "anyOf": [
+                                    {
+                                      "type": "number"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ],
+                                  "description": "Observed odometer mileage at the price change when available."
                                 },
                                 "price_before": {
                                   "anyOf": [
@@ -6625,7 +7256,7 @@
                       "properties": {
                         "limit": {
                           "type": "number",
-                          "description": "Maximum number of records requested for this page. Collection endpoints default to 50 and cap at 100."
+                          "description": "Maximum number of records requested for this page. Collection endpoints default to 50; values above 100 are rejected."
                         },
                         "offset": {
                           "type": "number",
@@ -6662,6 +7293,40 @@
                     }
                   },
                   "additionalProperties": false
+                },
+                "examples": {
+                  "success": {
+                    "summary": "Attributed inventory for one dealer",
+                    "value": {
+                      "data": [
+                        {
+                          "id": "03738526521c9c73b36cbc2fc28f8891",
+                          "vin": "3TMLB5JN3TM286572",
+                          "year": 2026,
+                          "make": "Toyota",
+                          "model": "Tacoma",
+                          "trim": "SR5",
+                          "price": 41903,
+                          "miles": 0,
+                          "status": "active",
+                          "inventory_status": "active",
+                          "inventory_type": "new",
+                          "dealer_id": "b62c6042-b3a0-4a58-bc5b-55966bd1c68c",
+                          "dealer_name": "Claremont Toyota",
+                          "city": "Claremont",
+                          "state": "CA",
+                          "vdp_url": "https://www.claremonttoyota.com/viewdetails/new/3tmlb5jn3tm286572"
+                        }
+                      ],
+                      "pagination": {
+                        "limit": 2,
+                        "offset": 0,
+                        "total": 1656,
+                        "next_offset": 2
+                      },
+                      "meta": {}
+                    }
+                  }
                 }
               }
             },
@@ -6857,7 +7522,15 @@
           }
         },
         "description": "Returns listing summaries scoped to one dealer after VIN-level listing deduplication and ownership assignment. If a dealer feed contains a VIN that Freeway attributes to another dealer, that VIN may not appear here. Supports the listing filter and pagination surface.",
-        "summary": "List a dealer's inventory"
+        "summary": "List a dealer's inventory",
+        "x-visor-example-request": {
+          "method": "GET",
+          "path": "/v1/dealers/b62c6042-b3a0-4a58-bc5b-55966bd1c68c/listings",
+          "query": {
+            "limit": "2",
+            "fields": "default,price,miles,vdp_url"
+          }
+        }
       }
     },
     "/v1/usage": {
@@ -6895,7 +7568,8 @@
               "description": "Optional comma-separated metering classes to include."
             },
             "required": false,
-            "description": "Optional comma-separated metering classes to include."
+            "description": "Optional comma-separated metering classes to include.",
+            "example": "listing_search,vehicle_detail"
           }
         ],
         "security": [
@@ -7028,6 +7702,33 @@
                   },
                   "additionalProperties": false,
                   "description": "Public API usage summary response envelope."
+                },
+                "examples": {
+                  "success": {
+                    "summary": "Daily usage summary for selected metering classes",
+                    "value": {
+                      "data": [
+                        {
+                          "date": "2026-06-09",
+                          "metering_class": "listing_search",
+                          "requests": 1,
+                          "charged_micros": 2000
+                        }
+                      ],
+                      "totals": {
+                        "requests": 1,
+                        "charged_micros": 2000
+                      },
+                      "meta": {
+                        "start_date": "2026-05-11",
+                        "end_date": "2026-06-09",
+                        "interval": "day",
+                        "currency": "USD",
+                        "source": "public_api_usage_events",
+                        "freshness": "Usage analytics are eventually consistent with the billing ledger."
+                      }
+                    }
+                  }
                 }
               }
             },
@@ -7205,7 +7906,14 @@
           }
         },
         "description": "Returns daily billable usage totals for the authenticated API account. Usage analytics are eventually consistent with the billing ledger and are intended for customer dashboards and reconciliation.",
-        "summary": "Summarize usage"
+        "summary": "Summarize usage",
+        "x-visor-example-request": {
+          "method": "GET",
+          "path": "/v1/usage",
+          "query": {
+            "metering_class": "listing_search,vehicle_detail"
+          }
+        }
       }
     }
   },
