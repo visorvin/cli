@@ -75,6 +75,7 @@ rsync -a --delete \
   --exclude='internal/cli/helpers.go' \
   --exclude='internal/client/*_test.go' \
   --exclude='internal/cli/*_test.go' \
+  --exclude='internal/config/*_test.go' \
   "$TMP/visor-generated/" "$ROOT/"
 
 "$ROOT/scripts/productize-generated.sh"

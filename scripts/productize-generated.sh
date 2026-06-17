@@ -73,7 +73,7 @@ fi
 # Keep product-specific root/client behavior that Printing Press regeneration
 # currently resets.
 if [ -f internal/cli/root.go ]; then
-  perl -0pi -e 's/var version = "1\.0\.0"/var version = "1.0.20"/' internal/cli/root.go
+  perl -0pi -e 's/var version = "1\.0\.0"/var version = "1.0.22"/' internal/cli/root.go
   perl -0pi -e 's/(\tcsv\s+bool\n)(\tplain\s+bool)/$1\tmarkdown      bool\n$2/' internal/cli/root.go
   perl -0pi -e 's/(\tc\.NoCache = f\.noCache\n)(\treturn c, nil)/$1\tc.UserAgent = "visor-cli\/" + version\n\tc.Telemetry = f.telemetryHeaders()\n$2/' internal/cli/root.go
   if ! rg -q 'func \(f \*rootFlags\) telemetryHeaders' internal/cli/root.go; then
@@ -94,8 +94,18 @@ if [ -f internal/client/client.go ]; then
   fi
 fi
 
+if [ -f internal/config/config.go ]; then
+  perl -0pi -e 's/\t\treturn c\.AuthHeaderVal/\t\treturn strings.TrimSpace(c.AuthHeaderVal)/' internal/config/config.go
+  perl -0pi -e 's/\tif c\.VisorApiKey != "" \{\n\t\tc\.AuthSource = "env:VISOR_API_KEY"\n\t\treturn "Bearer " \+ c\.VisorApiKey\n\t\}/\tif c.VisorApiKey != "" {\n\t\tif c.AuthSource == "" {\n\t\t\tc.AuthSource = "config"\n\t\t}\n\t\treturn bearerAuthHeader(c.VisorApiKey)\n\t}/' internal/config/config.go
+  perl -0pi -e 's/\t\treturn "Bearer " \+ c\.AccessToken/\t\treturn bearerAuthHeader(c.AccessToken)/' internal/config/config.go
+  if ! rg -q 'func NormalizeAPIToken' internal/config/config.go; then
+    perl -0pi -e 's/(func applyAuthFormat)/func NormalizeAPIToken(token string) string {\n\ttoken = strings.TrimSpace(token)\n\tif strings.HasPrefix(strings.ToLower(token), "bearer ") {\n\t\ttoken = strings.TrimSpace(token[len("bearer "):])\n\t}\n\treturn token\n}\n\nfunc bearerAuthHeader(token string) string {\n\ttoken = NormalizeAPIToken(token)\n\tif token == "" {\n\t\treturn ""\n\t}\n\treturn "Bearer " + token\n}\n\n$1/' internal/config/config.go
+  fi
+  perl -0pi -e 's/(func \(c \*Config\) ClearTokens\(\) error \{\n)(?!\tc\.AuthHeaderVal = "")/$1\tc.AuthHeaderVal = ""\n\tc.VisorApiKey = ""\n/' internal/config/config.go
+fi
+
 if [ -f cmd/visor-mcp/main.go ]; then
-  perl -0pi -e 's/"1\.0\.0"/"1.0.20"/' cmd/visor-mcp/main.go
+  perl -0pi -e 's/"1\.0\.0"/"1.0.22"/' cmd/visor-mcp/main.go
 fi
 
 if [ -f internal/mcp/tools.go ]; then

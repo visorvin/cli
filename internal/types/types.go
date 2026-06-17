@@ -29,16 +29,6 @@ type FacetsListResponse struct {
 	Meta json.RawMessage `json:"meta"`
 }
 
-type HttpApiDecodeError struct {
-	Issues  json.RawMessage `json:"issues"`
-	Message string          `json:"message"`
-}
-
-type Issue struct {
-	Message string          `json:"message"`
-	Path    json.RawMessage `json:"path"`
-}
-
 type ListingsDealersItem struct {
 	BaseExteriorColor string          `json:"base_exterior_color"`
 	BaseInteriorColor string          `json:"base_interior_color"`
@@ -156,6 +146,11 @@ type PublicApiPermissionError struct {
 
 type PublicApiPlatformError struct {
 	Error json.RawMessage `json:"error"`
+}
+
+type PublicApiRateLimitError struct {
+	Error      json.RawMessage `json:"error"`
+	RetryAfter float64         `json:"retryAfter"`
 }
 
 type PublicApiValidationError struct {

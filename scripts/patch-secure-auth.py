@@ -44,6 +44,8 @@ new_block = r'''func newAuthSetTokenCmd(flags *rootFlags) *cobra.Command {
 			// auth_header value (common after regenerate) shadows the saved
 			// token and set-token silently has no effect.
 			cfg.AuthHeaderVal = ""
+			cfg.VisorApiKey = ""
+			token = config.NormalizeAPIToken(token)
 			if err := cfg.SaveTokens("", "", token, "", cfg.TokenExpiry); err != nil {
 				return configErr(fmt.Errorf("saving token: %w", err))
 			}

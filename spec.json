@@ -770,20 +770,11 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "required": [
-                    "data",
-                    "pagination",
-                    "meta"
-                  ],
                   "properties": {
                     "data": {
                       "type": "array",
                       "items": {
                         "type": "object",
-                        "required": [
-                          "id",
-                          "vin"
-                        ],
                         "properties": {
                           "id": {
                             "type": "string",
@@ -1223,12 +1214,6 @@
                             "type": "array",
                             "items": {
                               "type": "object",
-                              "required": [
-                                "changed_at",
-                                "miles",
-                                "price_before",
-                                "price_after"
-                              ],
                               "properties": {
                                 "changed_at": {
                                   "type": "string",
@@ -1268,6 +1253,12 @@
                                   "description": "New listed price in whole dollars."
                                 }
                               },
+                              "required": [
+                                "changed_at",
+                                "miles",
+                                "price_before",
+                                "price_after"
+                              ],
                               "additionalProperties": false
                             },
                             "description": "Observed price changes when include=price_history is requested."
@@ -1276,11 +1267,6 @@
                             "type": "array",
                             "items": {
                               "type": "object",
-                              "required": [
-                                "code",
-                                "name",
-                                "msrp"
-                              ],
                               "properties": {
                                 "code": {
                                   "type": "string",
@@ -1302,12 +1288,21 @@
                                   "description": "Option MSRP in whole dollars when available."
                                 }
                               },
+                              "required": [
+                                "code",
+                                "name",
+                                "msrp"
+                              ],
                               "additionalProperties": false,
                               "description": "Listing option decoded from option/package codes."
                             },
                             "description": "Installed options decoded from option/package codes when include=options is requested."
                           }
                         },
+                        "required": [
+                          "id",
+                          "vin"
+                        ],
                         "additionalProperties": false,
                         "description": "Public listing summary returned by listing collection endpoints."
                       },
@@ -1315,12 +1310,6 @@
                     },
                     "pagination": {
                       "type": "object",
-                      "required": [
-                        "limit",
-                        "offset",
-                        "total",
-                        "next_offset"
-                      ],
                       "properties": {
                         "limit": {
                           "type": "number",
@@ -1346,20 +1335,25 @@
                           "description": "Offset for the next page, or null when there are no more records."
                         }
                       },
+                      "required": [
+                        "limit",
+                        "offset",
+                        "total",
+                        "next_offset"
+                      ],
                       "additionalProperties": false,
                       "description": "Offset pagination metadata returned by collection endpoints."
                     },
                     "meta": {
                       "type": "object",
-                      "required": [],
-                      "properties": {},
-                      "additionalProperties": {
-                        "$id": "/schemas/unknown",
-                        "title": "unknown"
-                      },
                       "description": "Reserved metadata object. It is empty for the beta contract unless an endpoint documents otherwise."
                     }
                   },
+                  "required": [
+                    "data",
+                    "pagination",
+                    "meta"
+                  ],
                   "additionalProperties": false
                 },
                 "examples": {
@@ -1454,14 +1448,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "anyOf": [
-                    {
-                      "$ref": "#/components/schemas/HttpApiDecodeError"
-                    },
-                    {
-                      "$ref": "#/components/schemas/PublicApiValidationError"
-                    }
-                  ]
+                  "$ref": "#/components/schemas/PublicApiValidationError"
                 }
               }
             }
@@ -1501,79 +1488,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "required": [
-                    "error",
-                    "_tag"
-                  ],
-                  "properties": {
-                    "error": {
-                      "type": "object",
-                      "required": [
-                        "type",
-                        "code",
-                        "message"
-                      ],
-                      "properties": {
-                        "type": {
-                          "type": "string"
-                        },
-                        "code": {
-                          "type": "string"
-                        },
-                        "message": {
-                          "type": "string"
-                        },
-                        "current_version": {
-                          "anyOf": [
-                            {
-                              "type": "string"
-                            },
-                            {
-                              "type": "null"
-                            }
-                          ]
-                        },
-                        "minimum_supported_version": {
-                          "anyOf": [
-                            {
-                              "type": "string"
-                            },
-                            {
-                              "type": "null"
-                            }
-                          ]
-                        },
-                        "reason_code": {
-                          "anyOf": [
-                            {
-                              "type": "string"
-                            },
-                            {
-                              "type": "null"
-                            }
-                          ]
-                        },
-                        "update_url": {
-                          "type": "string"
-                        },
-                        "update_command": {
-                          "type": "string"
-                        }
-                      },
-                      "additionalProperties": false
-                    },
-                    "retryAfter": {
-                      "type": "number"
-                    },
-                    "_tag": {
-                      "type": "string",
-                      "enum": [
-                        "PublicApiRateLimitError"
-                      ]
-                    }
-                  },
-                  "additionalProperties": false
+                  "$ref": "#/components/schemas/PublicApiRateLimitError"
                 }
               }
             }
@@ -2348,19 +2263,9 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "required": [
-                    "data",
-                    "meta"
-                  ],
                   "properties": {
                     "data": {
                       "type": "object",
-                      "required": [
-                        "total",
-                        "facets",
-                        "range_facets",
-                        "stats"
-                      ],
                       "properties": {
                         "total": {
                           "type": "number",
@@ -2368,16 +2273,10 @@
                         },
                         "facets": {
                           "type": "object",
-                          "required": [],
-                          "properties": {},
                           "additionalProperties": {
                             "type": "array",
                             "items": {
                               "type": "object",
-                              "required": [
-                                "value",
-                                "count"
-                              ],
                               "properties": {
                                 "value": {
                                   "type": "string",
@@ -2389,10 +2288,6 @@
                                 },
                                 "metric": {
                                   "type": "object",
-                                  "required": [
-                                    "name",
-                                    "value"
-                                  ],
                                   "properties": {
                                     "name": {
                                       "type": "string",
@@ -2417,6 +2312,10 @@
                                       "description": "Reason the Facet Metric value is null."
                                     }
                                   },
+                                  "required": [
+                                    "name",
+                                    "value"
+                                  ],
                                   "additionalProperties": false,
                                   "description": "Selected non-count Facet Metric for this bucket."
                                 },
@@ -2448,6 +2347,10 @@
                                   "description": "Median discount from MSRP for this bucket when option sort enrichment is enabled internally."
                                 }
                               },
+                              "required": [
+                                "value",
+                                "count"
+                              ],
                               "additionalProperties": false,
                               "description": "Facet value bucket."
                             }
@@ -2456,26 +2359,13 @@
                         },
                         "range_facets": {
                           "type": "object",
-                          "required": [],
-                          "properties": {},
                           "additionalProperties": {
                             "type": "object",
-                            "required": [
-                              "buckets",
-                              "interval",
-                              "min",
-                              "max"
-                            ],
                             "properties": {
                               "buckets": {
                                 "type": "array",
                                 "items": {
                                   "type": "object",
-                                  "required": [
-                                    "min",
-                                    "max",
-                                    "count"
-                                  ],
                                   "properties": {
                                     "min": {
                                       "type": "number",
@@ -2490,6 +2380,11 @@
                                       "description": "Number of matching records in the bucket."
                                     }
                                   },
+                                  "required": [
+                                    "min",
+                                    "max",
+                                    "count"
+                                  ],
                                   "additionalProperties": false,
                                   "description": "Numeric facet bucket."
                                 },
@@ -2515,6 +2410,12 @@
                                 "description": "Largest returned bucket upper bound."
                               }
                             },
+                            "required": [
+                              "buckets",
+                              "interval",
+                              "min",
+                              "max"
+                            ],
                             "additionalProperties": false,
                             "description": "Numeric range facet."
                           },
@@ -2522,19 +2423,8 @@
                         },
                         "stats": {
                           "type": "object",
-                          "required": [],
-                          "properties": {},
                           "additionalProperties": {
                             "type": "object",
-                            "required": [
-                              "min",
-                              "max",
-                              "count",
-                              "missing",
-                              "mean",
-                              "median",
-                              "stddev"
-                            ],
                             "properties": {
                               "min": {
                                 "type": "number",
@@ -2565,23 +2455,32 @@
                                 "description": "Sample standard deviation for the matching records."
                               }
                             },
+                            "required": [
+                              "min",
+                              "max",
+                              "count",
+                              "missing",
+                              "mean",
+                              "median",
+                              "stddev"
+                            ],
                             "additionalProperties": false,
                             "description": "Stats for a numeric facet field."
                           },
                           "description": "Numeric stats keyed by range facet name."
                         }
                       },
+                      "required": [
+                        "total",
+                        "facets",
+                        "range_facets",
+                        "stats"
+                      ],
                       "additionalProperties": false,
                       "description": "Facet counts and numeric ranges for the supplied filters."
                     },
                     "meta": {
                       "type": "object",
-                      "required": [
-                        "facets",
-                        "metric",
-                        "sort",
-                        "minimum_metric_count"
-                      ],
                       "properties": {
                         "facets": {
                           "type": "array",
@@ -2609,10 +2508,20 @@
                           "description": "Minimum bucket count required before non-count metric values are returned. Currently 10."
                         }
                       },
+                      "required": [
+                        "facets",
+                        "metric",
+                        "sort",
+                        "minimum_metric_count"
+                      ],
                       "additionalProperties": false,
                       "description": "Facet response metadata."
                     }
                   },
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
                   "additionalProperties": false,
                   "description": "Facet response envelope."
                 },
@@ -2751,14 +2660,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "anyOf": [
-                    {
-                      "$ref": "#/components/schemas/HttpApiDecodeError"
-                    },
-                    {
-                      "$ref": "#/components/schemas/PublicApiValidationError"
-                    }
-                  ]
+                  "$ref": "#/components/schemas/PublicApiValidationError"
                 }
               }
             }
@@ -2798,79 +2700,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "required": [
-                    "error",
-                    "_tag"
-                  ],
-                  "properties": {
-                    "error": {
-                      "type": "object",
-                      "required": [
-                        "type",
-                        "code",
-                        "message"
-                      ],
-                      "properties": {
-                        "type": {
-                          "type": "string"
-                        },
-                        "code": {
-                          "type": "string"
-                        },
-                        "message": {
-                          "type": "string"
-                        },
-                        "current_version": {
-                          "anyOf": [
-                            {
-                              "type": "string"
-                            },
-                            {
-                              "type": "null"
-                            }
-                          ]
-                        },
-                        "minimum_supported_version": {
-                          "anyOf": [
-                            {
-                              "type": "string"
-                            },
-                            {
-                              "type": "null"
-                            }
-                          ]
-                        },
-                        "reason_code": {
-                          "anyOf": [
-                            {
-                              "type": "string"
-                            },
-                            {
-                              "type": "null"
-                            }
-                          ]
-                        },
-                        "update_url": {
-                          "type": "string"
-                        },
-                        "update_command": {
-                          "type": "string"
-                        }
-                      },
-                      "additionalProperties": false
-                    },
-                    "retryAfter": {
-                      "type": "number"
-                    },
-                    "_tag": {
-                      "type": "string",
-                      "enum": [
-                        "PublicApiRateLimitError"
-                      ]
-                    }
-                  },
-                  "additionalProperties": false
+                  "$ref": "#/components/schemas/PublicApiRateLimitError"
                 }
               }
             }
@@ -2942,32 +2772,9 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "required": [
-                    "data",
-                    "meta"
-                  ],
                   "properties": {
                     "data": {
                       "type": "object",
-                      "required": [
-                        "id",
-                        "vin",
-                        "status",
-                        "price",
-                        "miles",
-                        "inventory_type",
-                        "stock_number",
-                        "vdp_url",
-                        "vhr_url",
-                        "photo_urls",
-                        "photo_url_primary",
-                        "inventory_date",
-                        "sold_date",
-                        "last_checked_at",
-                        "dealer",
-                        "vehicle",
-                        "price_history"
-                      ],
                       "properties": {
                         "id": {
                           "anyOf": [
@@ -3077,6 +2884,181 @@
                           ],
                           "description": "Primary listing photo URL when available."
                         },
+                        "pricing": {
+                          "anyOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "displayed_provider_current_price_usd": {
+                                  "anyOf": [
+                                    {
+                                      "type": "number"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ],
+                                  "description": "Provider-displayed listing price for broad shopper consumption at observation time. Excludes MSRP fallback and does not imply the lowest eligible price."
+                                },
+                                "seller_total_before_taxes_and_registration_usd": {
+                                  "anyOf": [
+                                    {
+                                      "type": "number"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ],
+                                  "description": "Comparable broad-buyer seller-side total before government taxes, title, registration, license, lien, and similar statutory charges."
+                                },
+                                "seller_total_before_manufacturer_incentives_usd": {
+                                  "anyOf": [
+                                    {
+                                      "type": "number"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ],
+                                  "description": "Dealer-controlled seller total before manufacturer-funded incentives and rebates, including broadly available temporary programs."
+                                },
+                                "dealer_adjusted_vehicle_price_usd": {
+                                  "anyOf": [
+                                    {
+                                      "type": "number"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ],
+                                  "description": "Vehicle price after dealer-controlled vehicle adjustments, before seller fees, seller add-ons, government charges, and manufacturer incentives."
+                                },
+                                "line_items": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "object",
+                                    "properties": {
+                                      "amount_usd": {
+                                        "anyOf": [
+                                          {
+                                            "type": "number"
+                                          },
+                                          {
+                                            "type": "null"
+                                          }
+                                        ],
+                                        "description": "Provider-observed line item amount in whole US dollars when available."
+                                      },
+                                      "applicability": {
+                                        "anyOf": [
+                                          {
+                                            "type": "string"
+                                          },
+                                          {
+                                            "type": "null"
+                                          }
+                                        ],
+                                        "description": "Buyer or configuration applicability for this line item, such as all_buyers, qualified_buyer, lead_gated, or configuration."
+                                      },
+                                      "direction": {
+                                        "anyOf": [
+                                          {
+                                            "type": "string"
+                                          },
+                                          {
+                                            "type": "null"
+                                          }
+                                        ],
+                                        "description": "How this line item participates in pricing context: add, subtract, set, anchor, or informational."
+                                      },
+                                      "raw_label": {
+                                        "anyOf": [
+                                          {
+                                            "type": "string"
+                                          },
+                                          {
+                                            "type": "null"
+                                          }
+                                        ],
+                                        "description": "Dealer- or provider-displayed line item label when available."
+                                      },
+                                      "role": {
+                                        "anyOf": [
+                                          {
+                                            "type": "string"
+                                          },
+                                          {
+                                            "type": "null"
+                                          }
+                                        ],
+                                        "description": "Normalized line item role, such as displayed_price, pricing_anchor, seller_fee, seller_add_on, dealer_markup, dealer_discount, manufacturer_incentive, government_charge, conditional_applicability, payment_quote, aggregate, disclaimer, or unknown."
+                                      },
+                                      "row_key": {
+                                        "anyOf": [
+                                          {
+                                            "type": "string"
+                                          },
+                                          {
+                                            "type": "null"
+                                          }
+                                        ],
+                                        "description": "Stable row key for this line item within the listing pricing payload when available."
+                                      },
+                                      "row_order": {
+                                        "anyOf": [
+                                          {
+                                            "type": "number"
+                                          },
+                                          {
+                                            "type": "null"
+                                          }
+                                        ],
+                                        "description": "Original display order for this line item when available."
+                                      },
+                                      "subtype": {
+                                        "anyOf": [
+                                          {
+                                            "type": "string"
+                                          },
+                                          {
+                                            "type": "null"
+                                          }
+                                        ],
+                                        "description": "Additional normalized line item subtype when available."
+                                      }
+                                    },
+                                    "required": [
+                                      "amount_usd",
+                                      "applicability",
+                                      "direction",
+                                      "raw_label",
+                                      "role",
+                                      "row_key",
+                                      "row_order",
+                                      "subtype"
+                                    ],
+                                    "additionalProperties": false,
+                                    "description": "Customer-safe provider-observed pricing row evidence for the listing. Internal parser/source fields are not exposed."
+                                  },
+                                  "description": "Provider-observed pricing row evidence when available."
+                                }
+                              },
+                              "required": [
+                                "displayed_provider_current_price_usd",
+                                "seller_total_before_taxes_and_registration_usd",
+                                "seller_total_before_manufacturer_incentives_usd",
+                                "dealer_adjusted_vehicle_price_usd",
+                                "line_items"
+                              ],
+                              "additionalProperties": false,
+                              "description": "Nullable listing pricing detail when supported provider data is available. Existing price remains unchanged."
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "description": "Detailed listing pricing when available from supported providers; otherwise null."
+                        },
                         "inventory_date": {
                           "anyOf": [
                             {
@@ -3112,15 +3094,6 @@
                         },
                         "dealer": {
                           "type": "object",
-                          "required": [
-                            "dealer_id",
-                            "name",
-                            "city",
-                            "state",
-                            "latitude",
-                            "longitude",
-                            "phone"
-                          ],
                           "properties": {
                             "dealer_id": {
                               "anyOf": [
@@ -3200,16 +3173,20 @@
                               "description": "Dealer phone number when available."
                             }
                           },
+                          "required": [
+                            "dealer_id",
+                            "name",
+                            "city",
+                            "state",
+                            "latitude",
+                            "longitude",
+                            "phone"
+                          ],
                           "additionalProperties": false,
                           "description": "Dealer attached to a VIN detail response."
                         },
                         "vehicle": {
                           "type": "object",
-                          "required": [
-                            "vin",
-                            "status",
-                            "build"
-                          ],
                           "properties": {
                             "vin": {
                               "type": "string",
@@ -3226,31 +3203,6 @@
                             },
                             "build": {
                               "type": "object",
-                              "required": [
-                                "year",
-                                "make",
-                                "model",
-                                "trim",
-                                "version",
-                                "body_type",
-                                "drivetrain",
-                                "fuel_type",
-                                "powertrain_type",
-                                "transmission",
-                                "engine",
-                                "cylinders",
-                                "doors",
-                                "seating_capacity",
-                                "exterior_color",
-                                "interior_color",
-                                "base_exterior_color",
-                                "base_interior_color",
-                                "assembly_location",
-                                "window_sticker_verified",
-                                "base_msrp",
-                                "combined_msrp",
-                                "options"
-                              ],
                               "properties": {
                                 "year": {
                                   "anyOf": [
@@ -3493,11 +3445,6 @@
                                       "type": "array",
                                       "items": {
                                         "type": "object",
-                                        "required": [
-                                          "code",
-                                          "name",
-                                          "msrp"
-                                        ],
                                         "properties": {
                                           "code": {
                                             "type": "string",
@@ -3519,6 +3466,11 @@
                                             "description": "Option MSRP in whole dollars when available."
                                           }
                                         },
+                                        "required": [
+                                          "code",
+                                          "name",
+                                          "msrp"
+                                        ],
                                         "additionalProperties": false,
                                         "description": "VIN option decoded from option codes."
                                       }
@@ -3530,10 +3482,40 @@
                                   "description": "Installed options when include=options is requested and option data is available; otherwise null."
                                 }
                               },
+                              "required": [
+                                "year",
+                                "make",
+                                "model",
+                                "trim",
+                                "version",
+                                "body_type",
+                                "drivetrain",
+                                "fuel_type",
+                                "powertrain_type",
+                                "transmission",
+                                "engine",
+                                "cylinders",
+                                "doors",
+                                "seating_capacity",
+                                "exterior_color",
+                                "interior_color",
+                                "base_exterior_color",
+                                "base_interior_color",
+                                "assembly_location",
+                                "window_sticker_verified",
+                                "base_msrp",
+                                "combined_msrp",
+                                "options"
+                              ],
                               "additionalProperties": false,
                               "description": "Build and specification fields for a VIN."
                             }
                           },
+                          "required": [
+                            "vin",
+                            "status",
+                            "build"
+                          ],
                           "additionalProperties": false,
                           "description": "Vehicle facts attached to a listing detail response."
                         },
@@ -3543,12 +3525,6 @@
                               "type": "array",
                               "items": {
                                 "type": "object",
-                                "required": [
-                                  "changed_at",
-                                  "miles",
-                                  "price_before",
-                                  "price_after"
-                                ],
                                 "properties": {
                                   "changed_at": {
                                     "type": "string",
@@ -3588,6 +3564,12 @@
                                     "description": "New listed price in whole dollars."
                                   }
                                 },
+                                "required": [
+                                  "changed_at",
+                                  "miles",
+                                  "price_before",
+                                  "price_after"
+                                ],
                                 "additionalProperties": false,
                                 "description": "VIN price change event."
                               }
@@ -3599,20 +3581,38 @@
                           "description": "Price history when include=price_history is requested; otherwise null."
                         }
                       },
+                      "required": [
+                        "id",
+                        "vin",
+                        "status",
+                        "price",
+                        "miles",
+                        "inventory_type",
+                        "stock_number",
+                        "vdp_url",
+                        "vhr_url",
+                        "photo_urls",
+                        "photo_url_primary",
+                        "pricing",
+                        "inventory_date",
+                        "sold_date",
+                        "last_checked_at",
+                        "dealer",
+                        "vehicle",
+                        "price_history"
+                      ],
                       "additionalProperties": false,
                       "description": "Listing detail record."
                     },
                     "meta": {
                       "type": "object",
-                      "required": [],
-                      "properties": {},
-                      "additionalProperties": {
-                        "$id": "/schemas/unknown",
-                        "title": "unknown"
-                      },
                       "description": "Reserved metadata object. It is empty for the beta contract unless an endpoint documents otherwise."
                     }
                   },
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
                   "additionalProperties": false,
                   "description": "Listing detail response envelope."
                 },
@@ -3634,6 +3634,7 @@
                           "https://delivery.via.assetscs.toyota.com/adobe/assets/urn:aaid:aem:260ec892-e9be-4815-9148-8c139edd5b95/as/image.png?fmt=png-alpha%2Crgb%2Cnone"
                         ],
                         "photo_url_primary": "https://delivery.via.assetscs.toyota.com/adobe/assets/urn:aaid:aem:260ec892-e9be-4815-9148-8c139edd5b95/as/image.png?fmt=png-alpha%2Crgb%2Cnone",
+                        "pricing": null,
                         "inventory_date": "2026-06-09",
                         "sold_date": null,
                         "last_checked_at": "2026-06-09 11:40:57.534384",
@@ -3750,14 +3751,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "anyOf": [
-                    {
-                      "$ref": "#/components/schemas/HttpApiDecodeError"
-                    },
-                    {
-                      "$ref": "#/components/schemas/PublicApiValidationError"
-                    }
-                  ]
+                  "$ref": "#/components/schemas/PublicApiValidationError"
                 }
               }
             }
@@ -3807,79 +3801,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "required": [
-                    "error",
-                    "_tag"
-                  ],
-                  "properties": {
-                    "error": {
-                      "type": "object",
-                      "required": [
-                        "type",
-                        "code",
-                        "message"
-                      ],
-                      "properties": {
-                        "type": {
-                          "type": "string"
-                        },
-                        "code": {
-                          "type": "string"
-                        },
-                        "message": {
-                          "type": "string"
-                        },
-                        "current_version": {
-                          "anyOf": [
-                            {
-                              "type": "string"
-                            },
-                            {
-                              "type": "null"
-                            }
-                          ]
-                        },
-                        "minimum_supported_version": {
-                          "anyOf": [
-                            {
-                              "type": "string"
-                            },
-                            {
-                              "type": "null"
-                            }
-                          ]
-                        },
-                        "reason_code": {
-                          "anyOf": [
-                            {
-                              "type": "string"
-                            },
-                            {
-                              "type": "null"
-                            }
-                          ]
-                        },
-                        "update_url": {
-                          "type": "string"
-                        },
-                        "update_command": {
-                          "type": "string"
-                        }
-                      },
-                      "additionalProperties": false
-                    },
-                    "retryAfter": {
-                      "type": "number"
-                    },
-                    "_tag": {
-                      "type": "string",
-                      "enum": [
-                        "PublicApiRateLimitError"
-                      ]
-                    }
-                  },
-                  "additionalProperties": false
+                  "$ref": "#/components/schemas/PublicApiRateLimitError"
                 }
               }
             }
@@ -3948,19 +3870,9 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "required": [
-                    "data",
-                    "meta"
-                  ],
                   "properties": {
                     "data": {
                       "type": "object",
-                      "required": [
-                        "vin",
-                        "status",
-                        "latest_listing",
-                        "build"
-                      ],
                       "properties": {
                         "vin": {
                           "type": "string",
@@ -3979,22 +3891,6 @@
                           "anyOf": [
                             {
                               "type": "object",
-                              "required": [
-                                "id",
-                                "price",
-                                "miles",
-                                "inventory_type",
-                                "stock_number",
-                                "vdp_url",
-                                "vhr_url",
-                                "photo_urls",
-                                "photo_url_primary",
-                                "inventory_date",
-                                "sold_date",
-                                "last_checked_at",
-                                "dealer",
-                                "price_history"
-                              ],
                               "properties": {
                                 "id": {
                                   "anyOf": [
@@ -4091,6 +3987,181 @@
                                   ],
                                   "description": "Primary listing photo URL when available."
                                 },
+                                "pricing": {
+                                  "anyOf": [
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "displayed_provider_current_price_usd": {
+                                          "anyOf": [
+                                            {
+                                              "type": "number"
+                                            },
+                                            {
+                                              "type": "null"
+                                            }
+                                          ],
+                                          "description": "Provider-displayed listing price for broad shopper consumption at observation time. Excludes MSRP fallback and does not imply the lowest eligible price."
+                                        },
+                                        "seller_total_before_taxes_and_registration_usd": {
+                                          "anyOf": [
+                                            {
+                                              "type": "number"
+                                            },
+                                            {
+                                              "type": "null"
+                                            }
+                                          ],
+                                          "description": "Comparable broad-buyer seller-side total before government taxes, title, registration, license, lien, and similar statutory charges."
+                                        },
+                                        "seller_total_before_manufacturer_incentives_usd": {
+                                          "anyOf": [
+                                            {
+                                              "type": "number"
+                                            },
+                                            {
+                                              "type": "null"
+                                            }
+                                          ],
+                                          "description": "Dealer-controlled seller total before manufacturer-funded incentives and rebates, including broadly available temporary programs."
+                                        },
+                                        "dealer_adjusted_vehicle_price_usd": {
+                                          "anyOf": [
+                                            {
+                                              "type": "number"
+                                            },
+                                            {
+                                              "type": "null"
+                                            }
+                                          ],
+                                          "description": "Vehicle price after dealer-controlled vehicle adjustments, before seller fees, seller add-ons, government charges, and manufacturer incentives."
+                                        },
+                                        "line_items": {
+                                          "type": "array",
+                                          "items": {
+                                            "type": "object",
+                                            "properties": {
+                                              "amount_usd": {
+                                                "anyOf": [
+                                                  {
+                                                    "type": "number"
+                                                  },
+                                                  {
+                                                    "type": "null"
+                                                  }
+                                                ],
+                                                "description": "Provider-observed line item amount in whole US dollars when available."
+                                              },
+                                              "applicability": {
+                                                "anyOf": [
+                                                  {
+                                                    "type": "string"
+                                                  },
+                                                  {
+                                                    "type": "null"
+                                                  }
+                                                ],
+                                                "description": "Buyer or configuration applicability for this line item, such as all_buyers, qualified_buyer, lead_gated, or configuration."
+                                              },
+                                              "direction": {
+                                                "anyOf": [
+                                                  {
+                                                    "type": "string"
+                                                  },
+                                                  {
+                                                    "type": "null"
+                                                  }
+                                                ],
+                                                "description": "How this line item participates in pricing context: add, subtract, set, anchor, or informational."
+                                              },
+                                              "raw_label": {
+                                                "anyOf": [
+                                                  {
+                                                    "type": "string"
+                                                  },
+                                                  {
+                                                    "type": "null"
+                                                  }
+                                                ],
+                                                "description": "Dealer- or provider-displayed line item label when available."
+                                              },
+                                              "role": {
+                                                "anyOf": [
+                                                  {
+                                                    "type": "string"
+                                                  },
+                                                  {
+                                                    "type": "null"
+                                                  }
+                                                ],
+                                                "description": "Normalized line item role, such as displayed_price, pricing_anchor, seller_fee, seller_add_on, dealer_markup, dealer_discount, manufacturer_incentive, government_charge, conditional_applicability, payment_quote, aggregate, disclaimer, or unknown."
+                                              },
+                                              "row_key": {
+                                                "anyOf": [
+                                                  {
+                                                    "type": "string"
+                                                  },
+                                                  {
+                                                    "type": "null"
+                                                  }
+                                                ],
+                                                "description": "Stable row key for this line item within the listing pricing payload when available."
+                                              },
+                                              "row_order": {
+                                                "anyOf": [
+                                                  {
+                                                    "type": "number"
+                                                  },
+                                                  {
+                                                    "type": "null"
+                                                  }
+                                                ],
+                                                "description": "Original display order for this line item when available."
+                                              },
+                                              "subtype": {
+                                                "anyOf": [
+                                                  {
+                                                    "type": "string"
+                                                  },
+                                                  {
+                                                    "type": "null"
+                                                  }
+                                                ],
+                                                "description": "Additional normalized line item subtype when available."
+                                              }
+                                            },
+                                            "required": [
+                                              "amount_usd",
+                                              "applicability",
+                                              "direction",
+                                              "raw_label",
+                                              "role",
+                                              "row_key",
+                                              "row_order",
+                                              "subtype"
+                                            ],
+                                            "additionalProperties": false,
+                                            "description": "Customer-safe provider-observed pricing row evidence for the listing. Internal parser/source fields are not exposed."
+                                          },
+                                          "description": "Provider-observed pricing row evidence when available."
+                                        }
+                                      },
+                                      "required": [
+                                        "displayed_provider_current_price_usd",
+                                        "seller_total_before_taxes_and_registration_usd",
+                                        "seller_total_before_manufacturer_incentives_usd",
+                                        "dealer_adjusted_vehicle_price_usd",
+                                        "line_items"
+                                      ],
+                                      "additionalProperties": false,
+                                      "description": "Nullable listing pricing detail when supported provider data is available. Existing price remains unchanged."
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ],
+                                  "description": "Detailed listing pricing when available from supported providers; otherwise null."
+                                },
                                 "inventory_date": {
                                   "anyOf": [
                                     {
@@ -4126,15 +4197,6 @@
                                 },
                                 "dealer": {
                                   "type": "object",
-                                  "required": [
-                                    "dealer_id",
-                                    "name",
-                                    "city",
-                                    "state",
-                                    "latitude",
-                                    "longitude",
-                                    "phone"
-                                  ],
                                   "properties": {
                                     "dealer_id": {
                                       "anyOf": [
@@ -4214,6 +4276,15 @@
                                       "description": "Dealer phone number when available."
                                     }
                                   },
+                                  "required": [
+                                    "dealer_id",
+                                    "name",
+                                    "city",
+                                    "state",
+                                    "latitude",
+                                    "longitude",
+                                    "phone"
+                                  ],
                                   "additionalProperties": false,
                                   "description": "Dealer attached to a VIN detail response."
                                 },
@@ -4223,12 +4294,6 @@
                                       "type": "array",
                                       "items": {
                                         "type": "object",
-                                        "required": [
-                                          "changed_at",
-                                          "miles",
-                                          "price_before",
-                                          "price_after"
-                                        ],
                                         "properties": {
                                           "changed_at": {
                                             "type": "string",
@@ -4268,6 +4333,12 @@
                                             "description": "New listed price in whole dollars."
                                           }
                                         },
+                                        "required": [
+                                          "changed_at",
+                                          "miles",
+                                          "price_before",
+                                          "price_after"
+                                        ],
                                         "additionalProperties": false,
                                         "description": "VIN price change event."
                                       }
@@ -4279,6 +4350,23 @@
                                   "description": "Price history when include=price_history is requested; otherwise null."
                                 }
                               },
+                              "required": [
+                                "id",
+                                "price",
+                                "miles",
+                                "inventory_type",
+                                "stock_number",
+                                "vdp_url",
+                                "vhr_url",
+                                "photo_urls",
+                                "photo_url_primary",
+                                "pricing",
+                                "inventory_date",
+                                "sold_date",
+                                "last_checked_at",
+                                "dealer",
+                                "price_history"
+                              ],
                               "additionalProperties": false,
                               "description": "Latest known listing for the VIN, whether active, missing, or sold."
                             },
@@ -4290,31 +4378,6 @@
                         },
                         "build": {
                           "type": "object",
-                          "required": [
-                            "year",
-                            "make",
-                            "model",
-                            "trim",
-                            "version",
-                            "body_type",
-                            "drivetrain",
-                            "fuel_type",
-                            "powertrain_type",
-                            "transmission",
-                            "engine",
-                            "cylinders",
-                            "doors",
-                            "seating_capacity",
-                            "exterior_color",
-                            "interior_color",
-                            "base_exterior_color",
-                            "base_interior_color",
-                            "assembly_location",
-                            "window_sticker_verified",
-                            "base_msrp",
-                            "combined_msrp",
-                            "options"
-                          ],
                           "properties": {
                             "year": {
                               "anyOf": [
@@ -4557,11 +4620,6 @@
                                   "type": "array",
                                   "items": {
                                     "type": "object",
-                                    "required": [
-                                      "code",
-                                      "name",
-                                      "msrp"
-                                    ],
                                     "properties": {
                                       "code": {
                                         "type": "string",
@@ -4583,6 +4641,11 @@
                                         "description": "Option MSRP in whole dollars when available."
                                       }
                                     },
+                                    "required": [
+                                      "code",
+                                      "name",
+                                      "msrp"
+                                    ],
                                     "additionalProperties": false,
                                     "description": "VIN option decoded from option codes."
                                   }
@@ -4594,24 +4657,53 @@
                               "description": "Installed options when include=options is requested and option data is available; otherwise null."
                             }
                           },
+                          "required": [
+                            "year",
+                            "make",
+                            "model",
+                            "trim",
+                            "version",
+                            "body_type",
+                            "drivetrain",
+                            "fuel_type",
+                            "powertrain_type",
+                            "transmission",
+                            "engine",
+                            "cylinders",
+                            "doors",
+                            "seating_capacity",
+                            "exterior_color",
+                            "interior_color",
+                            "base_exterior_color",
+                            "base_interior_color",
+                            "assembly_location",
+                            "window_sticker_verified",
+                            "base_msrp",
+                            "combined_msrp",
+                            "options"
+                          ],
                           "additionalProperties": false,
                           "description": "Build and specification fields for a VIN."
                         }
                       },
+                      "required": [
+                        "vin",
+                        "status",
+                        "latest_listing",
+                        "build"
+                      ],
                       "additionalProperties": false,
                       "description": "VIN detail record."
                     },
                     "meta": {
                       "type": "object",
-                      "required": [],
-                      "properties": {},
-                      "additionalProperties": {
-                        "$id": "/schemas/unknown",
-                        "title": "unknown"
-                      },
                       "description": "Reserved metadata object. It is empty for the beta contract unless an endpoint documents otherwise."
                     }
                   },
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
                   "additionalProperties": false,
                   "description": "VIN detail response envelope."
                 },
@@ -4670,6 +4762,7 @@
                             "https://delivery.via.assetscs.toyota.com/adobe/assets/urn:aaid:aem:260ec892-e9be-4815-9148-8c139edd5b95/as/image.png?fmt=png-alpha%2Crgb%2Cnone"
                           ],
                           "photo_url_primary": "https://delivery.via.assetscs.toyota.com/adobe/assets/urn:aaid:aem:260ec892-e9be-4815-9148-8c139edd5b95/as/image.png?fmt=png-alpha%2Crgb%2Cnone",
+                          "pricing": null,
                           "inventory_date": "2026-06-09",
                           "sold_date": null,
                           "last_checked_at": "2026-06-09 11:40:57.534384",
@@ -4747,14 +4840,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "anyOf": [
-                    {
-                      "$ref": "#/components/schemas/HttpApiDecodeError"
-                    },
-                    {
-                      "$ref": "#/components/schemas/PublicApiValidationError"
-                    }
-                  ]
+                  "$ref": "#/components/schemas/PublicApiValidationError"
                 }
               }
             }
@@ -4804,79 +4890,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "required": [
-                    "error",
-                    "_tag"
-                  ],
-                  "properties": {
-                    "error": {
-                      "type": "object",
-                      "required": [
-                        "type",
-                        "code",
-                        "message"
-                      ],
-                      "properties": {
-                        "type": {
-                          "type": "string"
-                        },
-                        "code": {
-                          "type": "string"
-                        },
-                        "message": {
-                          "type": "string"
-                        },
-                        "current_version": {
-                          "anyOf": [
-                            {
-                              "type": "string"
-                            },
-                            {
-                              "type": "null"
-                            }
-                          ]
-                        },
-                        "minimum_supported_version": {
-                          "anyOf": [
-                            {
-                              "type": "string"
-                            },
-                            {
-                              "type": "null"
-                            }
-                          ]
-                        },
-                        "reason_code": {
-                          "anyOf": [
-                            {
-                              "type": "string"
-                            },
-                            {
-                              "type": "null"
-                            }
-                          ]
-                        },
-                        "update_url": {
-                          "type": "string"
-                        },
-                        "update_command": {
-                          "type": "string"
-                        }
-                      },
-                      "additionalProperties": false
-                    },
-                    "retryAfter": {
-                      "type": "number"
-                    },
-                    "_tag": {
-                      "type": "string",
-                      "enum": [
-                        "PublicApiRateLimitError"
-                      ]
-                    }
-                  },
-                  "additionalProperties": false
+                  "$ref": "#/components/schemas/PublicApiRateLimitError"
                 }
               }
             }
@@ -5011,29 +5025,11 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "required": [
-                    "data",
-                    "pagination",
-                    "meta"
-                  ],
                   "properties": {
                     "data": {
                       "type": "array",
                       "items": {
                         "type": "object",
-                        "required": [
-                          "dealer_id",
-                          "name",
-                          "city",
-                          "state",
-                          "country",
-                          "latitude",
-                          "longitude",
-                          "type",
-                          "website",
-                          "makes",
-                          "listing_count"
-                        ],
                         "properties": {
                           "dealer_id": {
                             "type": "string",
@@ -5143,6 +5139,19 @@
                             "description": "Current active listing count for the dealer after VIN-level listing deduplication and ownership assignment."
                           }
                         },
+                        "required": [
+                          "dealer_id",
+                          "name",
+                          "city",
+                          "state",
+                          "country",
+                          "latitude",
+                          "longitude",
+                          "type",
+                          "website",
+                          "makes",
+                          "listing_count"
+                        ],
                         "additionalProperties": false,
                         "description": "Dealer summary."
                       },
@@ -5150,12 +5159,6 @@
                     },
                     "pagination": {
                       "type": "object",
-                      "required": [
-                        "limit",
-                        "offset",
-                        "total",
-                        "next_offset"
-                      ],
                       "properties": {
                         "limit": {
                           "type": "number",
@@ -5181,20 +5184,25 @@
                           "description": "Offset for the next page, or null when there are no more records."
                         }
                       },
+                      "required": [
+                        "limit",
+                        "offset",
+                        "total",
+                        "next_offset"
+                      ],
                       "additionalProperties": false,
                       "description": "Offset pagination metadata returned by collection endpoints."
                     },
                     "meta": {
                       "type": "object",
-                      "required": [],
-                      "properties": {},
-                      "additionalProperties": {
-                        "$id": "/schemas/unknown",
-                        "title": "unknown"
-                      },
                       "description": "Reserved metadata object. It is empty for the beta contract unless an endpoint documents otherwise."
                     }
                   },
+                  "required": [
+                    "data",
+                    "pagination",
+                    "meta"
+                  ],
                   "additionalProperties": false
                 },
                 "examples": {
@@ -5286,14 +5294,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "anyOf": [
-                    {
-                      "$ref": "#/components/schemas/HttpApiDecodeError"
-                    },
-                    {
-                      "$ref": "#/components/schemas/PublicApiValidationError"
-                    }
-                  ]
+                  "$ref": "#/components/schemas/PublicApiValidationError"
                 }
               }
             }
@@ -5333,79 +5334,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "required": [
-                    "error",
-                    "_tag"
-                  ],
-                  "properties": {
-                    "error": {
-                      "type": "object",
-                      "required": [
-                        "type",
-                        "code",
-                        "message"
-                      ],
-                      "properties": {
-                        "type": {
-                          "type": "string"
-                        },
-                        "code": {
-                          "type": "string"
-                        },
-                        "message": {
-                          "type": "string"
-                        },
-                        "current_version": {
-                          "anyOf": [
-                            {
-                              "type": "string"
-                            },
-                            {
-                              "type": "null"
-                            }
-                          ]
-                        },
-                        "minimum_supported_version": {
-                          "anyOf": [
-                            {
-                              "type": "string"
-                            },
-                            {
-                              "type": "null"
-                            }
-                          ]
-                        },
-                        "reason_code": {
-                          "anyOf": [
-                            {
-                              "type": "string"
-                            },
-                            {
-                              "type": "null"
-                            }
-                          ]
-                        },
-                        "update_url": {
-                          "type": "string"
-                        },
-                        "update_command": {
-                          "type": "string"
-                        }
-                      },
-                      "additionalProperties": false
-                    },
-                    "retryAfter": {
-                      "type": "number"
-                    },
-                    "_tag": {
-                      "type": "string",
-                      "enum": [
-                        "PublicApiRateLimitError"
-                      ]
-                    }
-                  },
-                  "additionalProperties": false
+                  "$ref": "#/components/schemas/PublicApiRateLimitError"
                 }
               }
             }
@@ -5466,28 +5395,9 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "required": [
-                    "data",
-                    "meta"
-                  ],
                   "properties": {
                     "data": {
                       "type": "object",
-                      "required": [
-                        "dealer_id",
-                        "name",
-                        "city",
-                        "state",
-                        "country",
-                        "latitude",
-                        "longitude",
-                        "type",
-                        "website",
-                        "makes",
-                        "listing_count",
-                        "phone",
-                        "address"
-                      ],
                       "properties": {
                         "dealer_id": {
                           "type": "string",
@@ -5611,12 +5521,6 @@
                           "anyOf": [
                             {
                               "type": "object",
-                              "required": [
-                                "line1",
-                                "city",
-                                "state",
-                                "country"
-                              ],
                               "properties": {
                                 "line1": {
                                   "anyOf": [
@@ -5663,6 +5567,12 @@
                                   "description": "Dealer country code."
                                 }
                               },
+                              "required": [
+                                "line1",
+                                "city",
+                                "state",
+                                "country"
+                              ],
                               "additionalProperties": false,
                               "description": "Structured dealer address."
                             },
@@ -5673,20 +5583,33 @@
                           "description": "Dealer address when available."
                         }
                       },
+                      "required": [
+                        "dealer_id",
+                        "name",
+                        "city",
+                        "state",
+                        "country",
+                        "latitude",
+                        "longitude",
+                        "type",
+                        "website",
+                        "makes",
+                        "listing_count",
+                        "phone",
+                        "address"
+                      ],
                       "additionalProperties": false,
                       "description": "Dealer record."
                     },
                     "meta": {
                       "type": "object",
-                      "required": [],
-                      "properties": {},
-                      "additionalProperties": {
-                        "$id": "/schemas/unknown",
-                        "title": "unknown"
-                      },
                       "description": "Reserved metadata object. It is empty for the beta contract unless an endpoint documents otherwise."
                     }
                   },
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
                   "additionalProperties": false,
                   "description": "Dealer detail response envelope."
                 },
@@ -5778,14 +5701,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "anyOf": [
-                    {
-                      "$ref": "#/components/schemas/HttpApiDecodeError"
-                    },
-                    {
-                      "$ref": "#/components/schemas/PublicApiValidationError"
-                    }
-                  ]
+                  "$ref": "#/components/schemas/PublicApiValidationError"
                 }
               }
             }
@@ -5835,79 +5751,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "required": [
-                    "error",
-                    "_tag"
-                  ],
-                  "properties": {
-                    "error": {
-                      "type": "object",
-                      "required": [
-                        "type",
-                        "code",
-                        "message"
-                      ],
-                      "properties": {
-                        "type": {
-                          "type": "string"
-                        },
-                        "code": {
-                          "type": "string"
-                        },
-                        "message": {
-                          "type": "string"
-                        },
-                        "current_version": {
-                          "anyOf": [
-                            {
-                              "type": "string"
-                            },
-                            {
-                              "type": "null"
-                            }
-                          ]
-                        },
-                        "minimum_supported_version": {
-                          "anyOf": [
-                            {
-                              "type": "string"
-                            },
-                            {
-                              "type": "null"
-                            }
-                          ]
-                        },
-                        "reason_code": {
-                          "anyOf": [
-                            {
-                              "type": "string"
-                            },
-                            {
-                              "type": "null"
-                            }
-                          ]
-                        },
-                        "update_url": {
-                          "type": "string"
-                        },
-                        "update_command": {
-                          "type": "string"
-                        }
-                      },
-                      "additionalProperties": false
-                    },
-                    "retryAfter": {
-                      "type": "number"
-                    },
-                    "_tag": {
-                      "type": "string",
-                      "enum": [
-                        "PublicApiRateLimitError"
-                      ]
-                    }
-                  },
-                  "additionalProperties": false
+                  "$ref": "#/components/schemas/PublicApiRateLimitError"
                 }
               }
             }
@@ -6702,20 +6546,11 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "required": [
-                    "data",
-                    "pagination",
-                    "meta"
-                  ],
                   "properties": {
                     "data": {
                       "type": "array",
                       "items": {
                         "type": "object",
-                        "required": [
-                          "id",
-                          "vin"
-                        ],
                         "properties": {
                           "id": {
                             "type": "string",
@@ -7155,12 +6990,6 @@
                             "type": "array",
                             "items": {
                               "type": "object",
-                              "required": [
-                                "changed_at",
-                                "miles",
-                                "price_before",
-                                "price_after"
-                              ],
                               "properties": {
                                 "changed_at": {
                                   "type": "string",
@@ -7200,6 +7029,12 @@
                                   "description": "New listed price in whole dollars."
                                 }
                               },
+                              "required": [
+                                "changed_at",
+                                "miles",
+                                "price_before",
+                                "price_after"
+                              ],
                               "additionalProperties": false
                             },
                             "description": "Observed price changes when include=price_history is requested."
@@ -7208,11 +7043,6 @@
                             "type": "array",
                             "items": {
                               "type": "object",
-                              "required": [
-                                "code",
-                                "name",
-                                "msrp"
-                              ],
                               "properties": {
                                 "code": {
                                   "type": "string",
@@ -7234,12 +7064,21 @@
                                   "description": "Option MSRP in whole dollars when available."
                                 }
                               },
+                              "required": [
+                                "code",
+                                "name",
+                                "msrp"
+                              ],
                               "additionalProperties": false,
                               "description": "Listing option decoded from option/package codes."
                             },
                             "description": "Installed options decoded from option/package codes when include=options is requested."
                           }
                         },
+                        "required": [
+                          "id",
+                          "vin"
+                        ],
                         "additionalProperties": false,
                         "description": "Public listing summary returned by listing collection endpoints."
                       },
@@ -7247,12 +7086,6 @@
                     },
                     "pagination": {
                       "type": "object",
-                      "required": [
-                        "limit",
-                        "offset",
-                        "total",
-                        "next_offset"
-                      ],
                       "properties": {
                         "limit": {
                           "type": "number",
@@ -7278,20 +7111,25 @@
                           "description": "Offset for the next page, or null when there are no more records."
                         }
                       },
+                      "required": [
+                        "limit",
+                        "offset",
+                        "total",
+                        "next_offset"
+                      ],
                       "additionalProperties": false,
                       "description": "Offset pagination metadata returned by collection endpoints."
                     },
                     "meta": {
                       "type": "object",
-                      "required": [],
-                      "properties": {},
-                      "additionalProperties": {
-                        "$id": "/schemas/unknown",
-                        "title": "unknown"
-                      },
                       "description": "Reserved metadata object. It is empty for the beta contract unless an endpoint documents otherwise."
                     }
                   },
+                  "required": [
+                    "data",
+                    "pagination",
+                    "meta"
+                  ],
                   "additionalProperties": false
                 },
                 "examples": {
@@ -7386,14 +7224,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "anyOf": [
-                    {
-                      "$ref": "#/components/schemas/HttpApiDecodeError"
-                    },
-                    {
-                      "$ref": "#/components/schemas/PublicApiValidationError"
-                    }
-                  ]
+                  "$ref": "#/components/schemas/PublicApiValidationError"
                 }
               }
             }
@@ -7433,79 +7264,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "required": [
-                    "error",
-                    "_tag"
-                  ],
-                  "properties": {
-                    "error": {
-                      "type": "object",
-                      "required": [
-                        "type",
-                        "code",
-                        "message"
-                      ],
-                      "properties": {
-                        "type": {
-                          "type": "string"
-                        },
-                        "code": {
-                          "type": "string"
-                        },
-                        "message": {
-                          "type": "string"
-                        },
-                        "current_version": {
-                          "anyOf": [
-                            {
-                              "type": "string"
-                            },
-                            {
-                              "type": "null"
-                            }
-                          ]
-                        },
-                        "minimum_supported_version": {
-                          "anyOf": [
-                            {
-                              "type": "string"
-                            },
-                            {
-                              "type": "null"
-                            }
-                          ]
-                        },
-                        "reason_code": {
-                          "anyOf": [
-                            {
-                              "type": "string"
-                            },
-                            {
-                              "type": "null"
-                            }
-                          ]
-                        },
-                        "update_url": {
-                          "type": "string"
-                        },
-                        "update_command": {
-                          "type": "string"
-                        }
-                      },
-                      "additionalProperties": false
-                    },
-                    "retryAfter": {
-                      "type": "number"
-                    },
-                    "_tag": {
-                      "type": "string",
-                      "enum": [
-                        "PublicApiRateLimitError"
-                      ]
-                    }
-                  },
-                  "additionalProperties": false
+                  "$ref": "#/components/schemas/PublicApiRateLimitError"
                 }
               }
             }
@@ -7584,22 +7343,11 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "required": [
-                    "data",
-                    "totals",
-                    "meta"
-                  ],
                   "properties": {
                     "data": {
                       "type": "array",
                       "items": {
                         "type": "object",
-                        "required": [
-                          "date",
-                          "metering_class",
-                          "requests",
-                          "charged_micros"
-                        ],
                         "properties": {
                           "date": {
                             "type": "string",
@@ -7632,6 +7380,12 @@
                             "description": "Total charged USD micros in this bucket."
                           }
                         },
+                        "required": [
+                          "date",
+                          "metering_class",
+                          "requests",
+                          "charged_micros"
+                        ],
                         "additionalProperties": false,
                         "description": "Daily public API usage bucket."
                       },
@@ -7639,10 +7393,6 @@
                     },
                     "totals": {
                       "type": "object",
-                      "required": [
-                        "requests",
-                        "charged_micros"
-                      ],
                       "properties": {
                         "requests": {
                           "type": "number",
@@ -7653,18 +7403,14 @@
                           "description": "Total charged USD micros in the response range."
                         }
                       },
+                      "required": [
+                        "requests",
+                        "charged_micros"
+                      ],
                       "additionalProperties": false
                     },
                     "meta": {
                       "type": "object",
-                      "required": [
-                        "start_date",
-                        "end_date",
-                        "interval",
-                        "currency",
-                        "source",
-                        "freshness"
-                      ],
                       "properties": {
                         "start_date": {
                           "type": "string",
@@ -7697,9 +7443,22 @@
                           "description": "Freshness note for usage analytics."
                         }
                       },
+                      "required": [
+                        "start_date",
+                        "end_date",
+                        "interval",
+                        "currency",
+                        "source",
+                        "freshness"
+                      ],
                       "additionalProperties": false
                     }
                   },
+                  "required": [
+                    "data",
+                    "totals",
+                    "meta"
+                  ],
                   "additionalProperties": false,
                   "description": "Public API usage summary response envelope."
                 },
@@ -7770,14 +7529,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "anyOf": [
-                    {
-                      "$ref": "#/components/schemas/HttpApiDecodeError"
-                    },
-                    {
-                      "$ref": "#/components/schemas/PublicApiValidationError"
-                    }
-                  ]
+                  "$ref": "#/components/schemas/PublicApiValidationError"
                 }
               }
             }
@@ -7817,79 +7569,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "required": [
-                    "error",
-                    "_tag"
-                  ],
-                  "properties": {
-                    "error": {
-                      "type": "object",
-                      "required": [
-                        "type",
-                        "code",
-                        "message"
-                      ],
-                      "properties": {
-                        "type": {
-                          "type": "string"
-                        },
-                        "code": {
-                          "type": "string"
-                        },
-                        "message": {
-                          "type": "string"
-                        },
-                        "current_version": {
-                          "anyOf": [
-                            {
-                              "type": "string"
-                            },
-                            {
-                              "type": "null"
-                            }
-                          ]
-                        },
-                        "minimum_supported_version": {
-                          "anyOf": [
-                            {
-                              "type": "string"
-                            },
-                            {
-                              "type": "null"
-                            }
-                          ]
-                        },
-                        "reason_code": {
-                          "anyOf": [
-                            {
-                              "type": "string"
-                            },
-                            {
-                              "type": "null"
-                            }
-                          ]
-                        },
-                        "update_url": {
-                          "type": "string"
-                        },
-                        "update_command": {
-                          "type": "string"
-                        }
-                      },
-                      "additionalProperties": false
-                    },
-                    "retryAfter": {
-                      "type": "number"
-                    },
-                    "_tag": {
-                      "type": "string",
-                      "enum": [
-                        "PublicApiRateLimitError"
-                      ]
-                    }
-                  },
-                  "additionalProperties": false
+                  "$ref": "#/components/schemas/PublicApiRateLimitError"
                 }
               }
             }
@@ -7919,258 +7599,17 @@
   },
   "components": {
     "schemas": {
-      "HttpApiDecodeError": {
-        "type": "object",
-        "required": [
-          "issues",
-          "message",
-          "_tag"
-        ],
-        "properties": {
-          "issues": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Issue"
-            }
-          },
-          "message": {
-            "type": "string"
-          },
-          "_tag": {
-            "type": "string",
-            "enum": [
-              "HttpApiDecodeError"
-            ]
-          }
-        },
-        "additionalProperties": false,
-        "description": "The request did not match the expected schema"
-      },
-      "Issue": {
-        "type": "object",
-        "required": [
-          "_tag",
-          "path",
-          "message"
-        ],
-        "properties": {
-          "_tag": {
-            "type": "string",
-            "enum": [
-              "Pointer",
-              "Unexpected",
-              "Missing",
-              "Composite",
-              "Refinement",
-              "Transformation",
-              "Type",
-              "Forbidden"
-            ],
-            "description": "The tag identifying the type of parse issue"
-          },
-          "path": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PropertyKey"
-            },
-            "description": "The path to the property where the issue occurred"
-          },
-          "message": {
-            "type": "string",
-            "description": "A descriptive message explaining the issue"
-          }
-        },
-        "additionalProperties": false,
-        "description": "Represents an error encountered while parsing a value to match the schema"
-      },
-      "PropertyKey": {
-        "anyOf": [
-          {
-            "type": "string"
-          },
-          {
-            "type": "number"
-          },
-          {
-            "type": "object",
-            "required": [
-              "_tag",
-              "key"
-            ],
-            "properties": {
-              "_tag": {
-                "type": "string",
-                "enum": [
-                  "symbol"
-                ]
-              },
-              "key": {
-                "type": "string"
-              }
-            },
-            "additionalProperties": false,
-            "description": "an object to be decoded into a globally shared symbol"
-          }
-        ]
-      },
-      "PublicApiValidationError": {
-        "type": "object",
-        "required": [
-          "error",
-          "_tag"
-        ],
-        "properties": {
-          "error": {
-            "type": "object",
-            "required": [
-              "type",
-              "code",
-              "message"
-            ],
-            "properties": {
-              "type": {
-                "type": "string"
-              },
-              "code": {
-                "type": "string"
-              },
-              "message": {
-                "type": "string"
-              },
-              "current_version": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "minimum_supported_version": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "reason_code": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "update_url": {
-                "type": "string"
-              },
-              "update_command": {
-                "type": "string"
-              }
-            },
-            "additionalProperties": false
-          },
-          "_tag": {
-            "type": "string",
-            "enum": [
-              "PublicApiValidationError"
-            ]
-          }
-        },
-        "additionalProperties": false
-      },
       "PublicApiAuthenticationError": {
         "type": "object",
-        "required": [
-          "error",
-          "_tag"
-        ],
         "properties": {
-          "error": {
-            "type": "object",
-            "required": [
-              "type",
-              "code",
-              "message"
-            ],
-            "properties": {
-              "type": {
-                "type": "string"
-              },
-              "code": {
-                "type": "string"
-              },
-              "message": {
-                "type": "string"
-              },
-              "current_version": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "minimum_supported_version": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "reason_code": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "update_url": {
-                "type": "string"
-              },
-              "update_command": {
-                "type": "string"
-              }
-            },
-            "additionalProperties": false
-          },
           "_tag": {
             "type": "string",
             "enum": [
               "PublicApiAuthenticationError"
             ]
-          }
-        },
-        "additionalProperties": false
-      },
-      "PublicApiPermissionError": {
-        "type": "object",
-        "required": [
-          "error",
-          "_tag"
-        ],
-        "properties": {
+          },
           "error": {
             "type": "object",
-            "required": [
-              "type",
-              "code",
-              "message"
-            ],
             "properties": {
               "type": {
                 "type": "string"
@@ -8218,31 +7657,31 @@
                 "type": "string"
               }
             },
+            "required": [
+              "type",
+              "code",
+              "message"
+            ],
             "additionalProperties": false
-          },
+          }
+        },
+        "required": [
+          "_tag",
+          "error"
+        ],
+        "additionalProperties": false
+      },
+      "PublicApiPermissionError": {
+        "type": "object",
+        "properties": {
           "_tag": {
             "type": "string",
             "enum": [
               "PublicApiPermissionError"
             ]
-          }
-        },
-        "additionalProperties": false
-      },
-      "PublicApiBillingError": {
-        "type": "object",
-        "required": [
-          "error",
-          "_tag"
-        ],
-        "properties": {
+          },
           "error": {
             "type": "object",
-            "required": [
-              "type",
-              "code",
-              "message"
-            ],
             "properties": {
               "type": {
                 "type": "string"
@@ -8290,31 +7729,31 @@
                 "type": "string"
               }
             },
+            "required": [
+              "type",
+              "code",
+              "message"
+            ],
             "additionalProperties": false
-          },
+          }
+        },
+        "required": [
+          "_tag",
+          "error"
+        ],
+        "additionalProperties": false
+      },
+      "PublicApiBillingError": {
+        "type": "object",
+        "properties": {
           "_tag": {
             "type": "string",
             "enum": [
               "PublicApiBillingError"
             ]
-          }
-        },
-        "additionalProperties": false
-      },
-      "PublicApiPlatformError": {
-        "type": "object",
-        "required": [
-          "error",
-          "_tag"
-        ],
-        "properties": {
+          },
           "error": {
             "type": "object",
-            "required": [
-              "type",
-              "code",
-              "message"
-            ],
             "properties": {
               "type": {
                 "type": "string"
@@ -8362,31 +7801,103 @@
                 "type": "string"
               }
             },
+            "required": [
+              "type",
+              "code",
+              "message"
+            ],
             "additionalProperties": false
+          }
+        },
+        "required": [
+          "_tag",
+          "error"
+        ],
+        "additionalProperties": false
+      },
+      "PublicApiValidationError": {
+        "type": "object",
+        "properties": {
+          "_tag": {
+            "type": "string",
+            "enum": [
+              "PublicApiValidationError"
+            ]
           },
+          "error": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string"
+              },
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              },
+              "current_version": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "minimum_supported_version": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "reason_code": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "update_url": {
+                "type": "string"
+              },
+              "update_command": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "type",
+              "code",
+              "message"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "_tag",
+          "error"
+        ],
+        "additionalProperties": false
+      },
+      "PublicApiPlatformError": {
+        "type": "object",
+        "properties": {
           "_tag": {
             "type": "string",
             "enum": [
               "PublicApiPlatformError"
             ]
-          }
-        },
-        "additionalProperties": false
-      },
-      "PublicApiNotFoundError": {
-        "type": "object",
-        "required": [
-          "error",
-          "_tag"
-        ],
-        "properties": {
+          },
           "error": {
             "type": "object",
-            "required": [
-              "type",
-              "code",
-              "message"
-            ],
             "properties": {
               "type": {
                 "type": "string"
@@ -8434,15 +7945,165 @@
                 "type": "string"
               }
             },
+            "required": [
+              "type",
+              "code",
+              "message"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "_tag",
+          "error"
+        ],
+        "additionalProperties": false
+      },
+      "PublicApiRateLimitError": {
+        "type": "object",
+        "properties": {
+          "_tag": {
+            "type": "string",
+            "enum": [
+              "PublicApiRateLimitError"
+            ]
+          },
+          "error": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string"
+              },
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              },
+              "current_version": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "minimum_supported_version": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "reason_code": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "update_url": {
+                "type": "string"
+              },
+              "update_command": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "type",
+              "code",
+              "message"
+            ],
             "additionalProperties": false
           },
+          "retryAfter": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "_tag",
+          "error"
+        ],
+        "additionalProperties": false
+      },
+      "PublicApiNotFoundError": {
+        "type": "object",
+        "properties": {
           "_tag": {
             "type": "string",
             "enum": [
               "PublicApiNotFoundError"
             ]
+          },
+          "error": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string"
+              },
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              },
+              "current_version": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "minimum_supported_version": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "reason_code": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "update_url": {
+                "type": "string"
+              },
+              "update_command": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "type",
+              "code",
+              "message"
+            ],
+            "additionalProperties": false
           }
         },
+        "required": [
+          "_tag",
+          "error"
+        ],
         "additionalProperties": false
       }
     },
