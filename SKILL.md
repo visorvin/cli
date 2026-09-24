@@ -56,6 +56,8 @@ visor vins 3TMAZ5CN0PM207381 --json \
   --select results.data.vin,results.data.status,results.data.latest_listing.price,results.data.build
 ```
 
+For installed options, `--options-packages` matches manufacturer option codes and `--option-slug` matches OpenSpec option slugs; they are separate filters. Run `visor facets --facets options_packages` to see option values for a search. Use `--dealer-group-id` for a dealer group's inventory and `--listed-after` or `--sort -listed_at` for newly observed listings.
+
 Responses use a provenance envelope. For standard list responses, `--select` accepts row-relative fields such as `id,vin,price,miles`; full paths under `results.data` also work. Listing fields use `miles` and `vdp_url`; guessed fields such as `mileage` or `url` return a validation error with valid field paths.
 
 ## Do Not Use For

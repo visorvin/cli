@@ -13,12 +13,14 @@ type DealersGetResponse struct {
 type DealersListItem struct {
 	City         string          `json:"city"`
 	Country      string          `json:"country"`
+	DealerGroup  string          `json:"dealer_group"`
 	DealerId     string          `json:"dealer_id"`
 	Latitude     string          `json:"latitude"`
 	ListingCount float64         `json:"listing_count"`
 	Longitude    string          `json:"longitude"`
 	Makes        json.RawMessage `json:"makes"`
 	Name         string          `json:"name"`
+	PostalCode   string          `json:"postal_code"`
 	State        string          `json:"state"`
 	Type         string          `json:"type"`
 	Website      string          `json:"website"`
@@ -30,50 +32,55 @@ type FacetsListResponse struct {
 }
 
 type ListingsDealersItem struct {
-	BaseExteriorColor string          `json:"base_exterior_color"`
-	BaseInteriorColor string          `json:"base_interior_color"`
-	BodyType          string          `json:"body_type"`
-	City              string          `json:"city"`
-	Cylinders         string          `json:"cylinders"`
-	DaysOnMarket      string          `json:"days_on_market"`
-	DealerId          string          `json:"dealer_id"`
-	DealerName        string          `json:"dealer_name"`
-	DealerType        string          `json:"dealer_type"`
-	DiscountFromMsrp  string          `json:"discount_from_msrp"`
-	DistanceMiles     string          `json:"distance_miles"`
-	Doors             string          `json:"doors"`
-	Drivetrain        string          `json:"drivetrain"`
-	Engine            string          `json:"engine"`
-	ExteriorColor     string          `json:"exterior_color"`
-	Features          json.RawMessage `json:"features"`
-	FuelType          string          `json:"fuel_type"`
-	Id                string          `json:"id"`
-	InteriorColor     string          `json:"interior_color"`
-	InventoryStatus   string          `json:"inventory_status"`
-	InventoryType     string          `json:"inventory_type"`
-	Latitude          string          `json:"latitude"`
-	Longitude         string          `json:"longitude"`
-	Make              string          `json:"make"`
-	Miles             string          `json:"miles"`
-	Model             string          `json:"model"`
-	Msrp              string          `json:"msrp"`
-	Options           json.RawMessage `json:"options"`
-	OptionsPackages   json.RawMessage `json:"options_packages"`
-	PhotoUrls         json.RawMessage `json:"photo_urls"`
-	PowertrainType    string          `json:"powertrain_type"`
-	Price             string          `json:"price"`
-	PriceHistory      json.RawMessage `json:"price_history"`
-	SeatingCapacity   string          `json:"seating_capacity"`
-	SoldDate          string          `json:"sold_date"`
-	State             string          `json:"state"`
-	Status            string          `json:"status"`
-	StockNumber       string          `json:"stock_number"`
-	Transmission      string          `json:"transmission"`
-	Trim              string          `json:"trim"`
-	VdpUrl            string          `json:"vdp_url"`
-	Version           string          `json:"version"`
-	Vin               string          `json:"vin"`
-	Year              string          `json:"year"`
+	AvailabilityStatus string          `json:"availability_status"`
+	BaseExteriorColor  string          `json:"base_exterior_color"`
+	BaseInteriorColor  string          `json:"base_interior_color"`
+	BodyType           string          `json:"body_type"`
+	City               string          `json:"city"`
+	Cylinders          string          `json:"cylinders"`
+	DaysOnMarket       string          `json:"days_on_market"`
+	DealerId           string          `json:"dealer_id"`
+	DealerName         string          `json:"dealer_name"`
+	DealerType         string          `json:"dealer_type"`
+	DiscountFromMsrp   string          `json:"discount_from_msrp"`
+	DistanceMiles      string          `json:"distance_miles"`
+	Doors              string          `json:"doors"`
+	Drivetrain         string          `json:"drivetrain"`
+	Engine             string          `json:"engine"`
+	ExteriorColor      string          `json:"exterior_color"`
+	Features           json.RawMessage `json:"features"`
+	FuelType           string          `json:"fuel_type"`
+	Id                 string          `json:"id"`
+	InteriorColor      string          `json:"interior_color"`
+	InventoryStatus    string          `json:"inventory_status"`
+	InventoryType      string          `json:"inventory_type"`
+	LastCheckedAt      string          `json:"last_checked_at"`
+	Latitude           string          `json:"latitude"`
+	ListedAt           string          `json:"listed_at"`
+	Longitude          string          `json:"longitude"`
+	Make               string          `json:"make"`
+	Miles              string          `json:"miles"`
+	Model              string          `json:"model"`
+	Msrp               string          `json:"msrp"`
+	Options            json.RawMessage `json:"options"`
+	OptionsPackages    json.RawMessage `json:"options_packages"`
+	PhotoUrls          json.RawMessage `json:"photo_urls"`
+	PostalCode         string          `json:"postal_code"`
+	PowertrainType     string          `json:"powertrain_type"`
+	Price              string          `json:"price"`
+	PriceHistory       json.RawMessage `json:"price_history"`
+	SeatingCapacity    string          `json:"seating_capacity"`
+	SoldDate           string          `json:"sold_date"`
+	SpecSource         string          `json:"spec_source"`
+	State              string          `json:"state"`
+	Status             string          `json:"status"`
+	StockNumber        string          `json:"stock_number"`
+	Transmission       string          `json:"transmission"`
+	Trim               string          `json:"trim"`
+	VdpUrl             string          `json:"vdp_url"`
+	Version            string          `json:"version"`
+	Vin                string          `json:"vin"`
+	Year               string          `json:"year"`
 }
 
 type ListingsGetResponse struct {
@@ -82,50 +89,55 @@ type ListingsGetResponse struct {
 }
 
 type ListingsListItem struct {
-	BaseExteriorColor string          `json:"base_exterior_color"`
-	BaseInteriorColor string          `json:"base_interior_color"`
-	BodyType          string          `json:"body_type"`
-	City              string          `json:"city"`
-	Cylinders         string          `json:"cylinders"`
-	DaysOnMarket      string          `json:"days_on_market"`
-	DealerId          string          `json:"dealer_id"`
-	DealerName        string          `json:"dealer_name"`
-	DealerType        string          `json:"dealer_type"`
-	DiscountFromMsrp  string          `json:"discount_from_msrp"`
-	DistanceMiles     string          `json:"distance_miles"`
-	Doors             string          `json:"doors"`
-	Drivetrain        string          `json:"drivetrain"`
-	Engine            string          `json:"engine"`
-	ExteriorColor     string          `json:"exterior_color"`
-	Features          json.RawMessage `json:"features"`
-	FuelType          string          `json:"fuel_type"`
-	Id                string          `json:"id"`
-	InteriorColor     string          `json:"interior_color"`
-	InventoryStatus   string          `json:"inventory_status"`
-	InventoryType     string          `json:"inventory_type"`
-	Latitude          string          `json:"latitude"`
-	Longitude         string          `json:"longitude"`
-	Make              string          `json:"make"`
-	Miles             string          `json:"miles"`
-	Model             string          `json:"model"`
-	Msrp              string          `json:"msrp"`
-	Options           json.RawMessage `json:"options"`
-	OptionsPackages   json.RawMessage `json:"options_packages"`
-	PhotoUrls         json.RawMessage `json:"photo_urls"`
-	PowertrainType    string          `json:"powertrain_type"`
-	Price             string          `json:"price"`
-	PriceHistory      json.RawMessage `json:"price_history"`
-	SeatingCapacity   string          `json:"seating_capacity"`
-	SoldDate          string          `json:"sold_date"`
-	State             string          `json:"state"`
-	Status            string          `json:"status"`
-	StockNumber       string          `json:"stock_number"`
-	Transmission      string          `json:"transmission"`
-	Trim              string          `json:"trim"`
-	VdpUrl            string          `json:"vdp_url"`
-	Version           string          `json:"version"`
-	Vin               string          `json:"vin"`
-	Year              string          `json:"year"`
+	AvailabilityStatus string          `json:"availability_status"`
+	BaseExteriorColor  string          `json:"base_exterior_color"`
+	BaseInteriorColor  string          `json:"base_interior_color"`
+	BodyType           string          `json:"body_type"`
+	City               string          `json:"city"`
+	Cylinders          string          `json:"cylinders"`
+	DaysOnMarket       string          `json:"days_on_market"`
+	DealerId           string          `json:"dealer_id"`
+	DealerName         string          `json:"dealer_name"`
+	DealerType         string          `json:"dealer_type"`
+	DiscountFromMsrp   string          `json:"discount_from_msrp"`
+	DistanceMiles      string          `json:"distance_miles"`
+	Doors              string          `json:"doors"`
+	Drivetrain         string          `json:"drivetrain"`
+	Engine             string          `json:"engine"`
+	ExteriorColor      string          `json:"exterior_color"`
+	Features           json.RawMessage `json:"features"`
+	FuelType           string          `json:"fuel_type"`
+	Id                 string          `json:"id"`
+	InteriorColor      string          `json:"interior_color"`
+	InventoryStatus    string          `json:"inventory_status"`
+	InventoryType      string          `json:"inventory_type"`
+	LastCheckedAt      string          `json:"last_checked_at"`
+	Latitude           string          `json:"latitude"`
+	ListedAt           string          `json:"listed_at"`
+	Longitude          string          `json:"longitude"`
+	Make               string          `json:"make"`
+	Miles              string          `json:"miles"`
+	Model              string          `json:"model"`
+	Msrp               string          `json:"msrp"`
+	Options            json.RawMessage `json:"options"`
+	OptionsPackages    json.RawMessage `json:"options_packages"`
+	PhotoUrls          json.RawMessage `json:"photo_urls"`
+	PostalCode         string          `json:"postal_code"`
+	PowertrainType     string          `json:"powertrain_type"`
+	Price              string          `json:"price"`
+	PriceHistory       json.RawMessage `json:"price_history"`
+	SeatingCapacity    string          `json:"seating_capacity"`
+	SoldDate           string          `json:"sold_date"`
+	SpecSource         string          `json:"spec_source"`
+	State              string          `json:"state"`
+	Status             string          `json:"status"`
+	StockNumber        string          `json:"stock_number"`
+	Transmission       string          `json:"transmission"`
+	Trim               string          `json:"trim"`
+	VdpUrl             string          `json:"vdp_url"`
+	Version            string          `json:"version"`
+	Vin                string          `json:"vin"`
+	Year               string          `json:"year"`
 }
 
 type PublicApiAuthenticationError struct {

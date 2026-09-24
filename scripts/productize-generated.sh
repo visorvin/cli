@@ -17,6 +17,7 @@ fi
 rm -f visor-pp-cli visor-pp-mcp visor visor-mcp
 
 mapfile -t product_files < <(find . -type f \
+  -not -path './.git' \
   -not -path './.git/*' \
   -not -path './bin/*' \
   -not -path './build/*' \
@@ -43,6 +44,10 @@ if [ "${#product_files[@]}" -gt 0 ]; then
     s#\.visor\b#.visor#g;
   ' "${product_files[@]}"
 fi
+
+# Raw generator output is not gofmt-clean (for example `{"a", "b",  }`), while
+# the Go-source patches below are written against gofmt output.
+gofmt -w $(find cmd internal -type f -name '*.go')
 
 if [ -f .goreleaser.yaml ]; then
   perl -0pi -e 's/owner: cole/owner: visorvin/; s#homepage: "https://github.com/cole/visor"#homepage: "https://github.com/visorvin/cli"#' .goreleaser.yaml
@@ -73,7 +78,7 @@ fi
 # Keep product-specific root/client behavior that Printing Press regeneration
 # currently resets.
 if [ -f internal/cli/root.go ]; then
-  perl -0pi -e 's/var version = "1\.0\.0"/var version = "1.0.22"/' internal/cli/root.go
+  perl -0pi -e 's/var version = "1\.0\.0"/var version = "1.0.23"/' internal/cli/root.go
   perl -0pi -e 's/(\tcsv\s+bool\n)(\tplain\s+bool)/$1\tmarkdown      bool\n$2/' internal/cli/root.go
   perl -0pi -e 's/(\tc\.NoCache = f\.noCache\n)(\treturn c, nil)/$1\tc.UserAgent = "visor-cli\/" + version\n\tc.Telemetry = f.telemetryHeaders()\n$2/' internal/cli/root.go
   if ! rg -q 'func \(f \*rootFlags\) telemetryHeaders' internal/cli/root.go; then
@@ -105,7 +110,7 @@ if [ -f internal/config/config.go ]; then
 fi
 
 if [ -f cmd/visor-mcp/main.go ]; then
-  perl -0pi -e 's/"1\.0\.0"/"1.0.22"/' cmd/visor-mcp/main.go
+  perl -0pi -e 's/"1\.0\.0"/"1.0.23"/' cmd/visor-mcp/main.go
 fi
 
 if [ -f internal/mcp/tools.go ]; then
@@ -131,7 +136,7 @@ done
 # Keep the dealer inventory endpoint at a direct endpoint-equivalent path:
 #   visor dealers listings list <dealer_id>
 if [ -f internal/cli/dealers_listings_dealers.go ]; then
-  perl -0pi -e 's/Use:\s+"dealers <dealer_id>",\n\s+Aliases: \[\]string\{"get"\},/Use:   "list <dealer_id>",\n\t\tAliases: []string{"dealers", "get"},/' internal/cli/dealers_listings_dealers.go
+  perl -0pi -e 's/Use:\s+"dealers <dealer_id>",\n\s+Aliases:\s+\[\]string\{"get"\},/Use:   "list <dealer_id>",\n\t\tAliases: []string{"dealers", "get"},/' internal/cli/dealers_listings_dealers.go
   perl -0pi -e 's/visor dealers listings dealers 550e8400-e29b-41d4-a716-446655440000/visor dealers listings list 550e8400-e29b-41d4-a716-446655440000/' internal/cli/dealers_listings_dealers.go
   perl -0pi -e 's/\n\tvar flagDealerId string//' internal/cli/dealers_listings_dealers.go
   perl -0pi -e 's/\n\t\t\t\t"dealer_id":\s+fmt\.Sprintf\("%v", flagDealerId\),//' internal/cli/dealers_listings_dealers.go
@@ -143,9 +148,9 @@ fi
 # MCP tool names. Keep the path argument for this endpoint and leave query
 # dealer_id available on the top-level listings/facets commands.
 if [ -f internal/mcp/tools.go ]; then
-  perl -0pi -e 's/Required: dealer_id\. Optional: limit, offset, sort \(plus 64 more\)\./Required: dealer_id. Optional: limit, offset, sort (plus 63 more)./' internal/mcp/tools.go
+  perl -0pi -e 's/(Required: dealer_id\. Optional: limit, offset, sort \(plus )(\d+)( more\)\.)/$1 . ($2 - 1) . $3/e' internal/mcp/tools.go
   perl -0pi -e 's/\n\t\t\tmcplib\.WithString\("dealer_id", mcplib\.Description\("Comma-separated dealer UUIDs\. Accepts up to 50 dealer IDs and uses dealer-filtered listing metering\."\)\),//' internal/mcp/tools.go
-  perl -0pi -e 's/, \{PublicName: "dealer_id", WireName: "dealer_id", Location: "path"\}, \{PublicName: "dealer_type"/, {PublicName: "dealer_type"/' internal/mcp/tools.go
+  perl -0pi -e 's/(makeAPIHandler\("GET", "\/v1\/dealers\/\{dealer_id\}\/listings", \[\]mcpParamBinding\{\{PublicName: "dealer_id", WireName: "dealer_id", Location: "path"\}[^\n]*?),\s*\{PublicName: "dealer_id", WireName: "dealer_id", Location: "path"\}/$1/' internal/mcp/tools.go
 fi
 
 # Current Visor compatibility patch: generated sync otherwise sends generic params
@@ -167,7 +172,27 @@ if [ -f internal/cli/sync.go ]; then
 fi
 
 if [ -f internal/cli/channel_workflow.go ]; then
-  perl -0pi -e 's/\[\]string\{\s*"dealers",\s*"listings",\s*"usage"\s*\}/[]string{"dealers", "listings"}/s' internal/cli/channel_workflow.go
+  # Generator output carries a trailing comma that gofmt later removes.
+  perl -0pi -e 's/\[\]string\{\s*"dealers",\s*"listings",\s*"usage",?\s*\}/[]string{"dealers", "listings"}/s' internal/cli/channel_workflow.go
 fi
 
+# Printing Press emits generic tail and analytics commands. Visor ships neither:
+# tail polls unversioned paths (/listings) forever and would hang visor-mcp,
+# which mirrors every read-only Cobra command; analytics duplicates `sql`.
+rm -f internal/cli/tail.go internal/cli/analytics.go
+perl -0pi -e 's/\n\trootCmd\.AddCommand\(new(Tail|Analytics)Cmd\(flags\)\)//g' internal/cli/root.go
+
 gofmt -w $(find cmd internal -type f -name '*.go')
+
+# Fail loudly when a patch above stops matching new generator output.
+reject() {
+  if rg -qU "$1" "$2"; then
+    echo "productize: $3 ($2)" >&2
+    exit 1
+  fi
+}
+reject '"usage"' internal/cli/channel_workflow.go "usage is not an archivable resource"
+reject 'newTailCmd|newAnalyticsCmd' internal/cli/root.go "generic tail/analytics command still registered"
+reject 'Location: "path"\}.*\{PublicName: "dealer_id", WireName: "dealer_id", Location: "path"\}' internal/mcp/tools.go "duplicate dealer_id path binding"
+reject '"dealer-id"' internal/cli/dealers_listings_dealers.go "dealer inventory still exposes query --dealer-id"
+reject '"name":\s+"usage",\s+"description":\s+"Manage usage",\s+"endpoints":\s+\[\]string\{"public"\},\s+"syncable":\s+true' internal/mcp/tools.go "visor-mcp context marks usage as syncable"

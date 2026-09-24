@@ -85,6 +85,16 @@ visor vins 3TMAZ5CN0PM207381 --json \
 # Search dealers.
 visor dealers list --state CA --make toyota --limit 5 --json \
   --select results.data.dealer_id,results.data.name,results.data.city,results.data.state
+
+# Filter by installed options. --options-packages matches manufacturer option codes;
+# --option-slug matches OpenSpec option slugs. The two filters are separate.
+visor facets --make ford --model f-150 --facets options_packages --json
+visor listings list --make ford --model f-150 --options-packages 153 --sort -listed_at --agent
+visor listings list --make ford --model f-150 --option-slug <slug> --agent
+
+# Search a dealer group's inventory, or exclude dealers and groups.
+visor listings list --dealer-group-id dg:autonation --state TX --agent
+visor listings list --make toyota --exclude-dealer-group-id dg:autonation --agent
 ```
 
 ## Commands
@@ -164,11 +174,13 @@ The script:
 
 1. Runs Printing Press against `https://api.visor.vin/v1/openapi.json`.
 2. Copies the fresh generated CLI into a temporary directory.
-3. Reapplies Visor productization: binary name `visor`, module `github.com/visorvin/cli`, MCP binary `visor-mcp`, customer-facing docs, secure auth handling, agent-output fixes, and the current sync compatibility patch.
+3. Reapplies Visor productization: binary name `visor`, module `github.com/visorvin/cli`, MCP binary `visor-mcp`, customer-facing docs, secure auth handling, agent-output fixes, and the current sync compatibility patch. It drops the generator's generic `tail` and `analytics` commands, and it fails when a guarded patch (sync resources, dealer inventory `dealer_id`, dropped commands) no longer matches the generator output.
 4. Replaces this repo's generated code and spec files.
 5. Runs `go test ./...` and builds `visor` and `visor-mcp`.
 
 Review the resulting diff before committing.
+
+The generator runs `govulncheck`, which fails when the Go toolchain it selects has known standard-library vulnerabilities. If that happens, pin a patched toolchain, for example `GOTOOLCHAIN=go1.26.6 ./scripts/update-from-openapi.sh`.
 
 ## Development
 

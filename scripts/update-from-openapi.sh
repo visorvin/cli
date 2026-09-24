@@ -60,8 +60,11 @@ JSON
   --transport standard \
   --force --lenient --validate
 
+# .git is a file inside a git worktree, so exclude it without a trailing slash.
 rsync -a --delete \
-  --exclude='.git/' \
+  --exclude='.git' \
+  --exclude='AGENTS.md' \
+  --exclude='CLAUDE.md' \
   --exclude='bin/' \
   --exclude='build/' \
   --exclude='.gitignore' \

@@ -18,10 +18,12 @@ func newFacetsPromotedCmd(flags *rootFlags) *cobra.Command {
 	var flagSort string
 	var flagMake string
 	var flagModel string
+	var flagModelCode string
 	var flagTrim string
 	var flagYear string
 	var flagState string
 	var flagDealerId string
+	var flagDealerGroupId string
 	var flagDealerType string
 	var flagAvailabilityStatus string
 	var flagInventoryType string
@@ -42,6 +44,8 @@ func newFacetsPromotedCmd(flags *rootFlags) *cobra.Command {
 	var flagCylinders string
 	var flagDoors string
 	var flagOptionsPackages string
+	var flagOptionSlug string
+	var flagExcludeOptionSlug string
 	var flagFeatures string
 	var flagKeywords string
 	var flagVinPattern string
@@ -50,6 +54,8 @@ func newFacetsPromotedCmd(flags *rootFlags) *cobra.Command {
 	var flagExcludeTrim string
 	var flagExcludeYear string
 	var flagExcludeState string
+	var flagExcludeDealerId string
+	var flagExcludeDealerGroupId string
 	var flagExcludeInventoryType string
 	var flagExcludeBodyType string
 	var flagExcludeTransmission string
@@ -68,6 +74,7 @@ func newFacetsPromotedCmd(flags *rootFlags) *cobra.Command {
 	var flagExcludePowertrainType string
 	var flagExcludeKeywords string
 	var flagInventoryStatus string
+	var flagListedAfter string
 	var flagSoldWithinDays string
 	var flagSnapshotDate string
 	var flagMinPrice string
@@ -145,6 +152,9 @@ func newFacetsPromotedCmd(flags *rootFlags) *cobra.Command {
 			if flagModel != "" {
 				params["model"] = fmt.Sprintf("%v", flagModel)
 			}
+			if flagModelCode != "" {
+				params["model_code"] = fmt.Sprintf("%v", flagModelCode)
+			}
 			if flagTrim != "" {
 				params["trim"] = fmt.Sprintf("%v", flagTrim)
 			}
@@ -156,6 +166,9 @@ func newFacetsPromotedCmd(flags *rootFlags) *cobra.Command {
 			}
 			if flagDealerId != "" {
 				params["dealer_id"] = fmt.Sprintf("%v", flagDealerId)
+			}
+			if flagDealerGroupId != "" {
+				params["dealer_group_id"] = fmt.Sprintf("%v", flagDealerGroupId)
 			}
 			if flagDealerType != "" {
 				params["dealer_type"] = fmt.Sprintf("%v", flagDealerType)
@@ -217,6 +230,12 @@ func newFacetsPromotedCmd(flags *rootFlags) *cobra.Command {
 			if flagOptionsPackages != "" {
 				params["options_packages"] = fmt.Sprintf("%v", flagOptionsPackages)
 			}
+			if flagOptionSlug != "" {
+				params["option_slug"] = fmt.Sprintf("%v", flagOptionSlug)
+			}
+			if flagExcludeOptionSlug != "" {
+				params["exclude_option_slug"] = fmt.Sprintf("%v", flagExcludeOptionSlug)
+			}
 			if flagFeatures != "" {
 				params["features"] = fmt.Sprintf("%v", flagFeatures)
 			}
@@ -240,6 +259,12 @@ func newFacetsPromotedCmd(flags *rootFlags) *cobra.Command {
 			}
 			if flagExcludeState != "" {
 				params["exclude_state"] = fmt.Sprintf("%v", flagExcludeState)
+			}
+			if flagExcludeDealerId != "" {
+				params["exclude_dealer_id"] = fmt.Sprintf("%v", flagExcludeDealerId)
+			}
+			if flagExcludeDealerGroupId != "" {
+				params["exclude_dealer_group_id"] = fmt.Sprintf("%v", flagExcludeDealerGroupId)
 			}
 			if flagExcludeInventoryType != "" {
 				params["exclude_inventory_type"] = fmt.Sprintf("%v", flagExcludeInventoryType)
@@ -294,6 +319,9 @@ func newFacetsPromotedCmd(flags *rootFlags) *cobra.Command {
 			}
 			if flagInventoryStatus != "" {
 				params["inventory_status"] = fmt.Sprintf("%v", flagInventoryStatus)
+			}
+			if flagListedAfter != "" {
+				params["listed_after"] = fmt.Sprintf("%v", flagListedAfter)
 			}
 			if flagSoldWithinDays != "" {
 				params["sold_within_days"] = fmt.Sprintf("%v", flagSoldWithinDays)
@@ -385,36 +413,40 @@ func newFacetsPromotedCmd(flags *rootFlags) *cobra.Command {
 			return printOutputWithFlags(cmd.OutOrStdout(), data, flags)
 		},
 	}
-	cmd.Flags().StringVar(&flagFacets, "facets", "", "Required comma-separated facet names to return. Supported facets: make, model, inventory_type, year, trim, version,...")
+	cmd.Flags().StringVar(&flagFacets, "facets", "", "Required comma-separated facet names to return. Supported facets: make, model, model_code, inventory_type, year,...")
 	cmd.Flags().StringVar(&flagFacetValueLimit, "facet-value-limit", "", "Maximum number of values returned per categorical facet. Defaults to 20; maximum 100. Numeric range facets always...")
 	cmd.Flags().StringVar(&flagMetric, "metric", "", "Facet Metric used to compute an optional per-bucket aggregate. Defaults to count. Supported measures: price, miles,...")
 	cmd.Flags().StringVar(&flagSort, "sort", "", "Facet bucket ordering. Defaults to -count. Sorting by metric requires a non-count metric. (one of: count, -count, metric, -metric)")
 	cmd.Flags().StringVar(&flagMake, "make", "", "Comma-separated make names or slugs to apply before counting facet buckets.")
 	cmd.Flags().StringVar(&flagModel, "model", "", "Comma-separated model names or slugs to apply before counting facet buckets.")
+	cmd.Flags().StringVar(&flagModelCode, "model-code", "", "Comma-separated manufacturer model codes to apply before counting facet buckets.")
 	cmd.Flags().StringVar(&flagTrim, "trim", "", "Comma-separated trim names to apply before counting facet buckets.")
 	cmd.Flags().StringVar(&flagYear, "year", "", "Comma-separated model years to apply before counting facet buckets.")
 	cmd.Flags().StringVar(&flagState, "state", "", "Comma-separated two-letter dealer states to apply before counting facet buckets.")
 	cmd.Flags().StringVar(&flagDealerId, "dealer-id", "", "Comma-separated dealer UUIDs to apply before counting facet buckets. Accepts up to 50 dealer IDs.")
+	cmd.Flags().StringVar(&flagDealerGroupId, "dealer-group-id", "", "Comma-separated dealer-group IDs to apply before counting facet buckets. Matches current member locations and...")
 	cmd.Flags().StringVar(&flagDealerType, "dealer-type", "", "Comma-separated dealer types to apply before counting facet buckets.")
 	cmd.Flags().StringVar(&flagAvailabilityStatus, "availability-status", "", "Comma-separated availability statuses to apply before counting facet buckets: stock, transit, build.")
 	cmd.Flags().StringVar(&flagInventoryType, "inventory-type", "", "Comma-separated inventory classes to apply before counting facet buckets: new, used, certified. cpo is accepted as...")
 	cmd.Flags().StringVar(&flagBodyType, "body-type", "", "Comma-separated body types.")
-	cmd.Flags().StringVar(&flagTransmission, "transmission", "", "Comma-separated transmission values.")
-	cmd.Flags().StringVar(&flagDrivetrain, "drivetrain", "", "Comma-separated drivetrain values.")
+	cmd.Flags().StringVar(&flagTransmission, "transmission", "", "Comma-separated transmission values, case-insensitive: Automatic, CVT, Manual.")
+	cmd.Flags().StringVar(&flagDrivetrain, "drivetrain", "", "Comma-separated drivetrain values, case-insensitive: AWD, FWD, 4WD, RWD.")
 	cmd.Flags().StringVar(&flagAssemblyLocation, "assembly-location", "", "Pipe-separated assembly locations. Uses | because locations often contain commas.")
 	cmd.Flags().StringVar(&flagAssemblyCountry, "assembly-country", "", "Comma-separated assembly country values.")
-	cmd.Flags().StringVar(&flagFuelType, "fuel-type", "", "Comma-separated fuel type values.")
-	cmd.Flags().StringVar(&flagPowertrainType, "powertrain-type", "", "Comma-separated powertrain type values.")
+	cmd.Flags().StringVar(&flagFuelType, "fuel-type", "", "Comma-separated fuel type values, case-insensitive: Gas only, Hybrid, Diesel, Full Electric, Plug-in Hybrid,...")
+	cmd.Flags().StringVar(&flagPowertrainType, "powertrain-type", "", "Comma-separated powertrain type values, case-insensitive: Combustion, HEV, MHEV, BEV, PHEV, FCEV, EREV.")
 	cmd.Flags().StringVar(&flagEngine, "engine", "", "Comma-separated engine descriptions.")
 	cmd.Flags().StringVar(&flagVersion, "version", "", "Comma-separated vehicle version values.")
 	cmd.Flags().StringVar(&flagExteriorColor, "exterior-color", "", "Comma-separated exterior color values.")
 	cmd.Flags().StringVar(&flagInteriorColor, "interior-color", "", "Comma-separated interior color values.")
-	cmd.Flags().StringVar(&flagBaseExteriorColor, "base-exterior-color", "", "Comma-separated normalized exterior color values.")
-	cmd.Flags().StringVar(&flagBaseInteriorColor, "base-interior-color", "", "Comma-separated normalized interior color values.")
+	cmd.Flags().StringVar(&flagBaseExteriorColor, "base-exterior-color", "", "Comma-separated normalized exterior color values, case-insensitive: Black, White, Silver, Gray, Red, Blue, Green,...")
+	cmd.Flags().StringVar(&flagBaseInteriorColor, "base-interior-color", "", "Comma-separated normalized interior color values, case-insensitive: Black, White, Silver, Gray, Red, Blue, Green,...")
 	cmd.Flags().StringVar(&flagSeatingCapacity, "seating-capacity", "", "Comma-separated seating capacity integers.")
 	cmd.Flags().StringVar(&flagCylinders, "cylinders", "", "Comma-separated cylinder count integers.")
 	cmd.Flags().StringVar(&flagDoors, "doors", "", "Comma-separated door count integers.")
 	cmd.Flags().StringVar(&flagOptionsPackages, "options-packages", "", "Comma-separated manufacturer option/package codes.")
+	cmd.Flags().StringVar(&flagOptionSlug, "option-slug", "", "Comma-separated source-stable option slugs. Additive to options_packages; package-code semantics are unchanged.")
+	cmd.Flags().StringVar(&flagExcludeOptionSlug, "exclude-option-slug", "", "Comma-separated source-stable option slugs to exclude.")
 	cmd.Flags().StringVar(&flagFeatures, "features", "", "Comma-separated feature tokens.")
 	cmd.Flags().StringVar(&flagKeywords, "keywords", "", "Comma-separated provenance/history keyword tokens to apply before counting facet buckets. Supported values:...")
 	cmd.Flags().StringVar(&flagVinPattern, "vin-pattern", "", "Comma-separated VIN masks, up to 10 distinct patterns. VIN characters match themselves, ? matches one VIN position,...")
@@ -423,24 +455,27 @@ func newFacetsPromotedCmd(flags *rootFlags) *cobra.Command {
 	cmd.Flags().StringVar(&flagExcludeTrim, "exclude-trim", "", "Comma-separated trims to exclude.")
 	cmd.Flags().StringVar(&flagExcludeYear, "exclude-year", "", "Comma-separated model years to exclude.")
 	cmd.Flags().StringVar(&flagExcludeState, "exclude-state", "", "Comma-separated dealer states to exclude.")
+	cmd.Flags().StringVar(&flagExcludeDealerId, "exclude-dealer-id", "", "Comma-separated dealer UUIDs to exclude before counting facet buckets. Accepts up to 50 dealer IDs.")
+	cmd.Flags().StringVar(&flagExcludeDealerGroupId, "exclude-dealer-group-id", "", "Comma-separated dealer-group IDs whose current member locations should be excluded before counting facet buckets....")
 	cmd.Flags().StringVar(&flagExcludeInventoryType, "exclude-inventory-type", "", "Comma-separated inventory classes to exclude: new, used, certified. cpo is accepted as an alias for certified.")
 	cmd.Flags().StringVar(&flagExcludeBodyType, "exclude-body-type", "", "Comma-separated body types to exclude.")
-	cmd.Flags().StringVar(&flagExcludeTransmission, "exclude-transmission", "", "Comma-separated transmission values to exclude.")
-	cmd.Flags().StringVar(&flagExcludeDrivetrain, "exclude-drivetrain", "", "Comma-separated drivetrain values to exclude.")
+	cmd.Flags().StringVar(&flagExcludeTransmission, "exclude-transmission", "", "Comma-separated transmission values to exclude, case-insensitive: Automatic, CVT, Manual.")
+	cmd.Flags().StringVar(&flagExcludeDrivetrain, "exclude-drivetrain", "", "Comma-separated drivetrain values to exclude, case-insensitive: AWD, FWD, 4WD, RWD.")
 	cmd.Flags().StringVar(&flagExcludeVersion, "exclude-version", "", "Comma-separated vehicle versions to exclude.")
 	cmd.Flags().StringVar(&flagExcludeEngine, "exclude-engine", "", "Comma-separated engine descriptions to exclude.")
 	cmd.Flags().StringVar(&flagExcludeAssemblyLocation, "exclude-assembly-location", "", "Plus-separated assembly locations to exclude. Uses + to match the private API separator.")
 	cmd.Flags().StringVar(&flagExcludeAssemblyCountry, "exclude-assembly-country", "", "Comma-separated assembly countries to exclude.")
 	cmd.Flags().StringVar(&flagExcludeExteriorColor, "exclude-exterior-color", "", "Comma-separated exterior colors to exclude.")
 	cmd.Flags().StringVar(&flagExcludeInteriorColor, "exclude-interior-color", "", "Comma-separated interior colors to exclude.")
-	cmd.Flags().StringVar(&flagExcludeBaseExteriorColor, "exclude-base-exterior-color", "", "Comma-separated normalized exterior colors to exclude.")
-	cmd.Flags().StringVar(&flagExcludeBaseInteriorColor, "exclude-base-interior-color", "", "Comma-separated normalized interior colors to exclude.")
+	cmd.Flags().StringVar(&flagExcludeBaseExteriorColor, "exclude-base-exterior-color", "", "Comma-separated normalized exterior colors to exclude, case-insensitive: Black, White, Silver, Gray, Red, Blue,...")
+	cmd.Flags().StringVar(&flagExcludeBaseInteriorColor, "exclude-base-interior-color", "", "Comma-separated normalized interior colors to exclude, case-insensitive: Black, White, Silver, Gray, Red, Blue,...")
 	cmd.Flags().StringVar(&flagExcludeOptionsPackages, "exclude-options-packages", "", "Comma-separated manufacturer option/package codes to exclude.")
 	cmd.Flags().StringVar(&flagExcludeFeatures, "exclude-features", "", "Comma-separated feature tokens to exclude.")
-	cmd.Flags().StringVar(&flagExcludeFuelType, "exclude-fuel-type", "", "Comma-separated fuel types to exclude.")
-	cmd.Flags().StringVar(&flagExcludePowertrainType, "exclude-powertrain-type", "", "Comma-separated powertrain types to exclude.")
+	cmd.Flags().StringVar(&flagExcludeFuelType, "exclude-fuel-type", "", "Comma-separated fuel types to exclude, case-insensitive: Gas only, Hybrid, Diesel, Full Electric, Plug-in Hybrid,...")
+	cmd.Flags().StringVar(&flagExcludePowertrainType, "exclude-powertrain-type", "", "Comma-separated powertrain types to exclude, case-insensitive: Combustion, HEV, MHEV, BEV, PHEV, FCEV, EREV.")
 	cmd.Flags().StringVar(&flagExcludeKeywords, "exclude-keywords", "", "Comma-separated keyword tokens to exclude.")
 	cmd.Flags().StringVar(&flagInventoryStatus, "inventory-status", "", "Inventory mode used for facet counts. active is the default. (one of: active, sold)")
+	cmd.Flags().StringVar(&flagListedAfter, "listed-after", "", "Filter to listings first observed by Visor on or after this ISO 8601 timestamp.")
 	cmd.Flags().StringVar(&flagSoldWithinDays, "sold-within-days", "", "Positive integer day window for sold inventory facets.")
 	cmd.Flags().StringVar(&flagSnapshotDate, "snapshot-date", "", "Historical active-inventory snapshot date in YYYY-MM-DD format.")
 	cmd.Flags().StringVar(&flagMinPrice, "min-price", "", "Minimum listed price in whole dollars.")

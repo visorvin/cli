@@ -44,6 +44,8 @@
               "enum": [
                 "days_on_market",
                 "-days_on_market",
+                "listed_at",
+                "-listed_at",
                 "price",
                 "-price",
                 "miles",
@@ -54,21 +56,21 @@
                 "-discount",
                 "distance"
               ],
-              "description": "Sort order. Use field names with optional - for descending, for example price or -price. Defaults to days_on_market, which returns newest listings first. discount returns best discount from MSRP first. distance requires postal_code or latitude and longitude."
+              "description": "Sort order. Use field names with optional - for descending, for example price or -price. Defaults to days_on_market, which returns newest listings first. listed_at sorts by the first time Visor observed the listing. discount returns best discount from MSRP first. distance requires postal_code or latitude and longitude."
             },
             "required": false,
-            "description": "Sort order. Use field names with optional - for descending, for example price or -price. Defaults to days_on_market, which returns newest listings first. discount returns best discount from MSRP first. distance requires postal_code or latitude and longitude."
+            "description": "Sort order. Use field names with optional - for descending, for example price or -price. Defaults to days_on_market, which returns newest listings first. listed_at sorts by the first time Visor observed the listing. discount returns best discount from MSRP first. distance requires postal_code or latitude and longitude."
           },
           {
             "name": "fields",
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "Comma-separated public listing summary fields to return. This controls response projection only; filters such as availability_status, options_packages, and features do not belong in fields. id and vin are always returned. Use default to include the default listing summary fieldset plus selected extras. Unknown fields are rejected. Supported fields: default, id, vin, year, make, model, trim, version, body_type, drivetrain, fuel_type, powertrain_type, transmission, engine, cylinders, doors, seating_capacity, exterior_color, interior_color, base_exterior_color, base_interior_color, msrp, discount_from_msrp, price, miles, days_on_market, status, inventory_status, inventory_type, stock_number, vdp_url, sold_date, dealer_id, dealer_name, dealer_type, city, state, latitude, longitude, distance_miles, photo_urls, features, options_packages."
+              "description": "Comma-separated public listing summary fields to return. This controls response projection only; filter-only parameters do not belong in fields. id and vin are always returned. Use default to include the default listing summary fieldset plus selected extras. Unknown fields are rejected. Supported fields: default, id, vin, year, make, model, trim, version, body_type, drivetrain, fuel_type, powertrain_type, transmission, engine, cylinders, doors, seating_capacity, exterior_color, interior_color, base_exterior_color, base_interior_color, spec_source, msrp, discount_from_msrp, price, miles, days_on_market, listed_at, last_checked_at, status, inventory_status, availability_status, inventory_type, stock_number, vdp_url, sold_date, dealer_id, dealer_name, dealer_type, city, state, postal_code, latitude, longitude, distance_miles, photo_urls, features, options_packages."
             },
             "required": false,
-            "description": "Comma-separated public listing summary fields to return. This controls response projection only; filters such as availability_status, options_packages, and features do not belong in fields. id and vin are always returned. Use default to include the default listing summary fieldset plus selected extras. Unknown fields are rejected. Supported fields: default, id, vin, year, make, model, trim, version, body_type, drivetrain, fuel_type, powertrain_type, transmission, engine, cylinders, doors, seating_capacity, exterior_color, interior_color, base_exterior_color, base_interior_color, msrp, discount_from_msrp, price, miles, days_on_market, status, inventory_status, inventory_type, stock_number, vdp_url, sold_date, dealer_id, dealer_name, dealer_type, city, state, latitude, longitude, distance_miles, photo_urls, features, options_packages.",
-            "example": "default,price,miles,dealer_id,dealer_name,vdp_url"
+            "description": "Comma-separated public listing summary fields to return. This controls response projection only; filter-only parameters do not belong in fields. id and vin are always returned. Use default to include the default listing summary fieldset plus selected extras. Unknown fields are rejected. Supported fields: default, id, vin, year, make, model, trim, version, body_type, drivetrain, fuel_type, powertrain_type, transmission, engine, cylinders, doors, seating_capacity, exterior_color, interior_color, base_exterior_color, base_interior_color, spec_source, msrp, discount_from_msrp, price, miles, days_on_market, listed_at, last_checked_at, status, inventory_status, availability_status, inventory_type, stock_number, vdp_url, sold_date, dealer_id, dealer_name, dealer_type, city, state, postal_code, latitude, longitude, distance_miles, photo_urls, features, options_packages.",
+            "example": "default,price,miles,dealer_id,dealer_name,postal_code,listed_at,vdp_url"
           },
           {
             "name": "include",
@@ -101,6 +103,16 @@
             "required": false,
             "description": "Comma-separated model names or slugs. Combine with make when possible for narrower results.",
             "example": "Camry"
+          },
+          {
+            "name": "model_code",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "Comma-separated manufacturer model codes."
+            },
+            "required": false,
+            "description": "Comma-separated manufacturer model codes."
           },
           {
             "name": "trim",
@@ -142,6 +154,16 @@
             },
             "required": false,
             "description": "Comma-separated dealer UUIDs. Accepts up to 50 dealer IDs and uses dealer-filtered listing metering."
+          },
+          {
+            "name": "dealer_group_id",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "Comma-separated dealer-group IDs. Matches listings at any current member location, accepts up to 50 group IDs, and uses dealer-filtered listing metering."
+            },
+            "required": false,
+            "description": "Comma-separated dealer-group IDs. Matches listings at any current member location, accepts up to 50 group IDs, and uses dealer-filtered listing metering."
           },
           {
             "name": "dealer_type",
@@ -188,20 +210,20 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "Comma-separated transmission values."
+              "description": "Comma-separated transmission values, case-insensitive: Automatic, CVT, Manual."
             },
             "required": false,
-            "description": "Comma-separated transmission values."
+            "description": "Comma-separated transmission values, case-insensitive: Automatic, CVT, Manual."
           },
           {
             "name": "drivetrain",
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "Comma-separated drivetrain values."
+              "description": "Comma-separated drivetrain values, case-insensitive: AWD, FWD, 4WD, RWD."
             },
             "required": false,
-            "description": "Comma-separated drivetrain values."
+            "description": "Comma-separated drivetrain values, case-insensitive: AWD, FWD, 4WD, RWD."
           },
           {
             "name": "assembly_location",
@@ -228,20 +250,20 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "Comma-separated fuel type values."
+              "description": "Comma-separated fuel type values, case-insensitive: Gas only, Hybrid, Diesel, Full Electric, Plug-in Hybrid, Biodiesel, Fuel Cell Electric, Natural Gas (CNG), LPG, Other."
             },
             "required": false,
-            "description": "Comma-separated fuel type values."
+            "description": "Comma-separated fuel type values, case-insensitive: Gas only, Hybrid, Diesel, Full Electric, Plug-in Hybrid, Biodiesel, Fuel Cell Electric, Natural Gas (CNG), LPG, Other."
           },
           {
             "name": "powertrain_type",
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "Comma-separated powertrain type values."
+              "description": "Comma-separated powertrain type values, case-insensitive: Combustion, HEV, MHEV, BEV, PHEV, FCEV, EREV."
             },
             "required": false,
-            "description": "Comma-separated powertrain type values."
+            "description": "Comma-separated powertrain type values, case-insensitive: Combustion, HEV, MHEV, BEV, PHEV, FCEV, EREV."
           },
           {
             "name": "engine",
@@ -288,20 +310,20 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "Comma-separated normalized exterior color values."
+              "description": "Comma-separated normalized exterior color values, case-insensitive: Black, White, Silver, Gray, Red, Blue, Green, Yellow, Orange, Brown, Tan, Beige, Gold, Purple, Burgundy."
             },
             "required": false,
-            "description": "Comma-separated normalized exterior color values."
+            "description": "Comma-separated normalized exterior color values, case-insensitive: Black, White, Silver, Gray, Red, Blue, Green, Yellow, Orange, Brown, Tan, Beige, Gold, Purple, Burgundy."
           },
           {
             "name": "base_interior_color",
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "Comma-separated normalized interior color values."
+              "description": "Comma-separated normalized interior color values, case-insensitive: Black, White, Silver, Gray, Red, Blue, Green, Yellow, Orange, Brown, Tan, Beige, Gold, Purple, Burgundy."
             },
             "required": false,
-            "description": "Comma-separated normalized interior color values."
+            "description": "Comma-separated normalized interior color values, case-insensitive: Black, White, Silver, Gray, Red, Blue, Green, Yellow, Orange, Brown, Tan, Beige, Gold, Purple, Burgundy."
           },
           {
             "name": "seating_capacity",
@@ -342,6 +364,26 @@
             },
             "required": false,
             "description": "Comma-separated manufacturer option/package codes."
+          },
+          {
+            "name": "option_slug",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "Comma-separated source-stable option slugs. Additive to options_packages; package-code semantics are unchanged."
+            },
+            "required": false,
+            "description": "Comma-separated source-stable option slugs. Additive to options_packages; package-code semantics are unchanged."
+          },
+          {
+            "name": "exclude_option_slug",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "Comma-separated source-stable option slugs to exclude."
+            },
+            "required": false,
+            "description": "Comma-separated source-stable option slugs to exclude."
           },
           {
             "name": "features",
@@ -424,6 +466,26 @@
             "description": "Comma-separated dealer states to exclude."
           },
           {
+            "name": "exclude_dealer_id",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "Comma-separated dealer UUIDs to exclude. Accepts up to 50 dealer IDs; exclusion-only searches use market-wide listing metering."
+            },
+            "required": false,
+            "description": "Comma-separated dealer UUIDs to exclude. Accepts up to 50 dealer IDs; exclusion-only searches use market-wide listing metering."
+          },
+          {
+            "name": "exclude_dealer_group_id",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "Comma-separated dealer-group IDs whose current member locations should be excluded. Accepts up to 50 group IDs; exclusion-only searches use market-wide listing metering."
+            },
+            "required": false,
+            "description": "Comma-separated dealer-group IDs whose current member locations should be excluded. Accepts up to 50 group IDs; exclusion-only searches use market-wide listing metering."
+          },
+          {
             "name": "exclude_inventory_type",
             "in": "query",
             "schema": {
@@ -448,20 +510,20 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "Comma-separated transmission values to exclude."
+              "description": "Comma-separated transmission values to exclude, case-insensitive: Automatic, CVT, Manual."
             },
             "required": false,
-            "description": "Comma-separated transmission values to exclude."
+            "description": "Comma-separated transmission values to exclude, case-insensitive: Automatic, CVT, Manual."
           },
           {
             "name": "exclude_drivetrain",
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "Comma-separated drivetrain values to exclude."
+              "description": "Comma-separated drivetrain values to exclude, case-insensitive: AWD, FWD, 4WD, RWD."
             },
             "required": false,
-            "description": "Comma-separated drivetrain values to exclude."
+            "description": "Comma-separated drivetrain values to exclude, case-insensitive: AWD, FWD, 4WD, RWD."
           },
           {
             "name": "exclude_version",
@@ -528,20 +590,20 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "Comma-separated normalized exterior colors to exclude."
+              "description": "Comma-separated normalized exterior colors to exclude, case-insensitive: Black, White, Silver, Gray, Red, Blue, Green, Yellow, Orange, Brown, Tan, Beige, Gold, Purple, Burgundy."
             },
             "required": false,
-            "description": "Comma-separated normalized exterior colors to exclude."
+            "description": "Comma-separated normalized exterior colors to exclude, case-insensitive: Black, White, Silver, Gray, Red, Blue, Green, Yellow, Orange, Brown, Tan, Beige, Gold, Purple, Burgundy."
           },
           {
             "name": "exclude_base_interior_color",
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "Comma-separated normalized interior colors to exclude."
+              "description": "Comma-separated normalized interior colors to exclude, case-insensitive: Black, White, Silver, Gray, Red, Blue, Green, Yellow, Orange, Brown, Tan, Beige, Gold, Purple, Burgundy."
             },
             "required": false,
-            "description": "Comma-separated normalized interior colors to exclude."
+            "description": "Comma-separated normalized interior colors to exclude, case-insensitive: Black, White, Silver, Gray, Red, Blue, Green, Yellow, Orange, Brown, Tan, Beige, Gold, Purple, Burgundy."
           },
           {
             "name": "exclude_options_packages",
@@ -568,20 +630,20 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "Comma-separated fuel types to exclude."
+              "description": "Comma-separated fuel types to exclude, case-insensitive: Gas only, Hybrid, Diesel, Full Electric, Plug-in Hybrid, Biodiesel, Fuel Cell Electric, Natural Gas (CNG), LPG, Other."
             },
             "required": false,
-            "description": "Comma-separated fuel types to exclude."
+            "description": "Comma-separated fuel types to exclude, case-insensitive: Gas only, Hybrid, Diesel, Full Electric, Plug-in Hybrid, Biodiesel, Fuel Cell Electric, Natural Gas (CNG), LPG, Other."
           },
           {
             "name": "exclude_powertrain_type",
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "Comma-separated powertrain types to exclude."
+              "description": "Comma-separated powertrain types to exclude, case-insensitive: Combustion, HEV, MHEV, BEV, PHEV, FCEV, EREV."
             },
             "required": false,
-            "description": "Comma-separated powertrain types to exclude."
+            "description": "Comma-separated powertrain types to exclude, case-insensitive: Combustion, HEV, MHEV, BEV, PHEV, FCEV, EREV."
           },
           {
             "name": "exclude_keywords",
@@ -606,6 +668,16 @@
             },
             "required": false,
             "description": "Inventory mode. active is the default; sold searches historical sold inventory."
+          },
+          {
+            "name": "listed_after",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "Return listings first observed by Visor on or after this ISO 8601 timestamp, for example 2026-06-28T15:30:00Z."
+            },
+            "required": false,
+            "description": "Return listings first observed by Visor on or after this ISO 8601 timestamp, for example 2026-06-28T15:30:00Z."
           },
           {
             "name": "sold_within_days",
@@ -982,6 +1054,14 @@
                             ],
                             "description": "Normalized interior color."
                           },
+                          "spec_source": {
+                            "type": "string",
+                            "enum": [
+                              "legacy",
+                              "openspec"
+                            ],
+                            "description": "Vehicle specification source selected for this row."
+                          },
                           "msrp": {
                             "anyOf": [
                               {
@@ -1037,6 +1117,28 @@
                             ],
                             "description": "Days the listing has been observed on market when available."
                           },
+                          "listed_at": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "Timestamp when Visor first observed this listing when available."
+                          },
+                          "last_checked_at": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "Latest Visor observation timestamp for this listing when available."
+                          },
                           "status": {
                             "type": "string",
                             "enum": [
@@ -1052,6 +1154,22 @@
                               "sold"
                             ],
                             "description": "Deprecated alias for status, retained for beta compatibility."
+                          },
+                          "availability_status": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "enum": [
+                                  "stock",
+                                  "transit",
+                                  "build"
+                                ]
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "Listing availability state when known: stock, transit, or build."
                           },
                           "inventory_type": {
                             "anyOf": [
@@ -1155,6 +1273,17 @@
                               }
                             ],
                             "description": "Dealer state."
+                          },
+                          "postal_code": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "Dealer ZIP or postal code."
                           },
                           "latitude": {
                             "anyOf": [
@@ -1377,6 +1506,8 @@
                           "dealer_name": "North Hollywood Toyota",
                           "city": "North Hollywood",
                           "state": "CA",
+                          "postal_code": "91602",
+                          "listed_at": "2026-06-09T11:40:57.534Z",
                           "vdp_url": "https://www.northhollywoodtoyota.com/viewdetails/new/4t1daackxtu765422"
                         }
                       ],
@@ -1514,7 +1645,7 @@
             "make": "Toyota",
             "model": "Camry",
             "state": "CA",
-            "fields": "default,price,miles,dealer_id,dealer_name,vdp_url"
+            "fields": "default,price,miles,dealer_id,dealer_name,postal_code,listed_at,vdp_url"
           }
         }
       }
@@ -1531,10 +1662,10 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "Required comma-separated facet names to return. Supported facets: make, model, inventory_type, year, trim, version, base_exterior_color, exterior_color, base_interior_color, interior_color, seating_capacity, doors, engine, state, drivetrain, assembly_location, assembly_country, transmission, fuel_type, body_type, cylinders, dealer_type, availability_status, options_packages, features, keywords, price, msrp, miles, days_on_market."
+              "description": "Required comma-separated facet names to return. Supported facets: make, model, model_code, inventory_type, year, trim, version, base_exterior_color, exterior_color, base_interior_color, interior_color, seating_capacity, doors, engine, state, drivetrain, assembly_location, assembly_country, transmission, fuel_type, powertrain_type, body_type, cylinders, dealer_type, availability_status, options_packages, features, keywords, price, msrp, miles, days_on_market."
             },
             "required": true,
-            "description": "Required comma-separated facet names to return. Supported facets: make, model, inventory_type, year, trim, version, base_exterior_color, exterior_color, base_interior_color, interior_color, seating_capacity, doors, engine, state, drivetrain, assembly_location, assembly_country, transmission, fuel_type, body_type, cylinders, dealer_type, availability_status, options_packages, features, keywords, price, msrp, miles, days_on_market.",
+            "description": "Required comma-separated facet names to return. Supported facets: make, model, model_code, inventory_type, year, trim, version, base_exterior_color, exterior_color, base_interior_color, interior_color, seating_capacity, doors, engine, state, drivetrain, assembly_location, assembly_country, transmission, fuel_type, powertrain_type, body_type, cylinders, dealer_type, availability_status, options_packages, features, keywords, price, msrp, miles, days_on_market.",
             "example": "make,model,price"
           },
           {
@@ -1596,6 +1727,16 @@
             "description": "Comma-separated model names or slugs to apply before counting facet buckets."
           },
           {
+            "name": "model_code",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "Comma-separated manufacturer model codes to apply before counting facet buckets."
+            },
+            "required": false,
+            "description": "Comma-separated manufacturer model codes to apply before counting facet buckets."
+          },
+          {
             "name": "trim",
             "in": "query",
             "schema": {
@@ -1635,6 +1776,16 @@
             },
             "required": false,
             "description": "Comma-separated dealer UUIDs to apply before counting facet buckets. Accepts up to 50 dealer IDs."
+          },
+          {
+            "name": "dealer_group_id",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "Comma-separated dealer-group IDs to apply before counting facet buckets. Matches current member locations and accepts up to 50 group IDs."
+            },
+            "required": false,
+            "description": "Comma-separated dealer-group IDs to apply before counting facet buckets. Matches current member locations and accepts up to 50 group IDs."
           },
           {
             "name": "dealer_type",
@@ -1681,20 +1832,20 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "Comma-separated transmission values."
+              "description": "Comma-separated transmission values, case-insensitive: Automatic, CVT, Manual."
             },
             "required": false,
-            "description": "Comma-separated transmission values."
+            "description": "Comma-separated transmission values, case-insensitive: Automatic, CVT, Manual."
           },
           {
             "name": "drivetrain",
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "Comma-separated drivetrain values."
+              "description": "Comma-separated drivetrain values, case-insensitive: AWD, FWD, 4WD, RWD."
             },
             "required": false,
-            "description": "Comma-separated drivetrain values."
+            "description": "Comma-separated drivetrain values, case-insensitive: AWD, FWD, 4WD, RWD."
           },
           {
             "name": "assembly_location",
@@ -1721,20 +1872,20 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "Comma-separated fuel type values."
+              "description": "Comma-separated fuel type values, case-insensitive: Gas only, Hybrid, Diesel, Full Electric, Plug-in Hybrid, Biodiesel, Fuel Cell Electric, Natural Gas (CNG), LPG, Other."
             },
             "required": false,
-            "description": "Comma-separated fuel type values."
+            "description": "Comma-separated fuel type values, case-insensitive: Gas only, Hybrid, Diesel, Full Electric, Plug-in Hybrid, Biodiesel, Fuel Cell Electric, Natural Gas (CNG), LPG, Other."
           },
           {
             "name": "powertrain_type",
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "Comma-separated powertrain type values."
+              "description": "Comma-separated powertrain type values, case-insensitive: Combustion, HEV, MHEV, BEV, PHEV, FCEV, EREV."
             },
             "required": false,
-            "description": "Comma-separated powertrain type values."
+            "description": "Comma-separated powertrain type values, case-insensitive: Combustion, HEV, MHEV, BEV, PHEV, FCEV, EREV."
           },
           {
             "name": "engine",
@@ -1781,20 +1932,20 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "Comma-separated normalized exterior color values."
+              "description": "Comma-separated normalized exterior color values, case-insensitive: Black, White, Silver, Gray, Red, Blue, Green, Yellow, Orange, Brown, Tan, Beige, Gold, Purple, Burgundy."
             },
             "required": false,
-            "description": "Comma-separated normalized exterior color values."
+            "description": "Comma-separated normalized exterior color values, case-insensitive: Black, White, Silver, Gray, Red, Blue, Green, Yellow, Orange, Brown, Tan, Beige, Gold, Purple, Burgundy."
           },
           {
             "name": "base_interior_color",
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "Comma-separated normalized interior color values."
+              "description": "Comma-separated normalized interior color values, case-insensitive: Black, White, Silver, Gray, Red, Blue, Green, Yellow, Orange, Brown, Tan, Beige, Gold, Purple, Burgundy."
             },
             "required": false,
-            "description": "Comma-separated normalized interior color values."
+            "description": "Comma-separated normalized interior color values, case-insensitive: Black, White, Silver, Gray, Red, Blue, Green, Yellow, Orange, Brown, Tan, Beige, Gold, Purple, Burgundy."
           },
           {
             "name": "seating_capacity",
@@ -1835,6 +1986,26 @@
             },
             "required": false,
             "description": "Comma-separated manufacturer option/package codes."
+          },
+          {
+            "name": "option_slug",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "Comma-separated source-stable option slugs. Additive to options_packages; package-code semantics are unchanged."
+            },
+            "required": false,
+            "description": "Comma-separated source-stable option slugs. Additive to options_packages; package-code semantics are unchanged."
+          },
+          {
+            "name": "exclude_option_slug",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "Comma-separated source-stable option slugs to exclude."
+            },
+            "required": false,
+            "description": "Comma-separated source-stable option slugs to exclude."
           },
           {
             "name": "features",
@@ -1917,6 +2088,26 @@
             "description": "Comma-separated dealer states to exclude."
           },
           {
+            "name": "exclude_dealer_id",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "Comma-separated dealer UUIDs to exclude before counting facet buckets. Accepts up to 50 dealer IDs."
+            },
+            "required": false,
+            "description": "Comma-separated dealer UUIDs to exclude before counting facet buckets. Accepts up to 50 dealer IDs."
+          },
+          {
+            "name": "exclude_dealer_group_id",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "Comma-separated dealer-group IDs whose current member locations should be excluded before counting facet buckets. Accepts up to 50 group IDs."
+            },
+            "required": false,
+            "description": "Comma-separated dealer-group IDs whose current member locations should be excluded before counting facet buckets. Accepts up to 50 group IDs."
+          },
+          {
             "name": "exclude_inventory_type",
             "in": "query",
             "schema": {
@@ -1941,20 +2132,20 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "Comma-separated transmission values to exclude."
+              "description": "Comma-separated transmission values to exclude, case-insensitive: Automatic, CVT, Manual."
             },
             "required": false,
-            "description": "Comma-separated transmission values to exclude."
+            "description": "Comma-separated transmission values to exclude, case-insensitive: Automatic, CVT, Manual."
           },
           {
             "name": "exclude_drivetrain",
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "Comma-separated drivetrain values to exclude."
+              "description": "Comma-separated drivetrain values to exclude, case-insensitive: AWD, FWD, 4WD, RWD."
             },
             "required": false,
-            "description": "Comma-separated drivetrain values to exclude."
+            "description": "Comma-separated drivetrain values to exclude, case-insensitive: AWD, FWD, 4WD, RWD."
           },
           {
             "name": "exclude_version",
@@ -2021,20 +2212,20 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "Comma-separated normalized exterior colors to exclude."
+              "description": "Comma-separated normalized exterior colors to exclude, case-insensitive: Black, White, Silver, Gray, Red, Blue, Green, Yellow, Orange, Brown, Tan, Beige, Gold, Purple, Burgundy."
             },
             "required": false,
-            "description": "Comma-separated normalized exterior colors to exclude."
+            "description": "Comma-separated normalized exterior colors to exclude, case-insensitive: Black, White, Silver, Gray, Red, Blue, Green, Yellow, Orange, Brown, Tan, Beige, Gold, Purple, Burgundy."
           },
           {
             "name": "exclude_base_interior_color",
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "Comma-separated normalized interior colors to exclude."
+              "description": "Comma-separated normalized interior colors to exclude, case-insensitive: Black, White, Silver, Gray, Red, Blue, Green, Yellow, Orange, Brown, Tan, Beige, Gold, Purple, Burgundy."
             },
             "required": false,
-            "description": "Comma-separated normalized interior colors to exclude."
+            "description": "Comma-separated normalized interior colors to exclude, case-insensitive: Black, White, Silver, Gray, Red, Blue, Green, Yellow, Orange, Brown, Tan, Beige, Gold, Purple, Burgundy."
           },
           {
             "name": "exclude_options_packages",
@@ -2061,20 +2252,20 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "Comma-separated fuel types to exclude."
+              "description": "Comma-separated fuel types to exclude, case-insensitive: Gas only, Hybrid, Diesel, Full Electric, Plug-in Hybrid, Biodiesel, Fuel Cell Electric, Natural Gas (CNG), LPG, Other."
             },
             "required": false,
-            "description": "Comma-separated fuel types to exclude."
+            "description": "Comma-separated fuel types to exclude, case-insensitive: Gas only, Hybrid, Diesel, Full Electric, Plug-in Hybrid, Biodiesel, Fuel Cell Electric, Natural Gas (CNG), LPG, Other."
           },
           {
             "name": "exclude_powertrain_type",
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "Comma-separated powertrain types to exclude."
+              "description": "Comma-separated powertrain types to exclude, case-insensitive: Combustion, HEV, MHEV, BEV, PHEV, FCEV, EREV."
             },
             "required": false,
-            "description": "Comma-separated powertrain types to exclude."
+            "description": "Comma-separated powertrain types to exclude, case-insensitive: Combustion, HEV, MHEV, BEV, PHEV, FCEV, EREV."
           },
           {
             "name": "exclude_keywords",
@@ -2099,6 +2290,16 @@
             },
             "required": false,
             "description": "Inventory mode used for facet counts. active is the default."
+          },
+          {
+            "name": "listed_after",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "Filter to listings first observed by Visor on or after this ISO 8601 timestamp."
+            },
+            "required": false,
+            "description": "Filter to listings first observed by Visor on or after this ISO 8601 timestamp."
           },
           {
             "name": "sold_within_days",
@@ -2716,7 +2917,7 @@
             }
           }
         },
-        "description": "Returns categorical facets, numeric range facets, and stats for an explicit listing filter surface facet selection. Use facets=make,model,price. Supported facets: make, model, inventory_type, year, trim, version, base_exterior_color, exterior_color, base_interior_color, interior_color, seating_capacity, doors, engine, state, drivetrain, assembly_location, assembly_country, transmission, fuel_type, body_type, cylinders, dealer_type, availability_status, options_packages, features, keywords, price, msrp, miles, days_on_market.",
+        "description": "Returns categorical facets, numeric range facets, and stats for an explicit listing filter surface facet selection. Use facets=make,model,price. Supported facets: make, model, model_code, inventory_type, year, trim, version, base_exterior_color, exterior_color, base_interior_color, interior_color, seating_capacity, doors, engine, state, drivetrain, assembly_location, assembly_country, transmission, fuel_type, powertrain_type, body_type, cylinders, dealer_type, availability_status, options_packages, features, keywords, price, msrp, miles, days_on_market.",
         "summary": "Filter facets",
         "x-visor-example-request": {
           "method": "GET",
@@ -3090,7 +3291,7 @@
                               "type": "null"
                             }
                           ],
-                          "description": "Last warehouse observation timestamp for this listing."
+                          "description": "Last Visor observation timestamp for this listing."
                         },
                         "dealer": {
                           "type": "object",
@@ -3139,6 +3340,17 @@
                               ],
                               "description": "Dealer state."
                             },
+                            "postal_code": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ],
+                              "description": "Dealer ZIP or postal code."
+                            },
                             "latitude": {
                               "anyOf": [
                                 {
@@ -3178,6 +3390,7 @@
                             "name",
                             "city",
                             "state",
+                            "postal_code",
                             "latitude",
                             "longitude",
                             "phone"
@@ -3402,6 +3615,14 @@
                                   ],
                                   "description": "Normalized interior color."
                                 },
+                                "spec_source": {
+                                  "type": "string",
+                                  "enum": [
+                                    "legacy",
+                                    "openspec"
+                                  ],
+                                  "description": "Vehicle specification source selected for this build."
+                                },
                                 "assembly_location": {
                                   "anyOf": [
                                     {
@@ -3501,6 +3722,7 @@
                                 "interior_color",
                                 "base_exterior_color",
                                 "base_interior_color",
+                                "spec_source",
                                 "assembly_location",
                                 "window_sticker_verified",
                                 "base_msrp",
@@ -3643,6 +3865,7 @@
                           "name": "North Hollywood Toyota",
                           "city": "North Hollywood",
                           "state": "CA",
+                          "postal_code": "91602",
                           "latitude": 34.154,
                           "longitude": -118.3678,
                           "phone": "(818) 369-3922"
@@ -4193,7 +4416,7 @@
                                       "type": "null"
                                     }
                                   ],
-                                  "description": "Last warehouse observation timestamp for the latest listing."
+                                  "description": "Last Visor observation timestamp for the latest listing."
                                 },
                                 "dealer": {
                                   "type": "object",
@@ -4242,6 +4465,17 @@
                                       ],
                                       "description": "Dealer state."
                                     },
+                                    "postal_code": {
+                                      "anyOf": [
+                                        {
+                                          "type": "string"
+                                        },
+                                        {
+                                          "type": "null"
+                                        }
+                                      ],
+                                      "description": "Dealer ZIP or postal code."
+                                    },
                                     "latitude": {
                                       "anyOf": [
                                         {
@@ -4281,6 +4515,7 @@
                                     "name",
                                     "city",
                                     "state",
+                                    "postal_code",
                                     "latitude",
                                     "longitude",
                                     "phone"
@@ -4577,6 +4812,14 @@
                               ],
                               "description": "Normalized interior color."
                             },
+                            "spec_source": {
+                              "type": "string",
+                              "enum": [
+                                "legacy",
+                                "openspec"
+                              ],
+                              "description": "Vehicle specification source selected for this build."
+                            },
                             "assembly_location": {
                               "anyOf": [
                                 {
@@ -4676,6 +4919,7 @@
                             "interior_color",
                             "base_exterior_color",
                             "base_interior_color",
+                            "spec_source",
                             "assembly_location",
                             "window_sticker_verified",
                             "base_msrp",
@@ -4771,6 +5015,7 @@
                             "name": "North Hollywood Toyota",
                             "city": "North Hollywood",
                             "state": "CA",
+                            "postal_code": "91602",
                             "latitude": 34.154,
                             "longitude": -118.3678,
                             "phone": "(818) 369-3922"
@@ -4956,6 +5201,16 @@
             "description": "Comma-separated dealer UUIDs to fetch directly. Accepts up to 100 dealer IDs."
           },
           {
+            "name": "dealer_group_id",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "Comma-separated current dealer-group IDs. Accepts up to 100 dealer-group IDs."
+            },
+            "required": false,
+            "description": "Comma-separated current dealer-group IDs. Accepts up to 100 dealer-group IDs."
+          },
+          {
             "name": "state",
             "in": "query",
             "schema": {
@@ -5007,10 +5262,10 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "Case-insensitive dealer name or website domain search string."
+              "description": "Case-insensitive dealer name, website domain, or dealer-group name search string."
             },
             "required": false,
-            "description": "Case-insensitive dealer name or website domain search string."
+            "description": "Case-insensitive dealer name, website domain, or dealer-group name search string."
           }
         ],
         "security": [
@@ -5067,6 +5322,17 @@
                               }
                             ],
                             "description": "Dealer state."
+                          },
+                          "postal_code": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "Dealer ZIP or postal code."
                           },
                           "country": {
                             "anyOf": [
@@ -5134,6 +5400,45 @@
                             },
                             "description": "Represented franchise makes. Empty when unavailable or not applicable."
                           },
+                          "dealer_group": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "dealer_group_id": {
+                                    "type": "string",
+                                    "description": "Stable dealer-group identifier."
+                                  },
+                                  "name": {
+                                    "type": "string",
+                                    "description": "Dealer-group display name."
+                                  },
+                                  "website": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ],
+                                    "description": "Dealer-group website as an absolute URL when available."
+                                  }
+                                },
+                                "required": [
+                                  "dealer_group_id",
+                                  "name",
+                                  "website"
+                                ],
+                                "additionalProperties": false,
+                                "description": "Current dealer-group affiliation."
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "Current dealer-group affiliation when known."
+                          },
                           "listing_count": {
                             "type": "number",
                             "description": "Current active listing count for the dealer after VIN-level listing deduplication and ownership assignment."
@@ -5144,12 +5449,14 @@
                           "name",
                           "city",
                           "state",
+                          "postal_code",
                           "country",
                           "latitude",
                           "longitude",
                           "type",
                           "website",
                           "makes",
+                          "dealer_group",
                           "listing_count"
                         ],
                         "additionalProperties": false,
@@ -5215,6 +5522,7 @@
                           "name": "Claremont Toyota",
                           "city": "Claremont",
                           "state": "CA",
+                          "postal_code": "91711",
                           "country": "US",
                           "latitude": 34.080929,
                           "longitude": -117.72527,
@@ -5223,6 +5531,7 @@
                           "makes": [
                             "Toyota"
                           ],
+                          "dealer_group": null,
                           "listing_count": 1656
                         }
                       ],
@@ -5350,7 +5659,7 @@
             }
           }
         },
-        "description": "Returns public dealer summaries ordered by active listing count. Listing counts use VIN-level listing deduplication and ownership assignment, so they can differ from raw dealer feed counts. Use dealer_id, state, country, type, make, and q to narrow results.",
+        "description": "Returns public dealer summaries ordered by active listing count. Listing counts use VIN-level listing deduplication and ownership assignment, so they can differ from raw dealer feed counts. Use dealer_id, dealer_group_id, state, country, type, make, and q to narrow results.",
         "summary": "Search dealers",
         "x-visor-example-request": {
           "method": "GET",
@@ -5502,6 +5811,45 @@
                           },
                           "description": "Represented franchise makes. Empty when unavailable or not applicable."
                         },
+                        "dealer_group": {
+                          "anyOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "dealer_group_id": {
+                                  "type": "string",
+                                  "description": "Stable dealer-group identifier."
+                                },
+                                "name": {
+                                  "type": "string",
+                                  "description": "Dealer-group display name."
+                                },
+                                "website": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ],
+                                  "description": "Dealer-group website as an absolute URL when available."
+                                }
+                              },
+                              "required": [
+                                "dealer_group_id",
+                                "name",
+                                "website"
+                              ],
+                              "additionalProperties": false,
+                              "description": "Current dealer-group affiliation."
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "description": "Current dealer-group affiliation when known."
+                        },
                         "listing_count": {
                           "type": "number",
                           "description": "Current active listing count for the dealer."
@@ -5555,6 +5903,17 @@
                                   ],
                                   "description": "Dealer state."
                                 },
+                                "postal_code": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ],
+                                  "description": "Dealer ZIP or postal code."
+                                },
                                 "country": {
                                   "anyOf": [
                                     {
@@ -5571,6 +5930,7 @@
                                 "line1",
                                 "city",
                                 "state",
+                                "postal_code",
                                 "country"
                               ],
                               "additionalProperties": false,
@@ -5594,6 +5954,7 @@
                         "type",
                         "website",
                         "makes",
+                        "dealer_group",
                         "listing_count",
                         "phone",
                         "address"
@@ -5622,6 +5983,7 @@
                         "name": "Claremont Toyota",
                         "city": "Claremont",
                         "state": "CA",
+                        "postal_code": "91711",
                         "country": "US",
                         "latitude": 34.080929,
                         "longitude": -117.72527,
@@ -5630,12 +5992,14 @@
                         "makes": [
                           "Toyota"
                         ],
+                        "dealer_group": null,
                         "listing_count": 1656,
                         "phone": "(909) 455-9142",
                         "address": {
                           "line1": "601 Auto Center Dr",
                           "city": "Claremont",
                           "state": "CA",
+                          "postal_code": "91711",
                           "country": "US"
                         }
                       },
@@ -5822,6 +6186,8 @@
               "enum": [
                 "days_on_market",
                 "-days_on_market",
+                "listed_at",
+                "-listed_at",
                 "price",
                 "-price",
                 "miles",
@@ -5832,20 +6198,20 @@
                 "-discount",
                 "distance"
               ],
-              "description": "Sort order. Use field names with optional - for descending, for example price or -price. Defaults to days_on_market, which returns newest listings first. discount returns best discount from MSRP first. distance requires postal_code or latitude and longitude."
+              "description": "Sort order. Use field names with optional - for descending, for example price or -price. Defaults to days_on_market, which returns newest listings first. listed_at sorts by the first time Visor observed the listing. discount returns best discount from MSRP first. distance requires postal_code or latitude and longitude."
             },
             "required": false,
-            "description": "Sort order. Use field names with optional - for descending, for example price or -price. Defaults to days_on_market, which returns newest listings first. discount returns best discount from MSRP first. distance requires postal_code or latitude and longitude."
+            "description": "Sort order. Use field names with optional - for descending, for example price or -price. Defaults to days_on_market, which returns newest listings first. listed_at sorts by the first time Visor observed the listing. discount returns best discount from MSRP first. distance requires postal_code or latitude and longitude."
           },
           {
             "name": "fields",
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "Comma-separated public listing summary fields to return. This controls response projection only; filters such as availability_status, options_packages, and features do not belong in fields. id and vin are always returned. Use default to include the default listing summary fieldset plus selected extras. Unknown fields are rejected. Supported fields: default, id, vin, year, make, model, trim, version, body_type, drivetrain, fuel_type, powertrain_type, transmission, engine, cylinders, doors, seating_capacity, exterior_color, interior_color, base_exterior_color, base_interior_color, msrp, discount_from_msrp, price, miles, days_on_market, status, inventory_status, inventory_type, stock_number, vdp_url, sold_date, dealer_id, dealer_name, dealer_type, city, state, latitude, longitude, distance_miles, photo_urls, features, options_packages."
+              "description": "Comma-separated public listing summary fields to return. This controls response projection only; filter-only parameters do not belong in fields. id and vin are always returned. Use default to include the default listing summary fieldset plus selected extras. Unknown fields are rejected. Supported fields: default, id, vin, year, make, model, trim, version, body_type, drivetrain, fuel_type, powertrain_type, transmission, engine, cylinders, doors, seating_capacity, exterior_color, interior_color, base_exterior_color, base_interior_color, spec_source, msrp, discount_from_msrp, price, miles, days_on_market, listed_at, last_checked_at, status, inventory_status, availability_status, inventory_type, stock_number, vdp_url, sold_date, dealer_id, dealer_name, dealer_type, city, state, postal_code, latitude, longitude, distance_miles, photo_urls, features, options_packages."
             },
             "required": false,
-            "description": "Comma-separated public listing summary fields to return. This controls response projection only; filters such as availability_status, options_packages, and features do not belong in fields. id and vin are always returned. Use default to include the default listing summary fieldset plus selected extras. Unknown fields are rejected. Supported fields: default, id, vin, year, make, model, trim, version, body_type, drivetrain, fuel_type, powertrain_type, transmission, engine, cylinders, doors, seating_capacity, exterior_color, interior_color, base_exterior_color, base_interior_color, msrp, discount_from_msrp, price, miles, days_on_market, status, inventory_status, inventory_type, stock_number, vdp_url, sold_date, dealer_id, dealer_name, dealer_type, city, state, latitude, longitude, distance_miles, photo_urls, features, options_packages.",
+            "description": "Comma-separated public listing summary fields to return. This controls response projection only; filter-only parameters do not belong in fields. id and vin are always returned. Use default to include the default listing summary fieldset plus selected extras. Unknown fields are rejected. Supported fields: default, id, vin, year, make, model, trim, version, body_type, drivetrain, fuel_type, powertrain_type, transmission, engine, cylinders, doors, seating_capacity, exterior_color, interior_color, base_exterior_color, base_interior_color, spec_source, msrp, discount_from_msrp, price, miles, days_on_market, listed_at, last_checked_at, status, inventory_status, availability_status, inventory_type, stock_number, vdp_url, sold_date, dealer_id, dealer_name, dealer_type, city, state, postal_code, latitude, longitude, distance_miles, photo_urls, features, options_packages.",
             "example": "default,price,miles,vdp_url"
           },
           {
@@ -5877,6 +6243,16 @@
             },
             "required": false,
             "description": "Comma-separated model names or slugs. Combine with make when possible for narrower results."
+          },
+          {
+            "name": "model_code",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "Comma-separated manufacturer model codes."
+            },
+            "required": false,
+            "description": "Comma-separated manufacturer model codes."
           },
           {
             "name": "trim",
@@ -5918,6 +6294,16 @@
             "required": false,
             "description": "Comma-separated dealer UUIDs. Accepts up to 50 dealer IDs and uses dealer-filtered listing metering.",
             "example": "b62c6042-b3a0-4a58-bc5b-55966bd1c68c"
+          },
+          {
+            "name": "dealer_group_id",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "Comma-separated dealer-group IDs. Matches listings at any current member location, accepts up to 50 group IDs, and uses dealer-filtered listing metering."
+            },
+            "required": false,
+            "description": "Comma-separated dealer-group IDs. Matches listings at any current member location, accepts up to 50 group IDs, and uses dealer-filtered listing metering."
           },
           {
             "name": "dealer_type",
@@ -5964,20 +6350,20 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "Comma-separated transmission values."
+              "description": "Comma-separated transmission values, case-insensitive: Automatic, CVT, Manual."
             },
             "required": false,
-            "description": "Comma-separated transmission values."
+            "description": "Comma-separated transmission values, case-insensitive: Automatic, CVT, Manual."
           },
           {
             "name": "drivetrain",
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "Comma-separated drivetrain values."
+              "description": "Comma-separated drivetrain values, case-insensitive: AWD, FWD, 4WD, RWD."
             },
             "required": false,
-            "description": "Comma-separated drivetrain values."
+            "description": "Comma-separated drivetrain values, case-insensitive: AWD, FWD, 4WD, RWD."
           },
           {
             "name": "assembly_location",
@@ -6004,20 +6390,20 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "Comma-separated fuel type values."
+              "description": "Comma-separated fuel type values, case-insensitive: Gas only, Hybrid, Diesel, Full Electric, Plug-in Hybrid, Biodiesel, Fuel Cell Electric, Natural Gas (CNG), LPG, Other."
             },
             "required": false,
-            "description": "Comma-separated fuel type values."
+            "description": "Comma-separated fuel type values, case-insensitive: Gas only, Hybrid, Diesel, Full Electric, Plug-in Hybrid, Biodiesel, Fuel Cell Electric, Natural Gas (CNG), LPG, Other."
           },
           {
             "name": "powertrain_type",
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "Comma-separated powertrain type values."
+              "description": "Comma-separated powertrain type values, case-insensitive: Combustion, HEV, MHEV, BEV, PHEV, FCEV, EREV."
             },
             "required": false,
-            "description": "Comma-separated powertrain type values."
+            "description": "Comma-separated powertrain type values, case-insensitive: Combustion, HEV, MHEV, BEV, PHEV, FCEV, EREV."
           },
           {
             "name": "engine",
@@ -6064,20 +6450,20 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "Comma-separated normalized exterior color values."
+              "description": "Comma-separated normalized exterior color values, case-insensitive: Black, White, Silver, Gray, Red, Blue, Green, Yellow, Orange, Brown, Tan, Beige, Gold, Purple, Burgundy."
             },
             "required": false,
-            "description": "Comma-separated normalized exterior color values."
+            "description": "Comma-separated normalized exterior color values, case-insensitive: Black, White, Silver, Gray, Red, Blue, Green, Yellow, Orange, Brown, Tan, Beige, Gold, Purple, Burgundy."
           },
           {
             "name": "base_interior_color",
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "Comma-separated normalized interior color values."
+              "description": "Comma-separated normalized interior color values, case-insensitive: Black, White, Silver, Gray, Red, Blue, Green, Yellow, Orange, Brown, Tan, Beige, Gold, Purple, Burgundy."
             },
             "required": false,
-            "description": "Comma-separated normalized interior color values."
+            "description": "Comma-separated normalized interior color values, case-insensitive: Black, White, Silver, Gray, Red, Blue, Green, Yellow, Orange, Brown, Tan, Beige, Gold, Purple, Burgundy."
           },
           {
             "name": "seating_capacity",
@@ -6118,6 +6504,26 @@
             },
             "required": false,
             "description": "Comma-separated manufacturer option/package codes."
+          },
+          {
+            "name": "option_slug",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "Comma-separated source-stable option slugs. Additive to options_packages; package-code semantics are unchanged."
+            },
+            "required": false,
+            "description": "Comma-separated source-stable option slugs. Additive to options_packages; package-code semantics are unchanged."
+          },
+          {
+            "name": "exclude_option_slug",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "Comma-separated source-stable option slugs to exclude."
+            },
+            "required": false,
+            "description": "Comma-separated source-stable option slugs to exclude."
           },
           {
             "name": "features",
@@ -6200,6 +6606,26 @@
             "description": "Comma-separated dealer states to exclude."
           },
           {
+            "name": "exclude_dealer_id",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "Comma-separated dealer UUIDs to exclude. Accepts up to 50 dealer IDs; exclusion-only searches use market-wide listing metering."
+            },
+            "required": false,
+            "description": "Comma-separated dealer UUIDs to exclude. Accepts up to 50 dealer IDs; exclusion-only searches use market-wide listing metering."
+          },
+          {
+            "name": "exclude_dealer_group_id",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "Comma-separated dealer-group IDs whose current member locations should be excluded. Accepts up to 50 group IDs; exclusion-only searches use market-wide listing metering."
+            },
+            "required": false,
+            "description": "Comma-separated dealer-group IDs whose current member locations should be excluded. Accepts up to 50 group IDs; exclusion-only searches use market-wide listing metering."
+          },
+          {
             "name": "exclude_inventory_type",
             "in": "query",
             "schema": {
@@ -6224,20 +6650,20 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "Comma-separated transmission values to exclude."
+              "description": "Comma-separated transmission values to exclude, case-insensitive: Automatic, CVT, Manual."
             },
             "required": false,
-            "description": "Comma-separated transmission values to exclude."
+            "description": "Comma-separated transmission values to exclude, case-insensitive: Automatic, CVT, Manual."
           },
           {
             "name": "exclude_drivetrain",
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "Comma-separated drivetrain values to exclude."
+              "description": "Comma-separated drivetrain values to exclude, case-insensitive: AWD, FWD, 4WD, RWD."
             },
             "required": false,
-            "description": "Comma-separated drivetrain values to exclude."
+            "description": "Comma-separated drivetrain values to exclude, case-insensitive: AWD, FWD, 4WD, RWD."
           },
           {
             "name": "exclude_version",
@@ -6304,20 +6730,20 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "Comma-separated normalized exterior colors to exclude."
+              "description": "Comma-separated normalized exterior colors to exclude, case-insensitive: Black, White, Silver, Gray, Red, Blue, Green, Yellow, Orange, Brown, Tan, Beige, Gold, Purple, Burgundy."
             },
             "required": false,
-            "description": "Comma-separated normalized exterior colors to exclude."
+            "description": "Comma-separated normalized exterior colors to exclude, case-insensitive: Black, White, Silver, Gray, Red, Blue, Green, Yellow, Orange, Brown, Tan, Beige, Gold, Purple, Burgundy."
           },
           {
             "name": "exclude_base_interior_color",
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "Comma-separated normalized interior colors to exclude."
+              "description": "Comma-separated normalized interior colors to exclude, case-insensitive: Black, White, Silver, Gray, Red, Blue, Green, Yellow, Orange, Brown, Tan, Beige, Gold, Purple, Burgundy."
             },
             "required": false,
-            "description": "Comma-separated normalized interior colors to exclude."
+            "description": "Comma-separated normalized interior colors to exclude, case-insensitive: Black, White, Silver, Gray, Red, Blue, Green, Yellow, Orange, Brown, Tan, Beige, Gold, Purple, Burgundy."
           },
           {
             "name": "exclude_options_packages",
@@ -6344,20 +6770,20 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "Comma-separated fuel types to exclude."
+              "description": "Comma-separated fuel types to exclude, case-insensitive: Gas only, Hybrid, Diesel, Full Electric, Plug-in Hybrid, Biodiesel, Fuel Cell Electric, Natural Gas (CNG), LPG, Other."
             },
             "required": false,
-            "description": "Comma-separated fuel types to exclude."
+            "description": "Comma-separated fuel types to exclude, case-insensitive: Gas only, Hybrid, Diesel, Full Electric, Plug-in Hybrid, Biodiesel, Fuel Cell Electric, Natural Gas (CNG), LPG, Other."
           },
           {
             "name": "exclude_powertrain_type",
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "Comma-separated powertrain types to exclude."
+              "description": "Comma-separated powertrain types to exclude, case-insensitive: Combustion, HEV, MHEV, BEV, PHEV, FCEV, EREV."
             },
             "required": false,
-            "description": "Comma-separated powertrain types to exclude."
+            "description": "Comma-separated powertrain types to exclude, case-insensitive: Combustion, HEV, MHEV, BEV, PHEV, FCEV, EREV."
           },
           {
             "name": "exclude_keywords",
@@ -6382,6 +6808,16 @@
             },
             "required": false,
             "description": "Inventory mode. active is the default; sold searches historical sold inventory."
+          },
+          {
+            "name": "listed_after",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "Return listings first observed by Visor on or after this ISO 8601 timestamp, for example 2026-06-28T15:30:00Z."
+            },
+            "required": false,
+            "description": "Return listings first observed by Visor on or after this ISO 8601 timestamp, for example 2026-06-28T15:30:00Z."
           },
           {
             "name": "sold_within_days",
@@ -6758,6 +7194,14 @@
                             ],
                             "description": "Normalized interior color."
                           },
+                          "spec_source": {
+                            "type": "string",
+                            "enum": [
+                              "legacy",
+                              "openspec"
+                            ],
+                            "description": "Vehicle specification source selected for this row."
+                          },
                           "msrp": {
                             "anyOf": [
                               {
@@ -6813,6 +7257,28 @@
                             ],
                             "description": "Days the listing has been observed on market when available."
                           },
+                          "listed_at": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "Timestamp when Visor first observed this listing when available."
+                          },
+                          "last_checked_at": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "Latest Visor observation timestamp for this listing when available."
+                          },
                           "status": {
                             "type": "string",
                             "enum": [
@@ -6828,6 +7294,22 @@
                               "sold"
                             ],
                             "description": "Deprecated alias for status, retained for beta compatibility."
+                          },
+                          "availability_status": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "enum": [
+                                  "stock",
+                                  "transit",
+                                  "build"
+                                ]
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "Listing availability state when known: stock, transit, or build."
                           },
                           "inventory_type": {
                             "anyOf": [
@@ -6931,6 +7413,17 @@
                               }
                             ],
                             "description": "Dealer state."
+                          },
+                          "postal_code": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "Dealer ZIP or postal code."
                           },
                           "latitude": {
                             "anyOf": [
