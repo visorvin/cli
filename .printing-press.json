@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-06-17T14:50:45.670548Z",
+  "generated_at": "2026-09-24T22:18:41.684372Z",
   "printing_press_version": "4.0.6",
   "api_name": "visor",
   "display_name": "Visor Public",
@@ -8,7 +8,7 @@
   "owner": "visorvin",
   "spec_path": "spec.json",
   "spec_format": "openapi3",
-  "spec_checksum": "sha256:63d6105569a58c31403eac7588c5f33df54ecf0133bc57182e502cb630743e8a",
+  "spec_checksum": "sha256:1e2b9658aad0ec092def14e514aaba9ee6c350576ace667be9c30edb9114f68c",
   "mcp_binary": "visor-mcp",
   "mcp_tool_count": 8,
   "mcp_ready": "full",
