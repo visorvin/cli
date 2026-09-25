@@ -18,7 +18,7 @@ import (
 	"github.com/visorvin/cli/internal/config"
 )
 
-var version = "1.0.23"
+var version = "1.1.0"
 
 type rootFlags struct {
 	asJSON        bool
