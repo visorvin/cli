@@ -105,7 +105,7 @@ func TestEndpointHelpShowsCuratedFlagsOnly(t *testing.T) {
 	for _, want := range []string{
 		"Key Flags:",
 		"--make string",
-		"--max-price string",
+		"--max-price int",
 		"Filter Flags:",
 		"--exclude-assembly-country",
 		"Output Flags:",
