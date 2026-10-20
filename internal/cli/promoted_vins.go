@@ -16,8 +16,8 @@ func newVinsPromotedCmd(flags *rootFlags) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:         "vins <vin>",
-		Short:       "Returns the current or latest known record for a VIN. Unknown VINs return 404 not_found_error; known VINs can return...",
-		Long:        "Shortcut for 'vins get'. Returns the current or latest known record for a VIN. Unknown VINs return 404 not_found_error; known VINs can return...",
+		Short:       "Get a vehicle by VIN: its status, build and installed options, and its latest known listing with price, dealer, and...",
+		Long:        "Shortcut for 'vins get'. Get a vehicle by VIN: its status, build and installed options, and its latest known listing with price, dealer, and...",
 		Example:     "  visor vins example-value",
 		Annotations: map[string]string{"pp:endpoint": "vins.get", "pp:method": "GET", "pp:path": "/v1/vins/{vin}", "mcp:read-only": "true"},
 		RunE: func(cmd *cobra.Command, args []string) error {

@@ -18,8 +18,8 @@ func newUsagePromotedCmd(flags *rootFlags) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:         "usage",
-		Short:       "Returns daily billable usage totals for the authenticated API account. Usage analytics are eventually consistent...",
-		Long:        "Returns daily billable usage totals for the authenticated API account. Usage analytics are eventually consistent...",
+		Short:       "Get your API account's billable request counts and charges per day and metering class, for up to 366 days (default:...",
+		Long:        "Get your API account's billable request counts and charges per day and metering class, for up to 366 days (default:...",
 		Example:     "  visor usage",
 		Annotations: map[string]string{"pp:endpoint": "usage.public", "pp:method": "GET", "pp:path": "/v1/usage", "mcp:read-only": "true"},
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -86,7 +86,7 @@ func newUsagePromotedCmd(flags *rootFlags) *cobra.Command {
 	}
 	cmd.Flags().StringVar(&flagStartDate, "start-date", "", "Inclusive UTC start date in YYYY-MM-DD format. Defaults to 29 days before end_date.")
 	cmd.Flags().StringVar(&flagEndDate, "end-date", "", "Inclusive UTC end date in YYYY-MM-DD format. Defaults to today.")
-	cmd.Flags().StringVar(&flagMeteringClass, "metering-class", "", "Optional comma-separated metering classes to include.")
+	cmd.Flags().StringVar(&flagMeteringClass, "metering-class", "", "Comma-separated metering classes to include. Defaults to all classes.")
 
 	// Wire sibling endpoints and sub-resources as subcommands
 
