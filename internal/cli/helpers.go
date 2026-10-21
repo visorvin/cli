@@ -515,7 +515,7 @@ func filterFieldsValidated(data json.RawMessage, fields string) (json.RawMessage
 		if len(valid) > 0 {
 			msg += "; valid fields include: " + strings.Join(valid, ", ")
 		}
-		return nil, usageErr(fmt.Errorf(msg))
+		return nil, usageErr(errors.New(msg))
 	}
 	return filterFieldsRec(data, paths), nil
 }
