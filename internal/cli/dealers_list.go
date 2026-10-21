@@ -12,7 +12,7 @@ import (
 )
 
 func newDealersListCmd(flags *rootFlags) *cobra.Command {
-	var flagLimit string
+	var flagLimit int
 	var flagOffset string
 	var flagDealerId string
 	var flagDealerGroupId string
@@ -25,7 +25,7 @@ func newDealersListCmd(flags *rootFlags) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:         "list",
-		Short:       "Returns public dealer summaries ordered by active listing count. Listing counts use VIN-level listing deduplication...",
+		Short:       "Find dealers by state, country, type, franchise make, dealer group, dealer_id, or a name and website search (q)....",
 		Example:     "  visor dealers list",
 		Annotations: map[string]string{"pp:endpoint": "dealers.list", "pp:method": "GET", "pp:path": "/v1/dealers", "mcp:read-only": "true"},
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -93,8 +93,8 @@ func newDealersListCmd(flags *rootFlags) *cobra.Command {
 			return printOutputWithFlags(cmd.OutOrStdout(), data, flags)
 		},
 	}
-	cmd.Flags().StringVar(&flagLimit, "limit", "", "Page size as an integer string. Defaults to 50; maximum 100.")
-	cmd.Flags().StringVar(&flagOffset, "offset", "", "Zero-based page offset as an integer string. Defaults to 0.")
+	cmd.Flags().IntVar(&flagLimit, "limit", 50, "Page size. Defaults to 50; maximum 100.")
+	cmd.Flags().StringVar(&flagOffset, "offset", "0", "Zero-based page offset. Defaults to 0.")
 	cmd.Flags().StringVar(&flagDealerId, "dealer-id", "", "Comma-separated dealer UUIDs to fetch directly. Accepts up to 100 dealer IDs.")
 	cmd.Flags().StringVar(&flagDealerGroupId, "dealer-group-id", "", "Comma-separated current dealer-group IDs. Accepts up to 100 dealer-group IDs.")
 	cmd.Flags().StringVar(&flagState, "state", "", "Comma-separated two-letter dealer states, for example CA,TX.")

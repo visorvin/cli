@@ -15,7 +15,7 @@ func newDealersGetCmd(flags *rootFlags) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:         "get <dealer_id>",
-		Short:       "Returns one dealer summary by dealer_id. Missing dealers return 404 not_found_error.",
+		Short:       "Get one dealer's profile by dealer_id: location, website, franchise makes, dealer group, active listing count,...",
 		Example:     "  visor dealers get 550e8400-e29b-41d4-a716-446655440000",
 		Annotations: map[string]string{"pp:endpoint": "dealers.get", "pp:method": "GET", "pp:path": "/v1/dealers/{dealer_id}", "mcp:read-only": "true"},
 		RunE: func(cmd *cobra.Command, args []string) error {
