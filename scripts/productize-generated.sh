@@ -138,19 +138,6 @@ done
 if [ -f internal/cli/dealers_listings_dealers.go ]; then
   perl -0pi -e 's/Use:\s+"dealers <dealer_id>",\n\s+Aliases:\s+\[\]string\{"get"\},/Use:   "list <dealer_id>",\n\t\tAliases: []string{"dealers", "get"},/' internal/cli/dealers_listings_dealers.go
   perl -0pi -e 's/visor dealers listings dealers 550e8400-e29b-41d4-a716-446655440000/visor dealers listings list 550e8400-e29b-41d4-a716-446655440000/' internal/cli/dealers_listings_dealers.go
-  perl -0pi -e 's/\n\tvar flagDealerId string//' internal/cli/dealers_listings_dealers.go
-  perl -0pi -e 's/\n\t\t\t\t"dealer_id":\s+fmt\.Sprintf\("%v", flagDealerId\),//' internal/cli/dealers_listings_dealers.go
-  perl -0pi -e 's/\n\tcmd\.Flags\(\)\.StringVar\(&flagDealerId, "dealer-id", "", "Comma-separated dealer UUIDs\. Accepts up to 50 dealer IDs and uses dealer-filtered listing metering\."\)//' internal/cli/dealers_listings_dealers.go
-fi
-
-# The dealer inventory endpoint has a path dealer_id. The upstream shared
-# listing filter also includes query dealer_id, which collides in generated
-# MCP tool names. Keep the path argument for this endpoint and leave query
-# dealer_id available on the top-level listings/facets commands.
-if [ -f internal/mcp/tools.go ]; then
-  perl -0pi -e 's/(Required: dealer_id\. Optional: limit, offset, sort \(plus )(\d+)( more\)\.)/$1 . ($2 - 1) . $3/e' internal/mcp/tools.go
-  perl -0pi -e 's/\n\t\t\tmcplib\.WithString\("dealer_id", mcplib\.Description\("Comma-separated dealer UUIDs\. Accepts up to 50 dealer IDs and uses dealer-filtered listing metering\."\)\),//' internal/mcp/tools.go
-  perl -0pi -e 's/(makeAPIHandler\("GET", "\/v1\/dealers\/\{dealer_id\}\/listings", \[\]mcpParamBinding\{\{PublicName: "dealer_id", WireName: "dealer_id", Location: "path"\}[^\n]*?),\s*\{PublicName: "dealer_id", WireName: "dealer_id", Location: "path"\}/$1/' internal/mcp/tools.go
 fi
 
 # Current Visor compatibility patch: generated sync otherwise sends generic params

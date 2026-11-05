@@ -10,7 +10,7 @@ import (
 func newDealersCmd(flags *rootFlags) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "dealers",
-		Short: "Manage dealers",
+		Short: "Find dealers, read a dealer profile, and list one dealer's inventory.",
 	}
 
 	cmd.AddCommand(newDealersGetCmd(flags))

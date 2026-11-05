@@ -233,6 +233,7 @@ func (s *Store) backfillColumns(ctx context.Context, conn *sql.Conn) error {
 		{table: "listings", column: "base_exterior_color", decl: "TEXT"},
 		{table: "listings", column: "base_interior_color", decl: "TEXT"},
 		{table: "listings", column: "body_type", decl: "TEXT"},
+		{table: "listings", column: "certification", decl: "TEXT"},
 		{table: "listings", column: "city", decl: "TEXT"},
 		{table: "listings", column: "cylinders", decl: "TEXT"},
 		{table: "listings", column: "days_on_market", decl: "TEXT"},
@@ -257,6 +258,8 @@ func (s *Store) backfillColumns(ctx context.Context, conn *sql.Conn) error {
 		{table: "listings", column: "miles", decl: "TEXT"},
 		{table: "listings", column: "model", decl: "TEXT"},
 		{table: "listings", column: "msrp", decl: "TEXT"},
+		{table: "listings", column: "original_market", decl: "TEXT"},
+		{table: "listings", column: "paint_program", decl: "TEXT"},
 		{table: "listings", column: "postal_code", decl: "TEXT"},
 		{table: "listings", column: "powertrain_type", decl: "TEXT"},
 		{table: "listings", column: "price", decl: "TEXT"},
@@ -266,6 +269,7 @@ func (s *Store) backfillColumns(ctx context.Context, conn *sql.Conn) error {
 		{table: "listings", column: "state", decl: "TEXT"},
 		{table: "listings", column: "status", decl: "TEXT"},
 		{table: "listings", column: "stock_number", decl: "TEXT"},
+		{table: "listings", column: "title_status", decl: "TEXT"},
 		{table: "listings", column: "transmission", decl: "TEXT"},
 		{table: "listings", column: "trim", decl: "TEXT"},
 		{table: "listings", column: "vdp_url", decl: "TEXT"},
@@ -363,6 +367,7 @@ func (s *Store) migrate(ctx context.Context) error {
 			base_exterior_color TEXT,
 			base_interior_color TEXT,
 			body_type TEXT,
+			certification TEXT,
 			city TEXT,
 			cylinders TEXT,
 			days_on_market TEXT,
@@ -387,6 +392,8 @@ func (s *Store) migrate(ctx context.Context) error {
 			miles TEXT,
 			model TEXT,
 			msrp TEXT,
+			original_market TEXT,
+			paint_program TEXT,
 			postal_code TEXT,
 			powertrain_type TEXT,
 			price TEXT,
@@ -396,6 +403,7 @@ func (s *Store) migrate(ctx context.Context) error {
 			state TEXT,
 			status TEXT,
 			stock_number TEXT,
+			title_status TEXT,
 			transmission TEXT,
 			trim TEXT,
 			vdp_url TEXT,
@@ -862,9 +870,9 @@ func (s *Store) UpsertDealersListings(data json.RawMessage) error {
 // opening a per-item transaction.
 func (s *Store) upsertListingsTx(tx *sql.Tx, id string, obj map[string]any, data json.RawMessage) error {
 	if _, err := tx.Exec(
-		`INSERT INTO listings (id, data, synced_at, availability_status, base_exterior_color, base_interior_color, body_type, city, cylinders, days_on_market, dealer_id, dealer_name, dealer_type, discount_from_msrp, distance_miles, doors, drivetrain, engine, exterior_color, fuel_type, interior_color, inventory_status, inventory_type, last_checked_at, latitude, listed_at, longitude, make, miles, model, msrp, postal_code, powertrain_type, price, seating_capacity, sold_date, spec_source, state, status, stock_number, transmission, trim, vdp_url, version, vin, year)
-		 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-		 ON CONFLICT(id) DO UPDATE SET data = excluded.data, synced_at = excluded.synced_at, availability_status = excluded.availability_status, base_exterior_color = excluded.base_exterior_color, base_interior_color = excluded.base_interior_color, body_type = excluded.body_type, city = excluded.city, cylinders = excluded.cylinders, days_on_market = excluded.days_on_market, dealer_id = excluded.dealer_id, dealer_name = excluded.dealer_name, dealer_type = excluded.dealer_type, discount_from_msrp = excluded.discount_from_msrp, distance_miles = excluded.distance_miles, doors = excluded.doors, drivetrain = excluded.drivetrain, engine = excluded.engine, exterior_color = excluded.exterior_color, fuel_type = excluded.fuel_type, interior_color = excluded.interior_color, inventory_status = excluded.inventory_status, inventory_type = excluded.inventory_type, last_checked_at = excluded.last_checked_at, latitude = excluded.latitude, listed_at = excluded.listed_at, longitude = excluded.longitude, make = excluded.make, miles = excluded.miles, model = excluded.model, msrp = excluded.msrp, postal_code = excluded.postal_code, powertrain_type = excluded.powertrain_type, price = excluded.price, seating_capacity = excluded.seating_capacity, sold_date = excluded.sold_date, spec_source = excluded.spec_source, state = excluded.state, status = excluded.status, stock_number = excluded.stock_number, transmission = excluded.transmission, trim = excluded.trim, vdp_url = excluded.vdp_url, version = excluded.version, vin = excluded.vin, year = excluded.year`,
+		`INSERT INTO listings (id, data, synced_at, availability_status, base_exterior_color, base_interior_color, body_type, certification, city, cylinders, days_on_market, dealer_id, dealer_name, dealer_type, discount_from_msrp, distance_miles, doors, drivetrain, engine, exterior_color, fuel_type, interior_color, inventory_status, inventory_type, last_checked_at, latitude, listed_at, longitude, make, miles, model, msrp, original_market, paint_program, postal_code, powertrain_type, price, seating_capacity, sold_date, spec_source, state, status, stock_number, title_status, transmission, trim, vdp_url, version, vin, year)
+		 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		 ON CONFLICT(id) DO UPDATE SET data = excluded.data, synced_at = excluded.synced_at, availability_status = excluded.availability_status, base_exterior_color = excluded.base_exterior_color, base_interior_color = excluded.base_interior_color, body_type = excluded.body_type, certification = excluded.certification, city = excluded.city, cylinders = excluded.cylinders, days_on_market = excluded.days_on_market, dealer_id = excluded.dealer_id, dealer_name = excluded.dealer_name, dealer_type = excluded.dealer_type, discount_from_msrp = excluded.discount_from_msrp, distance_miles = excluded.distance_miles, doors = excluded.doors, drivetrain = excluded.drivetrain, engine = excluded.engine, exterior_color = excluded.exterior_color, fuel_type = excluded.fuel_type, interior_color = excluded.interior_color, inventory_status = excluded.inventory_status, inventory_type = excluded.inventory_type, last_checked_at = excluded.last_checked_at, latitude = excluded.latitude, listed_at = excluded.listed_at, longitude = excluded.longitude, make = excluded.make, miles = excluded.miles, model = excluded.model, msrp = excluded.msrp, original_market = excluded.original_market, paint_program = excluded.paint_program, postal_code = excluded.postal_code, powertrain_type = excluded.powertrain_type, price = excluded.price, seating_capacity = excluded.seating_capacity, sold_date = excluded.sold_date, spec_source = excluded.spec_source, state = excluded.state, status = excluded.status, stock_number = excluded.stock_number, title_status = excluded.title_status, transmission = excluded.transmission, trim = excluded.trim, vdp_url = excluded.vdp_url, version = excluded.version, vin = excluded.vin, year = excluded.year`,
 		id,
 		string(data),
 		time.Now(),
@@ -872,6 +880,7 @@ func (s *Store) upsertListingsTx(tx *sql.Tx, id string, obj map[string]any, data
 		lookupFieldValue(obj, "base_exterior_color"),
 		lookupFieldValue(obj, "base_interior_color"),
 		lookupFieldValue(obj, "body_type"),
+		lookupFieldValue(obj, "certification"),
 		lookupFieldValue(obj, "city"),
 		lookupFieldValue(obj, "cylinders"),
 		lookupFieldValue(obj, "days_on_market"),
@@ -896,6 +905,8 @@ func (s *Store) upsertListingsTx(tx *sql.Tx, id string, obj map[string]any, data
 		lookupFieldValue(obj, "miles"),
 		lookupFieldValue(obj, "model"),
 		lookupFieldValue(obj, "msrp"),
+		lookupFieldValue(obj, "original_market"),
+		lookupFieldValue(obj, "paint_program"),
 		lookupFieldValue(obj, "postal_code"),
 		lookupFieldValue(obj, "powertrain_type"),
 		lookupFieldValue(obj, "price"),
@@ -905,6 +916,7 @@ func (s *Store) upsertListingsTx(tx *sql.Tx, id string, obj map[string]any, data
 		lookupFieldValue(obj, "state"),
 		lookupFieldValue(obj, "status"),
 		lookupFieldValue(obj, "stock_number"),
+		lookupFieldValue(obj, "title_status"),
 		lookupFieldValue(obj, "transmission"),
 		lookupFieldValue(obj, "trim"),
 		lookupFieldValue(obj, "vdp_url"),

@@ -16,7 +16,7 @@ func newListingsGetCmd(flags *rootFlags) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:         "get <listing_id>",
-		Short:       "Returns listing-centered detail by listing_id. Missing listings return 404 not_found_error.",
+		Short:       "Get one listing by listing_id (the id of a /v1/listings result): price, mileage, photos, pricing line items, dealer...",
 		Example:     "  visor listings get 550e8400-e29b-41d4-a716-446655440000",
 		Annotations: map[string]string{"pp:endpoint": "listings.get", "pp:method": "GET", "pp:path": "/v1/listings/{listing_id}", "mcp:read-only": "true"},
 		RunE: func(cmd *cobra.Command, args []string) error {

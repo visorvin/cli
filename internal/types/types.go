@@ -36,6 +36,7 @@ type ListingsDealersItem struct {
 	BaseExteriorColor  string          `json:"base_exterior_color"`
 	BaseInteriorColor  string          `json:"base_interior_color"`
 	BodyType           string          `json:"body_type"`
+	Certification      string          `json:"certification"`
 	City               string          `json:"city"`
 	Cylinders          string          `json:"cylinders"`
 	DaysOnMarket       string          `json:"days_on_market"`
@@ -64,6 +65,8 @@ type ListingsDealersItem struct {
 	Msrp               string          `json:"msrp"`
 	Options            json.RawMessage `json:"options"`
 	OptionsPackages    json.RawMessage `json:"options_packages"`
+	OriginalMarket     string          `json:"original_market"`
+	PaintProgram       string          `json:"paint_program"`
 	PhotoUrls          json.RawMessage `json:"photo_urls"`
 	PostalCode         string          `json:"postal_code"`
 	PowertrainType     string          `json:"powertrain_type"`
@@ -75,8 +78,10 @@ type ListingsDealersItem struct {
 	State              string          `json:"state"`
 	Status             string          `json:"status"`
 	StockNumber        string          `json:"stock_number"`
+	TitleStatus        string          `json:"title_status"`
 	Transmission       string          `json:"transmission"`
 	Trim               string          `json:"trim"`
+	Upfitters          json.RawMessage `json:"upfitters"`
 	VdpUrl             string          `json:"vdp_url"`
 	Version            string          `json:"version"`
 	Vin                string          `json:"vin"`
@@ -93,6 +98,7 @@ type ListingsListItem struct {
 	BaseExteriorColor  string          `json:"base_exterior_color"`
 	BaseInteriorColor  string          `json:"base_interior_color"`
 	BodyType           string          `json:"body_type"`
+	Certification      string          `json:"certification"`
 	City               string          `json:"city"`
 	Cylinders          string          `json:"cylinders"`
 	DaysOnMarket       string          `json:"days_on_market"`
@@ -121,6 +127,8 @@ type ListingsListItem struct {
 	Msrp               string          `json:"msrp"`
 	Options            json.RawMessage `json:"options"`
 	OptionsPackages    json.RawMessage `json:"options_packages"`
+	OriginalMarket     string          `json:"original_market"`
+	PaintProgram       string          `json:"paint_program"`
 	PhotoUrls          json.RawMessage `json:"photo_urls"`
 	PostalCode         string          `json:"postal_code"`
 	PowertrainType     string          `json:"powertrain_type"`
@@ -132,8 +140,10 @@ type ListingsListItem struct {
 	State              string          `json:"state"`
 	Status             string          `json:"status"`
 	StockNumber        string          `json:"stock_number"`
+	TitleStatus        string          `json:"title_status"`
 	Transmission       string          `json:"transmission"`
 	Trim               string          `json:"trim"`
+	Upfitters          json.RawMessage `json:"upfitters"`
 	VdpUrl             string          `json:"vdp_url"`
 	Version            string          `json:"version"`
 	Vin                string          `json:"vin"`
@@ -161,8 +171,7 @@ type PublicApiPlatformError struct {
 }
 
 type PublicApiRateLimitError struct {
-	Error      json.RawMessage `json:"error"`
-	RetryAfter float64         `json:"retryAfter"`
+	Error json.RawMessage `json:"error"`
 }
 
 type PublicApiValidationError struct {

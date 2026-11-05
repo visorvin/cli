@@ -5,6 +5,7 @@
 package cli_test
 
 import (
+	"slices"
 	"testing"
 
 	"github.com/mark3labs/mcp-go/server"
@@ -16,15 +17,22 @@ func TestVisorMCPExposesCurrentListingFilters(t *testing.T) {
 	mcptools.RegisterTools(s)
 	tools := s.ListTools()
 
-	for _, name := range []string{"listings_list", "facets_list", "dealers_listings_dealers"} {
+	listingFilters := []string{
+		"dealer_id", "option_slug", "exclude_option_slug", "model_code", "listed_after", "paint_program",
+	}
+	// One dealer's inventory takes the dealer in its path, so only the
+	// cross-dealer tools select dealers and dealer groups.
+	dealerSelection := []string{"dealer_group_id", "exclude_dealer_id", "exclude_dealer_group_id"}
+	for name, params := range map[string][]string{
+		"listings_list":            slices.Concat(listingFilters, dealerSelection),
+		"facets_list":              slices.Concat(listingFilters, dealerSelection),
+		"dealers_listings_dealers": listingFilters,
+	} {
 		tool, ok := tools[name]
 		if !ok {
 			t.Fatalf("visor-mcp is missing tool %q", name)
 		}
-		for _, param := range []string{
-			"dealer_id", "option_slug", "exclude_option_slug", "model_code", "dealer_group_id",
-			"exclude_dealer_id", "exclude_dealer_group_id", "listed_after",
-		} {
+		for _, param := range params {
 			if _, ok := tool.Tool.InputSchema.Properties[param]; !ok {
 				t.Errorf("visor-mcp tool %q is missing parameter %q", name, param)
 			}
